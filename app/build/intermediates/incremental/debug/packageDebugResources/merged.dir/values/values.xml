@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PadelAragón</string>
+    <string name="cargando">Cargando...</string>
+    <string name="clasificacion">Clasificación</string>
+    <string name="error_al_cargar_datos">Error al cargar datos</string>
+    <string name="femenina">Femenina</string>
+    <string name="jornada">Jornada</string>
+    <string name="liga_de_aragon_2026">Liga de Aragón 2026</string>
+    <string name="masculina">Masculina</string>
+    <string name="reintentar">Reintentar</string>
+    <string name="resultados">Resultados</string>
+    <string name="sin_resultados">Sin resultados</string>
+    <style name="Theme.PadelAragon" parent="Theme.Material3.Light.NoActionBar">
+        <item name="android:statusBarColor">#D6EAF8</item>
+        <item name="android:windowBackground">@android:color/white</item>
+    </style>
+</resources>

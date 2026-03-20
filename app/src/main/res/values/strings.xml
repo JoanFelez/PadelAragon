@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PadelAragón</string>
+    <string name="clasificacion">Clasificación</string>
+    <string name="resultados">Resultados</string>
+    <string name="masculina">Masculina</string>
+    <string name="femenina">Femenina</string>
+    <string name="cargando">Cargando...</string>
+    <string name="error_al_cargar_datos">Error al cargar datos</string>
+    <string name="reintentar">Reintentar</string>
+    <string name="sin_resultados">Sin resultados</string>
+    <string name="jornada">Jornada</string>
+    <string name="liga_de_aragon_2026">Liga de Aragón 2026</string>
+</resources>

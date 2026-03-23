@@ -14,7 +14,7 @@ class ScrapingService(
     val db: AppDatabase,
     val fetcher: HtmlFetcher = HtmlFetcher()
 ) {
-    val scrapeSemaphore = Semaphore(10)
+    val scrapeSemaphore = Semaphore(15)
 
     suspend fun <T> withSemaphore(block: suspend () -> T): T =
         scrapeSemaphore.withPermit { block() }

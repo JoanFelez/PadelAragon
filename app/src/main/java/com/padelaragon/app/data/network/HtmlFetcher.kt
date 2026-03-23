@@ -120,6 +120,24 @@ class HtmlFetcher(cacheDir: java.io.File? = null) {
 
         val sharedClient: OkHttpClient = buildClient()
 
+        /**
+         * Pre-establish HTTPS connection to the target host.
+         * Call from a background thread during app startup to avoid TLS handshake
+         * latency on the first real request.
+         */
+        fun prewarmConnection(url: String) {
+            Thread {
+                runCatching {
+                    val request = Request.Builder()
+                        .url(url)
+                        .head()
+                        .header("User-Agent", MOBILE_USER_AGENT)
+                        .build()
+                    sharedClient.newCall(request).execute().close()
+                }
+            }.start()
+        }
+
         private fun buildClient(): OkHttpClient {
             val builder = OkHttpClient.Builder()
                 .dispatcher(dispatcher)

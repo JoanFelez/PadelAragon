@@ -19,12 +19,16 @@ class StandingsRepository(
         cachedStandings[groupId]?.let { return it }
 
         val cacheKey = "standings_$groupId"
-        if (scraping.isCacheValid(cacheKey, TTL_STANDINGS)) {
-            val roomStandings = scraping.db.standingRowDao().getByGroupId(groupId).map { it.toModel() }
-            if (roomStandings.isNotEmpty()) {
-                cachedStandings[groupId] = roomStandings
+
+        // Room-first: always try Room before network (avoids network wait on cold start)
+        val roomStandings = scraping.db.standingRowDao().getByGroupId(groupId).map { it.toModel() }
+        if (roomStandings.isNotEmpty()) {
+            cachedStandings[groupId] = roomStandings
+            if (scraping.isCacheValid(cacheKey, TTL_STANDINGS)) {
                 return roomStandings
             }
+            // Stale data returned; caller can refresh in background
+            return roomStandings
         }
 
         val url = "${BASE_URL}Ligas_Clasificacion.asp"

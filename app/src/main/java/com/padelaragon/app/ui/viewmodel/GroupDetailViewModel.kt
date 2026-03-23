@@ -114,6 +114,38 @@ class GroupDetailViewModel(
                         }
                     }
             }
+
+            // Background refresh: silently update with fresh data if stale was returned
+            viewModelScope.launch {
+                coroutineScope {
+                    launch {
+                        runCatching { standingsDataSource.refreshStandings(groupId) }
+                            .onSuccess { freshStandings ->
+                                if (freshStandings.isNotEmpty() && freshStandings != _uiState.value.standings) {
+                                    _uiState.update { it.copy(standings = freshStandings) }
+                                }
+                            }
+                    }
+                    launch {
+                        runCatching { matchResultDataSource.refreshMatchResults(groupId) }
+                            .onSuccess { freshResults ->
+                                if (freshResults.isNotEmpty() && freshResults != _uiState.value.allMatchResults) {
+                                    val sortedJornadas = freshResults.keys.sorted()
+                                    _uiState.update { state ->
+                                        val selected = state.selectedJornada
+                                            ?.takeIf { it in sortedJornadas }
+                                            ?: findDefaultJornadaUseCase(sortedJornadas, freshResults)
+                                        state.copy(
+                                            allMatchResults = freshResults,
+                                            jornadas = sortedJornadas,
+                                            selectedJornada = selected
+                                        )
+                                    }
+                                }
+                            }
+                    }
+                }
+            }
         }
     }
 

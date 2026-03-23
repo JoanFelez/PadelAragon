@@ -1,5 +1,6 @@
 val versionMajor = 1
-val versionMinor = 0
+val versionMinor = 1
+val versionPatch = 0
 
 plugins {
     id("com.android.application")
@@ -16,8 +17,8 @@ android {
         applicationId = "com.padelaragon.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = versionMajor * 100 + versionMinor
-        versionName = "$versionMajor.$versionMinor"
+        versionCode = versionMajor * 10000 + versionMinor * 100 + versionPatch
+        versionName = "$versionMajor.$versionMinor.$versionPatch"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

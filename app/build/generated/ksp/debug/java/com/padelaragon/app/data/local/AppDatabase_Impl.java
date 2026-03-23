@@ -17,6 +17,8 @@ import com.padelaragon.app.data.local.dao.JornadaDao;
 import com.padelaragon.app.data.local.dao.JornadaDao_Impl;
 import com.padelaragon.app.data.local.dao.LeagueGroupDao;
 import com.padelaragon.app.data.local.dao.LeagueGroupDao_Impl;
+import com.padelaragon.app.data.local.dao.MatchDetailDao;
+import com.padelaragon.app.data.local.dao.MatchDetailDao_Impl;
 import com.padelaragon.app.data.local.dao.MatchResultDao;
 import com.padelaragon.app.data.local.dao.MatchResultDao_Impl;
 import com.padelaragon.app.data.local.dao.StandingRowDao;
@@ -44,6 +46,8 @@ public final class AppDatabase_Impl extends AppDatabase {
 
   private volatile MatchResultDao _matchResultDao;
 
+  private volatile MatchDetailDao _matchDetailDao;
+
   private volatile TeamDetailDao _teamDetailDao;
 
   private volatile JornadaDao _jornadaDao;
@@ -53,18 +57,19 @@ public final class AppDatabase_Impl extends AppDatabase {
   @Override
   @NonNull
   protected SupportSQLiteOpenHelper createOpenHelper(@NonNull final DatabaseConfiguration config) {
-    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(2) {
+    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(3) {
       @Override
       public void createAllTables(@NonNull final SupportSQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS `league_groups` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `gender` TEXT NOT NULL, `category` TEXT NOT NULL, `groupLetter` TEXT, PRIMARY KEY(`id`))");
         db.execSQL("CREATE TABLE IF NOT EXISTS `standings` (`groupId` INTEGER NOT NULL, `position` INTEGER NOT NULL, `teamName` TEXT NOT NULL, `teamId` INTEGER NOT NULL, `teamHref` TEXT NOT NULL, `points` INTEGER NOT NULL, `matchesPlayed` INTEGER NOT NULL, `encountersWon` INTEGER NOT NULL, `encountersLost` INTEGER NOT NULL, `matchesWon` INTEGER NOT NULL, `matchesLost` INTEGER NOT NULL, `setsWon` INTEGER NOT NULL, `setsLost` INTEGER NOT NULL, `gamesWon` INTEGER NOT NULL, `gamesLost` INTEGER NOT NULL, PRIMARY KEY(`groupId`, `teamId`))");
-        db.execSQL("CREATE TABLE IF NOT EXISTS `match_results` (`groupId` INTEGER NOT NULL, `localTeam` TEXT NOT NULL, `localTeamId` INTEGER NOT NULL, `visitorTeam` TEXT NOT NULL, `visitorTeamId` INTEGER NOT NULL, `localScore` TEXT NOT NULL, `visitorScore` TEXT NOT NULL, `date` TEXT, `venue` TEXT, `jornada` INTEGER NOT NULL, PRIMARY KEY(`groupId`, `jornada`, `localTeamId`, `visitorTeamId`))");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `match_results` (`groupId` INTEGER NOT NULL, `localTeam` TEXT NOT NULL, `localTeamId` INTEGER NOT NULL, `visitorTeam` TEXT NOT NULL, `visitorTeamId` INTEGER NOT NULL, `localScore` TEXT NOT NULL, `visitorScore` TEXT NOT NULL, `date` TEXT, `venue` TEXT, `jornada` INTEGER NOT NULL, `detailUrl` TEXT, PRIMARY KEY(`groupId`, `jornada`, `localTeamId`, `visitorTeamId`))");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `match_detail_pairs` (`detailUrl` TEXT NOT NULL, `pairNumber` INTEGER NOT NULL, `localPlayer1` TEXT NOT NULL, `localPlayer2` TEXT NOT NULL, `visitorPlayer1` TEXT NOT NULL, `visitorPlayer2` TEXT NOT NULL, `set1Local` INTEGER, `set1Visitor` INTEGER, `set2Local` INTEGER, `set2Visitor` INTEGER, `set3Local` INTEGER, `set3Visitor` INTEGER, PRIMARY KEY(`detailUrl`, `pairNumber`))");
         db.execSQL("CREATE TABLE IF NOT EXISTS `team_details` (`teamId` INTEGER NOT NULL, `category` TEXT, `captainName` TEXT, PRIMARY KEY(`teamId`))");
         db.execSQL("CREATE TABLE IF NOT EXISTS `players` (`teamId` INTEGER NOT NULL, `name` TEXT NOT NULL, `isCaptain` INTEGER NOT NULL, `points` TEXT, `birthYear` TEXT, PRIMARY KEY(`teamId`, `name`))");
         db.execSQL("CREATE TABLE IF NOT EXISTS `jornadas` (`groupId` INTEGER NOT NULL, `jornada` INTEGER NOT NULL, PRIMARY KEY(`groupId`, `jornada`))");
         db.execSQL("CREATE TABLE IF NOT EXISTS `cache_timestamps` (`cacheKey` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, PRIMARY KEY(`cacheKey`))");
         db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5d551a40665254deac7f8d0e1ee6be45')");
+        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8fa1147b885252b2ff743b6fbcba7084')");
       }
 
       @Override
@@ -72,6 +77,7 @@ public final class AppDatabase_Impl extends AppDatabase {
         db.execSQL("DROP TABLE IF EXISTS `league_groups`");
         db.execSQL("DROP TABLE IF EXISTS `standings`");
         db.execSQL("DROP TABLE IF EXISTS `match_results`");
+        db.execSQL("DROP TABLE IF EXISTS `match_detail_pairs`");
         db.execSQL("DROP TABLE IF EXISTS `team_details`");
         db.execSQL("DROP TABLE IF EXISTS `players`");
         db.execSQL("DROP TABLE IF EXISTS `jornadas`");
@@ -159,7 +165,7 @@ public final class AppDatabase_Impl extends AppDatabase {
                   + " Expected:\n" + _infoStandings + "\n"
                   + " Found:\n" + _existingStandings);
         }
-        final HashMap<String, TableInfo.Column> _columnsMatchResults = new HashMap<String, TableInfo.Column>(10);
+        final HashMap<String, TableInfo.Column> _columnsMatchResults = new HashMap<String, TableInfo.Column>(11);
         _columnsMatchResults.put("groupId", new TableInfo.Column("groupId", "INTEGER", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsMatchResults.put("localTeam", new TableInfo.Column("localTeam", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsMatchResults.put("localTeamId", new TableInfo.Column("localTeamId", "INTEGER", true, 3, null, TableInfo.CREATED_FROM_ENTITY));
@@ -170,6 +176,7 @@ public final class AppDatabase_Impl extends AppDatabase {
         _columnsMatchResults.put("date", new TableInfo.Column("date", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsMatchResults.put("venue", new TableInfo.Column("venue", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsMatchResults.put("jornada", new TableInfo.Column("jornada", "INTEGER", true, 2, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsMatchResults.put("detailUrl", new TableInfo.Column("detailUrl", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         final HashSet<TableInfo.ForeignKey> _foreignKeysMatchResults = new HashSet<TableInfo.ForeignKey>(0);
         final HashSet<TableInfo.Index> _indicesMatchResults = new HashSet<TableInfo.Index>(0);
         final TableInfo _infoMatchResults = new TableInfo("match_results", _columnsMatchResults, _foreignKeysMatchResults, _indicesMatchResults);
@@ -178,6 +185,28 @@ public final class AppDatabase_Impl extends AppDatabase {
           return new RoomOpenHelper.ValidationResult(false, "match_results(com.padelaragon.app.data.local.entity.MatchResultEntity).\n"
                   + " Expected:\n" + _infoMatchResults + "\n"
                   + " Found:\n" + _existingMatchResults);
+        }
+        final HashMap<String, TableInfo.Column> _columnsMatchDetailPairs = new HashMap<String, TableInfo.Column>(12);
+        _columnsMatchDetailPairs.put("detailUrl", new TableInfo.Column("detailUrl", "TEXT", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsMatchDetailPairs.put("pairNumber", new TableInfo.Column("pairNumber", "INTEGER", true, 2, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsMatchDetailPairs.put("localPlayer1", new TableInfo.Column("localPlayer1", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsMatchDetailPairs.put("localPlayer2", new TableInfo.Column("localPlayer2", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsMatchDetailPairs.put("visitorPlayer1", new TableInfo.Column("visitorPlayer1", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsMatchDetailPairs.put("visitorPlayer2", new TableInfo.Column("visitorPlayer2", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsMatchDetailPairs.put("set1Local", new TableInfo.Column("set1Local", "INTEGER", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsMatchDetailPairs.put("set1Visitor", new TableInfo.Column("set1Visitor", "INTEGER", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsMatchDetailPairs.put("set2Local", new TableInfo.Column("set2Local", "INTEGER", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsMatchDetailPairs.put("set2Visitor", new TableInfo.Column("set2Visitor", "INTEGER", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsMatchDetailPairs.put("set3Local", new TableInfo.Column("set3Local", "INTEGER", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsMatchDetailPairs.put("set3Visitor", new TableInfo.Column("set3Visitor", "INTEGER", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        final HashSet<TableInfo.ForeignKey> _foreignKeysMatchDetailPairs = new HashSet<TableInfo.ForeignKey>(0);
+        final HashSet<TableInfo.Index> _indicesMatchDetailPairs = new HashSet<TableInfo.Index>(0);
+        final TableInfo _infoMatchDetailPairs = new TableInfo("match_detail_pairs", _columnsMatchDetailPairs, _foreignKeysMatchDetailPairs, _indicesMatchDetailPairs);
+        final TableInfo _existingMatchDetailPairs = TableInfo.read(db, "match_detail_pairs");
+        if (!_infoMatchDetailPairs.equals(_existingMatchDetailPairs)) {
+          return new RoomOpenHelper.ValidationResult(false, "match_detail_pairs(com.padelaragon.app.data.local.entity.MatchDetailPairEntity).\n"
+                  + " Expected:\n" + _infoMatchDetailPairs + "\n"
+                  + " Found:\n" + _existingMatchDetailPairs);
         }
         final HashMap<String, TableInfo.Column> _columnsTeamDetails = new HashMap<String, TableInfo.Column>(3);
         _columnsTeamDetails.put("teamId", new TableInfo.Column("teamId", "INTEGER", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
@@ -233,7 +262,7 @@ public final class AppDatabase_Impl extends AppDatabase {
         }
         return new RoomOpenHelper.ValidationResult(true, null);
       }
-    }, "5d551a40665254deac7f8d0e1ee6be45", "638c75d74811b2a486963ea83b525f85");
+    }, "8fa1147b885252b2ff743b6fbcba7084", "3eb5ce2e8f603510d0c7c07d59e96896");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(config.context).name(config.name).callback(_openCallback).build();
     final SupportSQLiteOpenHelper _helper = config.sqliteOpenHelperFactory.create(_sqliteConfig);
     return _helper;
@@ -244,7 +273,7 @@ public final class AppDatabase_Impl extends AppDatabase {
   protected InvalidationTracker createInvalidationTracker() {
     final HashMap<String, String> _shadowTablesMap = new HashMap<String, String>(0);
     final HashMap<String, Set<String>> _viewTables = new HashMap<String, Set<String>>(0);
-    return new InvalidationTracker(this, _shadowTablesMap, _viewTables, "league_groups","standings","match_results","team_details","players","jornadas","cache_timestamps");
+    return new InvalidationTracker(this, _shadowTablesMap, _viewTables, "league_groups","standings","match_results","match_detail_pairs","team_details","players","jornadas","cache_timestamps");
   }
 
   @Override
@@ -256,6 +285,7 @@ public final class AppDatabase_Impl extends AppDatabase {
       _db.execSQL("DELETE FROM `league_groups`");
       _db.execSQL("DELETE FROM `standings`");
       _db.execSQL("DELETE FROM `match_results`");
+      _db.execSQL("DELETE FROM `match_detail_pairs`");
       _db.execSQL("DELETE FROM `team_details`");
       _db.execSQL("DELETE FROM `players`");
       _db.execSQL("DELETE FROM `jornadas`");
@@ -277,6 +307,7 @@ public final class AppDatabase_Impl extends AppDatabase {
     _typeConvertersMap.put(LeagueGroupDao.class, LeagueGroupDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(StandingRowDao.class, StandingRowDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(MatchResultDao.class, MatchResultDao_Impl.getRequiredConverters());
+    _typeConvertersMap.put(MatchDetailDao.class, MatchDetailDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(TeamDetailDao.class, TeamDetailDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(JornadaDao.class, JornadaDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(CacheTimestampDao.class, CacheTimestampDao_Impl.getRequiredConverters());
@@ -336,6 +367,20 @@ public final class AppDatabase_Impl extends AppDatabase {
           _matchResultDao = new MatchResultDao_Impl(this);
         }
         return _matchResultDao;
+      }
+    }
+  }
+
+  @Override
+  public MatchDetailDao matchDetailDao() {
+    if (_matchDetailDao != null) {
+      return _matchDetailDao;
+    } else {
+      synchronized(this) {
+        if(_matchDetailDao == null) {
+          _matchDetailDao = new MatchDetailDao_Impl(this);
+        }
+        return _matchDetailDao;
       }
     }
   }

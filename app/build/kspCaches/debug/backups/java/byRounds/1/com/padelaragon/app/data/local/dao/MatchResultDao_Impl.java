@@ -43,7 +43,7 @@ public final class MatchResultDao_Impl implements MatchResultDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "INSERT OR REPLACE INTO `match_results` (`groupId`,`localTeam`,`localTeamId`,`visitorTeam`,`visitorTeamId`,`localScore`,`visitorScore`,`date`,`venue`,`jornada`) VALUES (?,?,?,?,?,?,?,?,?,?)";
+        return "INSERT OR REPLACE INTO `match_results` (`groupId`,`localTeam`,`localTeamId`,`visitorTeam`,`visitorTeamId`,`localScore`,`visitorScore`,`date`,`venue`,`jornada`,`detailUrl`) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
       }
 
       @Override
@@ -67,6 +67,11 @@ public final class MatchResultDao_Impl implements MatchResultDao {
           statement.bindString(9, entity.getVenue());
         }
         statement.bindLong(10, entity.getJornada());
+        if (entity.getDetailUrl() == null) {
+          statement.bindNull(11);
+        } else {
+          statement.bindString(11, entity.getDetailUrl());
+        }
       }
     };
     this.__preparedStmtOfDeleteByGroupAndJornada = new SharedSQLiteStatement(__db) {
@@ -185,6 +190,7 @@ public final class MatchResultDao_Impl implements MatchResultDao {
           final int _cursorIndexOfDate = CursorUtil.getColumnIndexOrThrow(_cursor, "date");
           final int _cursorIndexOfVenue = CursorUtil.getColumnIndexOrThrow(_cursor, "venue");
           final int _cursorIndexOfJornada = CursorUtil.getColumnIndexOrThrow(_cursor, "jornada");
+          final int _cursorIndexOfDetailUrl = CursorUtil.getColumnIndexOrThrow(_cursor, "detailUrl");
           final List<MatchResultEntity> _result = new ArrayList<MatchResultEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final MatchResultEntity _item;
@@ -216,7 +222,13 @@ public final class MatchResultDao_Impl implements MatchResultDao {
             }
             final int _tmpJornada;
             _tmpJornada = _cursor.getInt(_cursorIndexOfJornada);
-            _item = new MatchResultEntity(_tmpGroupId,_tmpLocalTeam,_tmpLocalTeamId,_tmpVisitorTeam,_tmpVisitorTeamId,_tmpLocalScore,_tmpVisitorScore,_tmpDate,_tmpVenue,_tmpJornada);
+            final String _tmpDetailUrl;
+            if (_cursor.isNull(_cursorIndexOfDetailUrl)) {
+              _tmpDetailUrl = null;
+            } else {
+              _tmpDetailUrl = _cursor.getString(_cursorIndexOfDetailUrl);
+            }
+            _item = new MatchResultEntity(_tmpGroupId,_tmpLocalTeam,_tmpLocalTeamId,_tmpVisitorTeam,_tmpVisitorTeamId,_tmpLocalScore,_tmpVisitorScore,_tmpDate,_tmpVenue,_tmpJornada,_tmpDetailUrl);
             _result.add(_item);
           }
           return _result;
@@ -252,6 +264,7 @@ public final class MatchResultDao_Impl implements MatchResultDao {
           final int _cursorIndexOfDate = CursorUtil.getColumnIndexOrThrow(_cursor, "date");
           final int _cursorIndexOfVenue = CursorUtil.getColumnIndexOrThrow(_cursor, "venue");
           final int _cursorIndexOfJornada = CursorUtil.getColumnIndexOrThrow(_cursor, "jornada");
+          final int _cursorIndexOfDetailUrl = CursorUtil.getColumnIndexOrThrow(_cursor, "detailUrl");
           final List<MatchResultEntity> _result = new ArrayList<MatchResultEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final MatchResultEntity _item;
@@ -283,7 +296,13 @@ public final class MatchResultDao_Impl implements MatchResultDao {
             }
             final int _tmpJornada;
             _tmpJornada = _cursor.getInt(_cursorIndexOfJornada);
-            _item = new MatchResultEntity(_tmpGroupId,_tmpLocalTeam,_tmpLocalTeamId,_tmpVisitorTeam,_tmpVisitorTeamId,_tmpLocalScore,_tmpVisitorScore,_tmpDate,_tmpVenue,_tmpJornada);
+            final String _tmpDetailUrl;
+            if (_cursor.isNull(_cursorIndexOfDetailUrl)) {
+              _tmpDetailUrl = null;
+            } else {
+              _tmpDetailUrl = _cursor.getString(_cursorIndexOfDetailUrl);
+            }
+            _item = new MatchResultEntity(_tmpGroupId,_tmpLocalTeam,_tmpLocalTeamId,_tmpVisitorTeam,_tmpVisitorTeamId,_tmpLocalScore,_tmpVisitorScore,_tmpDate,_tmpVenue,_tmpJornada,_tmpDetailUrl);
             _result.add(_item);
           }
           return _result;

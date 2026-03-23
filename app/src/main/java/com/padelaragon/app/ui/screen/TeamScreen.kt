@@ -3,6 +3,7 @@ package com.padelaragon.app.ui.screen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,17 +16,19 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -99,16 +102,17 @@ fun TeamScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
-                val tabs = listOf("Resumen", "Plantilla", "Resultados", "Próximos")
+                val tabs = listOf("Resumen", "Plantilla", "Resultados", "Próximos", "Estadísticas")
                 val playedMatches = uiState.matches.filter { it.localScore != "--" }
                 val pendingMatches = uiState.matches.filter { it.localScore == "--" }
                 val nextMatch = pendingMatches.firstOrNull()
 
                 Column(modifier = Modifier.fillMaxSize()) {
-                    TabRow(
+                    ScrollableTabRow(
                         selectedTabIndex = selectedTabIndex,
                         containerColor = MaterialTheme.colorScheme.secondary,
-                        contentColor = MaterialTheme.colorScheme.onSecondary
+                        contentColor = MaterialTheme.colorScheme.onSecondary,
+                        edgePadding = 0.dp
                     ) {
                         tabs.forEachIndexed { index, title ->
                             Tab(
@@ -312,6 +316,173 @@ fun TeamScreen(
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        4 -> {
+                            LaunchedEffect(Unit) { viewModel.loadAllMatchDetails() }
+
+                            if (uiState.isLoadingStats) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            } else if (uiState.playerStats.isEmpty()) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize().padding(32.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "No hay estadísticas disponibles",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            } else {
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    item {
+                                        SectionTitle(text = "Estadísticas de Jugadores")
+                                        Card(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 12.dp),
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                                contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                                            ),
+                                            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                                        ) {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                                            ) {
+                                                // Header row
+                                                Row(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(vertical = 4.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Text(
+                                                        text = "Jugador",
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
+                                                        modifier = Modifier.weight(3f)
+                                                    )
+                                                    Text(
+                                                        text = "V",
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
+                                                        modifier = Modifier.weight(0.7f),
+                                                        textAlign = TextAlign.Center
+                                                    )
+                                                    Text(
+                                                        text = "D",
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
+                                                        modifier = Modifier.weight(0.7f),
+                                                        textAlign = TextAlign.Center
+                                                    )
+                                                    Text(
+                                                        text = "P1",
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
+                                                        modifier = Modifier.weight(0.5f),
+                                                        textAlign = TextAlign.Center
+                                                    )
+                                                    Text(
+                                                        text = "P2",
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
+                                                        modifier = Modifier.weight(0.5f),
+                                                        textAlign = TextAlign.Center
+                                                    )
+                                                    Text(
+                                                        text = "P3",
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
+                                                        modifier = Modifier.weight(0.5f),
+                                                        textAlign = TextAlign.Center
+                                                    )
+                                                }
+
+                                                HorizontalDivider(
+                                                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.2f)
+                                                )
+
+                                                // Player rows
+                                                uiState.playerStats.forEach { stats ->
+                                                    Row(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(vertical = 2.dp),
+                                                        verticalAlignment = Alignment.CenterVertically
+                                                    ) {
+                                                        Text(
+                                                            text = stats.name,
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                                            modifier = Modifier.weight(3f)
+                                                        )
+                                                        Text(
+                                                            text = stats.wins.toString(),
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                                            modifier = Modifier.weight(0.7f),
+                                                            textAlign = TextAlign.Center,
+                                                            fontWeight = FontWeight.Medium
+                                                        )
+                                                        Text(
+                                                            text = stats.losses.toString(),
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                                            modifier = Modifier.weight(0.7f),
+                                                            textAlign = TextAlign.Center,
+                                                            fontWeight = FontWeight.Medium
+                                                        )
+                                                        Text(
+                                                            text = stats.pair1Count.toString(),
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                                            modifier = Modifier.weight(0.5f),
+                                                            textAlign = TextAlign.Center
+                                                        )
+                                                        Text(
+                                                            text = stats.pair2Count.toString(),
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                                            modifier = Modifier.weight(0.5f),
+                                                            textAlign = TextAlign.Center
+                                                        )
+                                                        Text(
+                                                            text = stats.pair3Count.toString(),
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                                            modifier = Modifier.weight(0.5f),
+                                                            textAlign = TextAlign.Center
+                                                        )
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }

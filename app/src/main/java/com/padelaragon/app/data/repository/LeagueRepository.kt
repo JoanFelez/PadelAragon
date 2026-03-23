@@ -378,7 +378,48 @@ object LeagueRepository {
             )
         }
 
-        for (url in urlsToTry) {
+        if (urlsToTry.size > 1) {
+            val details = coroutineScope {
+                urlsToTry.map { url ->
+                    async {
+                        runCatching {
+                            android.util.Log.d("LeagueRepo", "Trying team detail URL: $url")
+                            val response = scrapeSemaphore.withPermit { fetcher.getWithStatus(url) }
+                            android.util.Log.d(
+                                "LeagueRepo",
+                                "Team detail HTTP ${response.statusCode} from $url (${response.body.length} chars)"
+                            )
+                            android.util.Log.d("LeagueRepo", "Response: ${response.body.length} chars")
+
+                            if (response.statusCode == 200 && response.body.isNotBlank()) {
+                                val parsed = teamDetailParser.parse(response.body)
+                                android.util.Log.d("LeagueRepo", "Parsed: players=${parsed.players.size}, captain=${parsed.captain}, category=${parsed.category}")
+                                parsed
+                            } else {
+                                null
+                            }
+                        }.onFailure { e ->
+                            android.util.Log.w("LeagueRepo", "Failed team detail URL: $url - ${e.message}", e)
+                        }.getOrNull()
+                    }
+                }.awaitAll()
+            }
+
+            val detail = details.firstOrNull { it != null && (it.players.isNotEmpty() || it.captain != null) }
+            if (detail != null) {
+                cachedTeamDetails[teamId] = detail
+
+                database?.let { roomDb ->
+                    roomDb.teamDetailDao().insertTeamWithPlayers(
+                        TeamDetailEntity(teamId = teamId, category = detail.category, captainName = detail.captainName),
+                        detail.players.map { PlayerEntity.fromModel(teamId, it) }
+                    )
+                }
+
+                return detail
+            }
+        } else {
+            val url = urlsToTry.first()
             val detail = runCatching {
                 android.util.Log.d("LeagueRepo", "Trying team detail URL: $url")
                 val response = scrapeSemaphore.withPermit { fetcher.getWithStatus(url) }
@@ -574,12 +615,25 @@ object LeagueRepository {
         return if (detail.pairs.isNotEmpty()) detail else null
     }
 
+    suspend fun prefetchMatchDetails(results: List<MatchResult>) {
+        val urlsToPrefetch = results
+            .mapNotNull { it.detailUrl }
+            .filter { it.isNotBlank() && !cachedMatchDetails.containsKey(it) }
+        if (urlsToPrefetch.isEmpty()) return
+
+        coroutineScope {
+            urlsToPrefetch.map { url ->
+                async { runCatching { getMatchDetail(url) } }
+            }.awaitAll()
+        }
+    }
+
     private fun buildDetailUrl(relativeUrl: String): String {
         val url = relativeUrl.trim()
         if (url.startsWith("http://", ignoreCase = true) || url.startsWith("https://", ignoreCase = true)) {
             return url
         }
-        return java.net.URI(BASE_URL).resolve(url).toString()
+        return URI(BASE_URL).resolve(url).toString()
     }
 
     private const val BASE_URL = "https://padelfederacion.es/pAGINAS/ARAPADEL/"

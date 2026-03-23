@@ -1,4 +1,4 @@
-#Fri Mar 20 09:17:00 CET 2026
+#Fri Mar 20 13:38:46 CET 2026
 base.0=/home/joanfelez/Escritorio/Proyectos/PadelAragon/app/build/intermediates/dex/debug/mergeExtDexDebug/classes.dex
 base.1=/home/joanfelez/Escritorio/Proyectos/PadelAragon/app/build/intermediates/dex/debug/mergeProjectDexDebug/0/classes.dex
 base.10=/home/joanfelez/Escritorio/Proyectos/PadelAragon/app/build/intermediates/dex/debug/mergeExtDexDebug/classes2.dex

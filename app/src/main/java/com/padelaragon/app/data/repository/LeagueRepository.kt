@@ -277,14 +277,22 @@ object LeagueRepository {
             return getTeamInfo(teamId, teamName)
         }
 
-        // Get match results for this group
-        val allResults = getAllMatchResults(groupId)
+        // Get match results for this group and team details concurrently
+        var allResults = emptyMap<Int, List<MatchResult>>()
+        var teamDetail: com.padelaragon.app.data.model.TeamDetail? = null
+        
+        coroutineScope {
+            val resultsDeferred = async { getAllMatchResults(groupId) }
+            val detailDeferred = async { runCatching { getTeamDetail(teamId, teamStanding.teamHref) }.getOrNull() }
+            
+            allResults = resultsDeferred.await()
+            teamDetail = detailDeferred.await()
+        }
+
         val teamMatches = allResults.values
             .flatten()
             .filter { it.localTeamId == teamId || it.visitorTeamId == teamId }
             .sortedBy { it.jornada }
-
-        val teamDetail = runCatching { getTeamDetail(teamId, teamStanding.teamHref) }.getOrNull()
 
         return TeamInfo(
             teamId = teamId,
@@ -331,16 +339,23 @@ object LeagueRepository {
         val groupId = teamGroupId ?: return null
         val groupName = teamGroupName ?: return null
 
-        // Get all match results for this group
-        val allResults = getAllMatchResults(groupId)
+        // Get all match results for this group and team details concurrently
+        var allResults = emptyMap<Int, List<MatchResult>>()
+        var teamDetail: com.padelaragon.app.data.model.TeamDetail? = null
+        
+        coroutineScope {
+            val resultsDeferred = async { getAllMatchResults(groupId) }
+            val detailDeferred = async { runCatching { getTeamDetail(teamId, teamStanding?.teamHref.orEmpty()) }.getOrNull() }
+            
+            allResults = resultsDeferred.await()
+            teamDetail = detailDeferred.await()
+        }
 
         // Filter matches where this team participated
         val teamMatches = allResults.values
             .flatten()
             .filter { it.localTeamId == teamId || it.visitorTeamId == teamId }
             .sortedBy { it.jornada }
-
-        val teamDetail = runCatching { getTeamDetail(teamId, teamStanding?.teamHref.orEmpty()) }.getOrNull()
 
         return TeamInfo(
             teamId = teamId,

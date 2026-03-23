@@ -75,7 +75,7 @@ fun MatchCard(
                     color = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = (
                         if (isLocalTeamClickable) {
-                            Modifier.clickable { onTeamClick?.invoke(match.localTeamId, match.localTeam) }
+                            Modifier.clickable { onTeamClick.invoke(match.localTeamId, match.localTeam) }
                         } else {
                             Modifier
                         }
@@ -105,7 +105,7 @@ fun MatchCard(
                     textAlign = TextAlign.End,
                     modifier = (
                         if (isVisitorTeamClickable) {
-                            Modifier.clickable { onTeamClick?.invoke(match.visitorTeamId, match.visitorTeam) }
+                            Modifier.clickable { onTeamClick.invoke(match.visitorTeamId, match.visitorTeam) }
                         } else {
                             Modifier
                         }
@@ -134,7 +134,7 @@ fun MatchCard(
                         .clickable {
                             expanded = !expanded
                             if (expanded && detail == null && !isLoadingDetail) {
-                                onToggleDetail?.invoke()
+                                onToggleDetail.invoke()
                             }
                         },
                     contentAlignment = Alignment.Center

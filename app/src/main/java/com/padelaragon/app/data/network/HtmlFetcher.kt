@@ -63,7 +63,7 @@ class HtmlFetcher {
                 if (!response.isSuccessful) {
                     throw IOException("HTTP ${response.code}: ${request.url}")
                 }
-                val bytes = response.body?.bytes() ?: throw IOException("Empty response body from ${request.url}")
+                val bytes = response.body.bytes()
                 val result = bytes.toString(latin1)
                 android.util.Log.d("HtmlFetcher", "Received ${result.length} chars from ${request.url}")
                 return result
@@ -77,7 +77,7 @@ class HtmlFetcher {
     private fun executeWithStatus(request: Request): HtmlResponse {
         android.util.Log.d("HtmlFetcher", "Fetching with status: ${request.url}")
         client.newCall(request).execute().use { response ->
-            val bytes = response.body?.bytes() ?: ByteArray(0)
+            val bytes = response.body.bytes()
             val result = bytes.toString(latin1)
             android.util.Log.d(
                 "HtmlFetcher",

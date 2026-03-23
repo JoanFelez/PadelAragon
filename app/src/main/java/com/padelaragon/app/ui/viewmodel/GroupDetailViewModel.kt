@@ -113,15 +113,7 @@ class GroupDetailViewModel(
     private fun findDefaultJornada(
         sortedJornadas: List<Int>,
         allResults: Map<Int, List<MatchResult>>
-    ): Int? {
-        // Pick the latest jornada that has at least one played match.
-        val lastWithResults = sortedJornadas.lastOrNull { jornada ->
-            allResults[jornada]?.any { it.localScore != "--" && it.visitorScore != "--" } == true
-        }
-
-        // If no jornada has results yet, fall back to the first available jornada.
-        return lastWithResults ?: sortedJornadas.firstOrNull()
-    }
+    ): Int? = Companion.findDefaultJornada(sortedJornadas, allResults)
 
     fun selectJornada(jornada: Int) {
         _uiState.update { it.copy(selectedJornada = jornada) }
@@ -246,6 +238,22 @@ class GroupDetailViewModel(
             }
 
             _isRefreshing.value = false
+        }
+    }
+
+    internal companion object {
+        /**
+         * Pick the latest jornada that has at least one played match.
+         * If no jornada has results yet, fall back to the first available jornada.
+         */
+        fun findDefaultJornada(
+            sortedJornadas: List<Int>,
+            allResults: Map<Int, List<MatchResult>>
+        ): Int? {
+            val lastWithResults = sortedJornadas.lastOrNull { jornada ->
+                allResults[jornada]?.any { it.localScore != "--" && it.visitorScore != "--" } == true
+            }
+            return lastWithResults ?: sortedJornadas.firstOrNull()
         }
     }
 }

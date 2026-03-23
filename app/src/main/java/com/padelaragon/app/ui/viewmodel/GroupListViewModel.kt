@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 class GroupListViewModel : ViewModel() {
@@ -67,13 +68,14 @@ class GroupListViewModel : ViewModel() {
                         }
                     }
 
-                    // Prefetch favorites first (so they load instantly when tapped), then all groups
                     viewModelScope.launch {
-                        val favIds = FavoritesManager.favorites.value.toList()
-                        if (favIds.isNotEmpty()) {
-                            runCatching { repository.prefetchGroups(favIds) }
+                        coroutineScope {
+                            val favIds = FavoritesManager.favorites.value.toList()
+                            if (favIds.isNotEmpty()) {
+                                launch { runCatching { repository.prefetchGroups(favIds) } }
+                            }
+                            launch { runCatching { repository.prefetchAllGroups() } }
                         }
-                        runCatching { repository.prefetchAllGroups() }
                     }
                 }
                 .onFailure { throwable ->
@@ -110,17 +112,23 @@ class GroupListViewModel : ViewModel() {
         }
     }
 
-    private fun sortGroups(groups: List<LeagueGroup>): List<LeagueGroup> {
-        return groups.sortedWith(
-            compareBy<LeagueGroup> {
-                when (it.gender) {
-                    Gender.MASCULINA -> 0
-                    Gender.FEMENINA -> 1
-                }
-            }.thenBy { it.category }
-                .thenBy { it.name }
-        )
-    }
+    private fun sortGroups(groups: List<LeagueGroup>): List<LeagueGroup> =
+        Companion.sortGroups(groups)
 
     fun retry() = loadGroups()
+
+    internal companion object {
+        /** Sort groups: MASCULINA before FEMENINA, then by category, then by name. */
+        fun sortGroups(groups: List<LeagueGroup>): List<LeagueGroup> {
+            return groups.sortedWith(
+                compareBy<LeagueGroup> {
+                    when (it.gender) {
+                        Gender.MASCULINA -> 0
+                        Gender.FEMENINA -> 1
+                    }
+                }.thenBy { it.category }
+                    .thenBy { it.name }
+            )
+        }
+    }
 }

@@ -18,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,6 +38,7 @@ fun GroupListScreen(
     viewModel: GroupListViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
 
     Scaffold(
         topBar = {
@@ -52,48 +54,54 @@ fun GroupListScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        LoadingErrorWrapper(
-            isLoading = uiState.isLoading,
-            error = uiState.error,
-            onRetry = viewModel::retry,
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = viewModel::refresh,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            val grouped = uiState.groups.groupBy { it.gender }
-            val favoriteGroups = uiState.groups.filter { it.id in uiState.favoriteIds }
-            val masculineGroups = grouped[Gender.MASCULINA].orEmpty()
-            val feminineGroups = grouped[Gender.FEMENINA].orEmpty()
-
-            LazyColumn(
+            LoadingErrorWrapper(
+                isLoading = uiState.isLoading,
+                error = uiState.error,
+                onRetry = viewModel::retry,
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                if (favoriteGroups.isNotEmpty()) {
-                    item(key = "fav_header") {
-                        GenderHeader(title = "⭐ FAVORITOS")
-                    }
-                    items(favoriteGroups, key = { "fav_${it.id}" }) { group ->
-                        GroupItem(group = group, onGroupClick = onGroupClick)
-                    }
-                }
+                val grouped = uiState.groups.groupBy { it.gender }
+                val favoriteGroups = uiState.groups.filter { it.id in uiState.favoriteIds }
+                val masculineGroups = grouped[Gender.MASCULINA].orEmpty()
+                val feminineGroups = grouped[Gender.FEMENINA].orEmpty()
 
-                if (masculineGroups.isNotEmpty()) {
-                    item {
-                        GenderHeader(title = "MASCULINA")
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    if (favoriteGroups.isNotEmpty()) {
+                        item(key = "fav_header") {
+                            GenderHeader(title = "⭐ FAVORITOS")
+                        }
+                        items(favoriteGroups, key = { "fav_${it.id}" }) { group ->
+                            GroupItem(group = group, onGroupClick = onGroupClick)
+                        }
                     }
-                    items(masculineGroups, key = { it.id }) { group ->
-                        GroupItem(group = group, onGroupClick = onGroupClick)
-                    }
-                }
 
-                if (feminineGroups.isNotEmpty()) {
-                    item {
-                        GenderHeader(title = "FEMENINA")
+                    if (masculineGroups.isNotEmpty()) {
+                        item {
+                            GenderHeader(title = "MASCULINA")
+                        }
+                        items(masculineGroups, key = { it.id }) { group ->
+                            GroupItem(group = group, onGroupClick = onGroupClick)
+                        }
                     }
-                    items(feminineGroups, key = { it.id }) { group ->
-                        GroupItem(group = group, onGroupClick = onGroupClick)
+
+                    if (feminineGroups.isNotEmpty()) {
+                        item {
+                            GenderHeader(title = "FEMENINA")
+                        }
+                        items(feminineGroups, key = { it.id }) { group ->
+                            GroupItem(group = group, onGroupClick = onGroupClick)
+                        }
                     }
                 }
             }

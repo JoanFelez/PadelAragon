@@ -24,6 +24,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -58,6 +59,7 @@ fun TeamScreen(
     )
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
 
     Scaffold(
         topBar = {
@@ -83,96 +85,167 @@ fun TeamScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        LoadingErrorWrapper(
-            isLoading = uiState.isLoading,
-            error = uiState.error,
-            onRetry = viewModel::retry,
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = viewModel::refresh,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
-            val tabs = listOf("Resumen", "Plantilla", "Resultados", "Próximos")
-            val playedMatches = uiState.matches.filter { it.localScore != "--" }
-            val pendingMatches = uiState.matches.filter { it.localScore == "--" }
-            val nextMatch = pendingMatches.firstOrNull()
+            LoadingErrorWrapper(
+                isLoading = uiState.isLoading,
+                error = uiState.error,
+                onRetry = viewModel::retry,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
+                val tabs = listOf("Resumen", "Plantilla", "Resultados", "Próximos")
+                val playedMatches = uiState.matches.filter { it.localScore != "--" }
+                val pendingMatches = uiState.matches.filter { it.localScore == "--" }
+                val nextMatch = pendingMatches.firstOrNull()
 
-            Column(modifier = Modifier.fillMaxSize()) {
-                TabRow(
-                    selectedTabIndex = selectedTabIndex,
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
-                ) {
-                    tabs.forEachIndexed { index, title ->
-                        Tab(
-                            selected = selectedTabIndex == index,
-                            onClick = { selectedTabIndex = index },
-                            text = {
-                                Text(
-                                    title,
-                                    color = if (selectedTabIndex == index)
-                                        MaterialTheme.colorScheme.onSecondary
-                                    else
-                                        MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.6f)
-                                )
-                            }
-                        )
-                    }
-                }
-
-                when (selectedTabIndex) {
-                    0 -> {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            item {
-                                SectionTitle(text = "Grupo")
-                                Card(
-                                    modifier = Modifier.padding(horizontal = 12.dp),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.surface,
-                                        contentColor = MaterialTheme.colorScheme.onSurface
-                                    ),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-                                ) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    TabRow(
+                        selectedTabIndex = selectedTabIndex,
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
+                    ) {
+                        tabs.forEachIndexed { index, title ->
+                            Tab(
+                                selected = selectedTabIndex == index,
+                                onClick = { selectedTabIndex = index },
+                                text = {
                                     Text(
-                                        text = uiState.groupName,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
+                                        title,
+                                        color = if (selectedTabIndex == index)
+                                            MaterialTheme.colorScheme.onSecondary
+                                        else
+                                            MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.6f)
                                     )
                                 }
-                            }
+                            )
+                        }
+                    }
 
-                            uiState.standing?.let { standing ->
+                    when (selectedTabIndex) {
+                        0 -> {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 16.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
                                 item {
-                                    SectionTitle(text = "Resumen")
-                                    StandingSummaryCard(standing = standing)
-                                }
-                            }
-
-                            item {
-                                SectionTitle(text = "Próximo Partido")
-                                if (nextMatch != null) {
-                                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    SectionTitle(text = "Grupo")
+                                    Card(
+                                        modifier = Modifier.padding(horizontal = 12.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = MaterialTheme.colorScheme.surface,
+                                            contentColor = MaterialTheme.colorScheme.onSurface
+                                        ),
+                                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                                    ) {
                                         Text(
-                                            text = "Jornada ${nextMatch.jornada}",
-                                            style = MaterialTheme.typography.labelMedium,
+                                            text = uiState.groupName,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
+                                        )
+                                    }
+                                }
+
+                                uiState.standing?.let { standing ->
+                                    item {
+                                        SectionTitle(text = "Resumen")
+                                        StandingSummaryCard(standing = standing)
+                                    }
+                                }
+
+                                item {
+                                    SectionTitle(text = "Próximo Partido")
+                                    if (nextMatch != null) {
+                                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                            Text(
+                                                text = "Jornada ${nextMatch.jornada}",
+                                                style = MaterialTheme.typography.labelMedium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.padding(horizontal = 12.dp)
+                                            )
+                                            Card(
+                                                modifier = Modifier.padding(horizontal = 12.dp),
+                                                colors = CardDefaults.cardColors(
+                                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                                ),
+                                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                                            ) {
+                                                MatchCard(
+                                                    match = nextMatch,
+                                                    modifier = Modifier,
+                                                    onTeamClick = { clickedTeamId, clickedTeamName ->
+                                                        if (clickedTeamId != teamId) {
+                                                            onTeamClick(clickedTeamId, clickedTeamName, groupId)
+                                                        }
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    } else {
+                                        Text(
+                                            text = "No hay partidos pendientes",
+                                            style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             modifier = Modifier.padding(horizontal = 12.dp)
                                         )
-                                        Card(
-                                            modifier = Modifier.padding(horizontal = 12.dp),
-                                            colors = CardDefaults.cardColors(
-                                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                                            ),
-                                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                                        ) {
+                                    }
+                                }
+                            }
+                        }
+
+                        1 -> {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 16.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                uiState.teamDetail?.let { detail ->
+                                    item {
+                                        TeamDetailCard(detail = detail)
+                                    }
+                                } ?: item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(32.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "No se encontró información de la plantilla",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        2 -> {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 16.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                if (playedMatches.isNotEmpty()) {
+                                    val sortedPlayed = playedMatches.sortedByDescending { it.jornada }
+                                    items(sortedPlayed) { match ->
+                                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                            Text(
+                                                text = "Jornada ${match.jornada}",
+                                                style = MaterialTheme.typography.labelMedium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.padding(horizontal = 12.dp)
+                                            )
                                             MatchCard(
-                                                match = nextMatch,
-                                                modifier = Modifier,
+                                                match = match,
+                                                modifier = Modifier.padding(horizontal = 12.dp),
                                                 onTeamClick = { clickedTeamId, clickedTeamName ->
                                                     if (clickedTeamId != teamId) {
                                                         onTeamClick(clickedTeamId, clickedTeamName, groupId)
@@ -182,127 +255,61 @@ fun TeamScreen(
                                         }
                                     }
                                 } else {
-                                    Text(
-                                        text = "No hay partidos pendientes",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.padding(horizontal = 12.dp)
-                                    )
-                                }
-                            }
-
-                        }
-                    }
-
-                    1 -> {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            uiState.teamDetail?.let { detail ->
-                                item {
-                                    TeamDetailCard(detail = detail)
-                                }
-                            } ?: item {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(32.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "No se encontró información de la plantilla",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                                    item {
+                                        Box(
+                                            modifier = Modifier.fillMaxWidth().padding(32.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = "No hay resultados todavía",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    2 -> {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            if (playedMatches.isNotEmpty()) {
-                                val sortedPlayed = playedMatches.sortedByDescending { it.jornada }
-                                items(sortedPlayed) { match ->
-                                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                        Text(
-                                            text = "Jornada ${match.jornada}",
-                                            style = MaterialTheme.typography.labelMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.padding(horizontal = 12.dp)
-                                        )
-                                        MatchCard(
-                                            match = match,
-                                            modifier = Modifier.padding(horizontal = 12.dp),
-                                            onTeamClick = { clickedTeamId, clickedTeamName ->
-                                                if (clickedTeamId != teamId) {
-                                                    onTeamClick(clickedTeamId, clickedTeamName, groupId)
+                        3 -> {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 16.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                if (pendingMatches.isNotEmpty()) {
+                                    val sortedPending = pendingMatches.sortedBy { it.jornada }
+                                    items(sortedPending) { match ->
+                                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                            Text(
+                                                text = "Jornada ${match.jornada}",
+                                                style = MaterialTheme.typography.labelMedium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.padding(horizontal = 12.dp)
+                                            )
+                                            MatchCard(
+                                                match = match,
+                                                modifier = Modifier.padding(horizontal = 12.dp),
+                                                onTeamClick = { clickedTeamId, clickedTeamName ->
+                                                    if (clickedTeamId != teamId) {
+                                                        onTeamClick(clickedTeamId, clickedTeamName, groupId)
+                                                    }
                                                 }
-                                            }
-                                        )
+                                            )
+                                        }
                                     }
-                                }
-                            } else {
-                                item {
-                                    Box(
-                                        modifier = Modifier.fillMaxWidth().padding(32.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = "No hay resultados todavía",
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    3 -> {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            if (pendingMatches.isNotEmpty()) {
-                                val sortedPending = pendingMatches.sortedBy { it.jornada }
-                                items(sortedPending) { match ->
-                                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                        Text(
-                                            text = "Jornada ${match.jornada}",
-                                            style = MaterialTheme.typography.labelMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.padding(horizontal = 12.dp)
-                                        )
-                                        MatchCard(
-                                            match = match,
-                                            modifier = Modifier.padding(horizontal = 12.dp),
-                                            onTeamClick = { clickedTeamId, clickedTeamName ->
-                                                if (clickedTeamId != teamId) {
-                                                    onTeamClick(clickedTeamId, clickedTeamName, groupId)
-                                                }
-                                            }
-                                        )
-                                    }
-                                }
-                            } else {
-                                item {
-                                    Box(
-                                        modifier = Modifier.fillMaxWidth().padding(32.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = "No hay próximos partidos",
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
+                                } else {
+                                    item {
+                                        Box(
+                                            modifier = Modifier.fillMaxWidth().padding(32.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = "No hay próximos partidos",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
                                     }
                                 }
                             }

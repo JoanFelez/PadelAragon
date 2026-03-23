@@ -6,8 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.padelaragon.app.data.model.MatchResult
 import com.padelaragon.app.data.model.StandingRow
 import com.padelaragon.app.data.model.TeamDetail
-import com.padelaragon.app.data.model.TeamInfo
 import com.padelaragon.app.data.repository.LeagueRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,6 +34,8 @@ class TeamViewModel(
 
     private val _uiState = MutableStateFlow(UiState(teamName = teamName))
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
     init {
         loadTeamInfo()
@@ -72,6 +75,46 @@ class TeamViewModel(
                         )
                     }
                 }
+        }
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+
+            coroutineScope {
+                val standingsRefresh = async { runCatching { repository.refreshStandings(groupId) } }
+                val resultsRefresh = async { runCatching { repository.refreshMatchResults(groupId) } }
+                standingsRefresh.await()
+                resultsRefresh.await()
+            }
+
+            runCatching { repository.getTeamInfoForGroup(teamId, teamName, groupId) }
+                .onSuccess { info ->
+                    if (info != null) {
+                        _uiState.update {
+                            it.copy(
+                                teamName = info.teamName,
+                                groupName = info.groupName,
+                                standing = info.standing,
+                                matches = info.matches,
+                                teamDetail = info.teamDetail,
+                                error = null
+                            )
+                        }
+                    } else {
+                        _uiState.update {
+                            it.copy(error = "No se encontró información del equipo")
+                        }
+                    }
+                }
+                .onFailure { throwable ->
+                    _uiState.update {
+                        it.copy(error = throwable.message ?: "Error al refrescar datos del equipo")
+                    }
+                }
+
+            _isRefreshing.value = false
         }
     }
 

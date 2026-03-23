@@ -38,6 +38,8 @@ class GroupDetailViewModel(
 
     private val _uiState = MutableStateFlow(UiState(groupName = groupName))
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
     val currentResults: StateFlow<List<MatchResult>> = uiState
         .map { state -> state.selectedJornada?.let { state.allMatchResults[it] } ?: emptyList() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -173,6 +175,60 @@ class GroupDetailViewModel(
                         )
                     }
                 }
+        }
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+
+            coroutineScope {
+                val standingsDeferred = async { runCatching { repository.refreshStandings(groupId) } }
+                val resultsDeferred = async { runCatching { repository.refreshMatchResults(groupId) } }
+
+                standingsDeferred.await()
+                    .onSuccess { standings ->
+                        _uiState.update {
+                            it.copy(
+                                standings = standings,
+                                standingsError = null
+                            )
+                        }
+                    }
+                    .onFailure { throwable ->
+                        _uiState.update {
+                            it.copy(
+                                standingsError = throwable.message ?: "Error al refrescar clasificacion"
+                            )
+                        }
+                    }
+
+                resultsDeferred.await()
+                    .onSuccess { allResults ->
+                        val sortedJornadas = allResults.keys.sorted()
+                        _uiState.update { state ->
+                            val selected = state.selectedJornada
+                                ?.takeIf { it in sortedJornadas }
+                                ?: findDefaultJornada(sortedJornadas, allResults)
+
+                            state.copy(
+                                allMatchResults = allResults,
+                                jornadas = sortedJornadas,
+                                selectedJornada = selected,
+                                resultsError = null
+                            )
+                        }
+                    }
+                    .onFailure { throwable ->
+                        _uiState.update {
+                            it.copy(
+                                resultsError = throwable.message ?: "Error al refrescar resultados"
+                            )
+                        }
+                    }
+            }
+
+            _isRefreshing.value = false
         }
     }
 }

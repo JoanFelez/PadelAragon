@@ -246,6 +246,9 @@ fun TeamScreen(
                                             MatchCard(
                                                 match = match,
                                                 modifier = Modifier.padding(horizontal = 12.dp),
+                                                detail = match.detailUrl?.let { uiState.matchDetails[it] },
+                                                isLoadingDetail = match.detailUrl in uiState.loadingMatchDetails,
+                                                onToggleDetail = match.detailUrl?.let { url -> { viewModel.loadMatchDetail(url) } },
                                                 onTeamClick = { clickedTeamId, clickedTeamName ->
                                                     if (clickedTeamId != teamId) {
                                                         onTeamClick(clickedTeamId, clickedTeamName, groupId)

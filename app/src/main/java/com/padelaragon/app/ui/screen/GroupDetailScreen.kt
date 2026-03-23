@@ -163,6 +163,9 @@ fun GroupDetailScreen(
                                             MatchCard(
                                                 match = match,
                                                 modifier = Modifier.padding(horizontal = 12.dp),
+                                                detail = match.detailUrl?.let { uiState.matchDetails[it] },
+                                                isLoadingDetail = match.detailUrl in uiState.loadingMatchDetails,
+                                                onToggleDetail = match.detailUrl?.let { url -> { viewModel.loadMatchDetail(url) } },
                                                 onTeamClick = { teamId, teamName ->
                                                     onTeamClick(teamId, teamName, groupId)
                                                 }

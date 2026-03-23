@@ -20,6 +20,7 @@ class MatchResultParser {
                 val localScore = normalizeScore(cells.getOrNull(1)?.text())
                 val visitorScore = normalizeScore(cells.getOrNull(2)?.text())
                 val (date, venue) = parseDateAndVenue(cells.getOrNull(4)?.text().orEmpty())
+                val detailUrl = row.selectFirst("a:has(img[src*=VerDetalle])")?.attr("href")
 
                 results.add(
                     MatchResult(
@@ -31,7 +32,8 @@ class MatchResultParser {
                         visitorScore = visitorScore,
                         date = date,
                         venue = venue,
-                        jornada = jornada
+                        jornada = jornada,
+                        detailUrl = detailUrl
                     )
                 )
             }

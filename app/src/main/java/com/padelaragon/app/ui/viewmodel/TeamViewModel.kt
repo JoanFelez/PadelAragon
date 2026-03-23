@@ -3,6 +3,7 @@ package com.padelaragon.app.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.padelaragon.app.data.model.MatchDetail
 import com.padelaragon.app.data.model.MatchResult
 import com.padelaragon.app.data.model.StandingRow
 import com.padelaragon.app.data.model.TeamDetail
@@ -28,6 +29,8 @@ class TeamViewModel(
         val standing: StandingRow? = null,
         val matches: List<MatchResult> = emptyList(),
         val teamDetail: TeamDetail? = null,
+        val matchDetails: Map<String, MatchDetail> = emptyMap(),
+        val loadingMatchDetails: Set<String> = emptySet(),
         val isLoading: Boolean = true,
         val error: String? = null
     )
@@ -119,6 +122,20 @@ class TeamViewModel(
     }
 
     fun retry() = loadTeamInfo()
+
+    fun loadMatchDetail(detailUrl: String) {
+        if (detailUrl in _uiState.value.matchDetails || detailUrl in _uiState.value.loadingMatchDetails) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(loadingMatchDetails = it.loadingMatchDetails + detailUrl) }
+            val detail = runCatching { repository.getMatchDetail(detailUrl) }.getOrNull()
+            _uiState.update { state ->
+                state.copy(
+                    matchDetails = if (detail != null) state.matchDetails + (detailUrl to detail) else state.matchDetails,
+                    loadingMatchDetails = state.loadingMatchDetails - detailUrl
+                )
+            }
+        }
+    }
 }
 
 class TeamViewModelFactory(

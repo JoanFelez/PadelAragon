@@ -4,11 +4,13 @@ import com.padelaragon.app.data.local.AppDatabase
 import com.padelaragon.app.data.local.entity.CacheTimestamp
 import com.padelaragon.app.data.local.entity.JornadaEntity
 import com.padelaragon.app.data.local.entity.LeagueGroupEntity
+import com.padelaragon.app.data.local.entity.MatchDetailPairEntity
 import com.padelaragon.app.data.local.entity.MatchResultEntity
 import com.padelaragon.app.data.local.entity.PlayerEntity
 import com.padelaragon.app.data.local.entity.StandingRowEntity
 import com.padelaragon.app.data.local.entity.TeamDetailEntity
 import com.padelaragon.app.data.model.LeagueGroup
+import com.padelaragon.app.data.model.MatchDetail
 import com.padelaragon.app.data.model.MatchResult
 import com.padelaragon.app.data.model.StandingRow
 import com.padelaragon.app.data.model.TeamDetail
@@ -16,6 +18,7 @@ import com.padelaragon.app.data.model.TeamInfo
 import com.padelaragon.app.data.network.HtmlFetcher
 import com.padelaragon.app.data.parser.GroupParser
 import com.padelaragon.app.data.parser.MatchResultParser
+import com.padelaragon.app.data.parser.MatchDetailParser
 import com.padelaragon.app.data.parser.StandingsParser
 import com.padelaragon.app.data.parser.TeamDetailParser
 import kotlinx.coroutines.async
@@ -33,6 +36,7 @@ object LeagueRepository {
     private val standingsParser = StandingsParser()
     private val matchResultParser = MatchResultParser()
     private val teamDetailParser = TeamDetailParser()
+    private val matchDetailParser = MatchDetailParser()
     private var db: AppDatabase? = null
 
     fun init(database: AppDatabase) {
@@ -54,6 +58,7 @@ object LeagueRepository {
     // Key = groupId * 100_000L + jornada
     private val cachedResults = ConcurrentHashMap<Long, List<MatchResult>>()
     private val cachedTeamDetails = ConcurrentHashMap<Int, TeamDetail>()
+    private val cachedMatchDetails = ConcurrentHashMap<String, MatchDetail>()
 
     // Track which jornadas have all results finalized (no "--" scores)
     private val finalizedJornadas = ConcurrentHashMap.newKeySet<Long>()
@@ -539,6 +544,42 @@ object LeagueRepository {
             matches = teamMatches,
             teamDetail = teamDetail
         )
+    }
+
+    suspend fun getMatchDetail(detailUrl: String): MatchDetail? {
+        // 1. In-memory cache (permanent - match details never change)
+        cachedMatchDetails[detailUrl]?.let { return it }
+
+        // 2. Room cache (permanent, no TTL)
+        val database = db
+        if (database != null) {
+            val entities = database.matchDetailDao().getByDetailUrl(detailUrl)
+            if (entities.isNotEmpty()) {
+                val detail = MatchDetail(entities.map { it.toModel() })
+                cachedMatchDetails[detailUrl] = detail
+                return detail
+            }
+        }
+
+        // 3. Network fetch
+        val fullUrl = buildDetailUrl(detailUrl)
+        val html = scrapeSemaphore.withPermit { fetcher.get(fullUrl) }
+        val detail = matchDetailParser.parse(html)
+        if (detail.pairs.isNotEmpty()) {
+            cachedMatchDetails[detailUrl] = detail
+            database?.matchDetailDao()?.insertAll(
+                detail.pairs.map { MatchDetailPairEntity.fromModel(detailUrl, it) }
+            )
+        }
+        return if (detail.pairs.isNotEmpty()) detail else null
+    }
+
+    private fun buildDetailUrl(relativeUrl: String): String {
+        val url = relativeUrl.trim()
+        if (url.startsWith("http://", ignoreCase = true) || url.startsWith("https://", ignoreCase = true)) {
+            return url
+        }
+        return java.net.URI(BASE_URL).resolve(url).toString()
     }
 
     private const val BASE_URL = "https://padelfederacion.es/pAGINAS/ARAPADEL/"

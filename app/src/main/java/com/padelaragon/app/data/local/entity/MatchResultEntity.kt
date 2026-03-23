@@ -14,7 +14,8 @@ data class MatchResultEntity(
     val visitorScore: String,
     val date: String?,
     val venue: String?,
-    val jornada: Int
+    val jornada: Int,
+    val detailUrl: String? = null
 ) {
     fun toModel(): MatchResult = MatchResult(
         localTeam = localTeam,
@@ -25,7 +26,8 @@ data class MatchResultEntity(
         visitorScore = visitorScore,
         date = date,
         venue = venue,
-        jornada = jornada
+        jornada = jornada,
+        detailUrl = detailUrl
     )
 
     companion object {
@@ -39,7 +41,8 @@ data class MatchResultEntity(
             visitorScore = model.visitorScore,
             date = model.date,
             venue = model.venue,
-            jornada = model.jornada
+            jornada = model.jornada,
+            detailUrl = model.detailUrl
         )
     }
 }

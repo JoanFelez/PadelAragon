@@ -52,14 +52,19 @@ class HtmlFetcher {
 
     private fun execute(request: Request): String {
         android.util.Log.d("HtmlFetcher", "Fetching: ${request.url}")
-        client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) {
-                throw IOException("HTTP ${response.code}: ${request.url}")
+        try {
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    throw IOException("HTTP ${response.code}: ${request.url}")
+                }
+                val bytes = response.body?.bytes() ?: throw IOException("Empty response body from ${request.url}")
+                val result = bytes.toString(latin1)
+                android.util.Log.d("HtmlFetcher", "Received ${result.length} chars from ${request.url}")
+                return result
             }
-            val bytes = response.body?.bytes() ?: throw IOException("Empty response body from ${request.url}")
-            val result = bytes.toString(latin1)
-            android.util.Log.d("HtmlFetcher", "Received ${result.length} chars from ${request.url}")
-            return result
+        } catch (e: javax.net.ssl.SSLHandshakeException) {
+            android.util.Log.e("HtmlFetcher", "SSL handshake failed for ${request.url}", e)
+            throw IOException("SSL error connecting to ${request.url}: ${e.message}", e)
         }
     }
 

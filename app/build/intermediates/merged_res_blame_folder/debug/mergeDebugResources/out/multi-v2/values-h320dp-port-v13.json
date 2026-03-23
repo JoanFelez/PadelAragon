@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.padelaragon.app-mergeDebugResources-62:/values-h320dp-port-v13/values-h320dp-port-v13.xml",
+            "outputFile": "com.padelaragon.app-mergeDebugResources-70:/values-h320dp-port-v13/values-h320dp-port-v13.xml",
             "map": [
                 {
-                    "source": "/home/joanfelez/.gradle/caches/8.13/transforms/e0fceb7cd8008ae05c4826a419bc9de3/transformed/material-1.11.0/res/values-h320dp-port-v13/values-h320dp-port-v13.xml",
+                    "source": "/home/joanfelez/.gradle/caches/8.13/transforms/c7982a3bcde6d62ec2bdc797cb68a6ad/transformed/material-1.12.0/res/values-h320dp-port-v13/values-h320dp-port-v13.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

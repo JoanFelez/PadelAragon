@@ -1,20 +1,27 @@
 package com.padelaragon.app.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.padelaragon.app.data.favorites.FavoritesManager
-import com.padelaragon.app.data.model.Gender
 import com.padelaragon.app.data.model.LeagueGroup
-import com.padelaragon.app.data.repository.LeagueRepository
+import com.padelaragon.app.data.repository.datasource.FavoritesDataSource
+import com.padelaragon.app.data.repository.datasource.GroupDataSource
+import com.padelaragon.app.domain.usecase.PrefetchGroupsUseCase
+import com.padelaragon.app.domain.usecase.SortGroupsUseCase
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
-class GroupListViewModel : ViewModel() {
-    private val repository = LeagueRepository
+class GroupListViewModel(
+    private val groupDataSource: GroupDataSource,
+    private val favoritesDataSource: FavoritesDataSource,
+    private val sortGroupsUseCase: SortGroupsUseCase = SortGroupsUseCase(),
+    private val prefetchGroupsUseCase: PrefetchGroupsUseCase
+) : ViewModel() {
 
     data class UiState(
         val groups: List<LeagueGroup> = emptyList(),
@@ -30,7 +37,7 @@ class GroupListViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            FavoritesManager.favorites.collect { ids ->
+            favoritesDataSource.favorites.collect { ids ->
                 _uiState.update { it.copy(favoriteIds = ids) }
             }
         }
@@ -41,15 +48,17 @@ class GroupListViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
-            runCatching { repository.getGroups() }
+            runCatching { groupDataSource.getGroups() }
                 .onSuccess { groups ->
-                    val sortedGroups = sortGroups(groups)
+                    val sortedGroups = sortGroupsUseCase(groups)
 
-                    val masc = sortedGroups.count { it.gender == Gender.MASCULINA }
-                    val fem = sortedGroups.count { it.gender == Gender.FEMENINA }
-                    android.util.Log.d("GroupListVM", "Groups: $masc MASCULINA, $fem FEMENINA, ${sortedGroups.size} total")
-                    sortedGroups.forEach { g ->
-                        android.util.Log.d("GroupListVM", "  → ${g.name} | gender=${g.gender} | category=${g.category}")
+                    // Start prefetch immediately (before UI update)
+                    viewModelScope.launch {
+                        val favIds = favoritesDataSource.favorites.value.toList()
+                        if (favIds.isNotEmpty()) {
+                            launch { runCatching { prefetchGroupsUseCase.prefetchFavorites(favIds) } }
+                        }
+                        launch { runCatching { prefetchGroupsUseCase.prefetchAll() } }
                     }
 
                     _uiState.update {
@@ -65,15 +74,6 @@ class GroupListViewModel : ViewModel() {
                                 error = null
                             )
                         }
-                    }
-
-                    // Prefetch favorites first (so they load instantly when tapped), then all groups
-                    viewModelScope.launch {
-                        val favIds = FavoritesManager.favorites.value.toList()
-                        if (favIds.isNotEmpty()) {
-                            runCatching { repository.prefetchGroups(favIds) }
-                        }
-                        runCatching { repository.prefetchAllGroups() }
                     }
                 }
                 .onFailure { throwable ->
@@ -91,11 +91,11 @@ class GroupListViewModel : ViewModel() {
         viewModelScope.launch {
             _isRefreshing.value = true
 
-            runCatching { repository.refreshGroups() }
+            runCatching { groupDataSource.refreshGroups() }
                 .onSuccess { groups ->
                     _uiState.update {
                         it.copy(
-                            groups = sortGroups(groups),
+                            groups = sortGroupsUseCase(groups),
                             error = null
                         )
                     }
@@ -110,17 +110,25 @@ class GroupListViewModel : ViewModel() {
         }
     }
 
-    private fun sortGroups(groups: List<LeagueGroup>): List<LeagueGroup> {
-        return groups.sortedWith(
-            compareBy<LeagueGroup> {
-                when (it.gender) {
-                    Gender.MASCULINA -> 0
-                    Gender.FEMENINA -> 1
-                }
-            }.thenBy { it.category }
-                .thenBy { it.name }
-        )
-    }
-
     fun retry() = loadGroups()
+
+    internal companion object {
+        /** Kept for backward compatibility with existing tests. */
+        fun sortGroups(groups: List<LeagueGroup>): List<LeagueGroup> =
+            SortGroupsUseCase()(groups)
+    }
+}
+
+class GroupListViewModelFactory(
+    private val groupDataSource: GroupDataSource,
+    private val favoritesDataSource: FavoritesDataSource,
+    private val prefetchGroupsUseCase: PrefetchGroupsUseCase
+) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        require(modelClass.isAssignableFrom(GroupListViewModel::class.java)) {
+            "Unknown ViewModel class: ${modelClass.name}"
+        }
+        return GroupListViewModel(groupDataSource, favoritesDataSource, prefetchGroupsUseCase = prefetchGroupsUseCase) as T
+    }
 }

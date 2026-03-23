@@ -2,11 +2,12 @@ package com.padelaragon.app.data.favorites
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.padelaragon.app.data.repository.datasource.FavoritesDataSource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-object FavoritesManager {
+object FavoritesManager : FavoritesDataSource {
     private const val PREFS_NAME = "favorites"
     private const val KEY_FAVORITE_GROUP_IDS = "favorite_group_ids"
     private const val MAX_FAVORITES = 3
@@ -14,14 +15,14 @@ object FavoritesManager {
     private lateinit var sharedPreferences: SharedPreferences
 
     private val _favorites = MutableStateFlow<Set<Int>>(emptySet())
-    val favorites: StateFlow<Set<Int>> = _favorites.asStateFlow()
+    override val favorites: StateFlow<Set<Int>> = _favorites.asStateFlow()
 
     fun init(context: Context) {
         sharedPreferences = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         _favorites.value = readFavoritesFromPrefs()
     }
 
-    fun toggleFavorite(groupId: Int): Boolean {
+    override fun toggleFavorite(groupId: Int): Boolean {
         val currentFavorites = _favorites.value
 
         if (currentFavorites.contains(groupId)) {
@@ -41,7 +42,7 @@ object FavoritesManager {
         return true
     }
 
-    fun isFavorite(groupId: Int): Boolean {
+    override fun isFavorite(groupId: Int): Boolean {
         return _favorites.value.contains(groupId)
     }
 

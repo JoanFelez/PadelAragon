@@ -25,6 +25,8 @@ class GroupListViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -41,15 +43,7 @@ class GroupListViewModel : ViewModel() {
 
             runCatching { repository.getGroups() }
                 .onSuccess { groups ->
-                    val sortedGroups = groups.sortedWith(
-                        compareBy<LeagueGroup> {
-                            when (it.gender) {
-                                Gender.MASCULINA -> 0
-                                Gender.FEMENINA -> 1
-                            }
-                        }.thenBy { it.category }
-                            .thenBy { it.name }
-                    )
+                    val sortedGroups = sortGroups(groups)
 
                     val masc = sortedGroups.count { it.gender == Gender.MASCULINA }
                     val fem = sortedGroups.count { it.gender == Gender.FEMENINA }
@@ -91,6 +85,41 @@ class GroupListViewModel : ViewModel() {
                     }
                 }
         }
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+
+            runCatching { repository.refreshGroups() }
+                .onSuccess { groups ->
+                    _uiState.update {
+                        it.copy(
+                            groups = sortGroups(groups),
+                            error = null
+                        )
+                    }
+                }
+                .onFailure { throwable ->
+                    _uiState.update {
+                        it.copy(error = throwable.message ?: "Error al refrescar grupos")
+                    }
+                }
+
+            _isRefreshing.value = false
+        }
+    }
+
+    private fun sortGroups(groups: List<LeagueGroup>): List<LeagueGroup> {
+        return groups.sortedWith(
+            compareBy<LeagueGroup> {
+                when (it.gender) {
+                    Gender.MASCULINA -> 0
+                    Gender.FEMENINA -> 1
+                }
+            }.thenBy { it.category }
+                .thenBy { it.name }
+        )
     }
 
     fun retry() = loadGroups()

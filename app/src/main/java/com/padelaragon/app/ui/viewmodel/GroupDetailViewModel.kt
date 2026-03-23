@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.padelaragon.app.data.favorites.FavoritesManager
+import com.padelaragon.app.data.model.MatchDetail
 import com.padelaragon.app.data.model.MatchResult
 import com.padelaragon.app.data.model.StandingRow
 import com.padelaragon.app.data.repository.LeagueRepository
@@ -33,11 +34,15 @@ class GroupDetailViewModel(
         val isLoadingStandings: Boolean = true,
         val isLoadingResults: Boolean = true,
         val standingsError: String? = null,
-        val resultsError: String? = null
+        val resultsError: String? = null,
+        val matchDetails: Map<String, MatchDetail> = emptyMap(),
+        val loadingMatchDetails: Set<String> = emptySet()
     )
 
     private val _uiState = MutableStateFlow(UiState(groupName = groupName))
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
     val currentResults: StateFlow<List<MatchResult>> = uiState
         .map { state -> state.selectedJornada?.let { state.allMatchResults[it] } ?: emptyList() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -122,6 +127,20 @@ class GroupDetailViewModel(
         _uiState.update { it.copy(selectedJornada = jornada) }
     }
 
+    fun loadMatchDetail(detailUrl: String) {
+        if (detailUrl in _uiState.value.matchDetails || detailUrl in _uiState.value.loadingMatchDetails) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(loadingMatchDetails = it.loadingMatchDetails + detailUrl) }
+            val detail = runCatching { repository.getMatchDetail(detailUrl) }.getOrNull()
+            _uiState.update { state ->
+                state.copy(
+                    matchDetails = if (detail != null) state.matchDetails + (detailUrl to detail) else state.matchDetails,
+                    loadingMatchDetails = state.loadingMatchDetails - detailUrl
+                )
+            }
+        }
+    }
+
     fun toggleFavorite(): Boolean = FavoritesManager.toggleFavorite(groupId)
 
     fun retryStandings() {
@@ -173,6 +192,60 @@ class GroupDetailViewModel(
                         )
                     }
                 }
+        }
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+
+            coroutineScope {
+                val standingsDeferred = async { runCatching { repository.refreshStandings(groupId) } }
+                val resultsDeferred = async { runCatching { repository.refreshMatchResults(groupId) } }
+
+                standingsDeferred.await()
+                    .onSuccess { standings ->
+                        _uiState.update {
+                            it.copy(
+                                standings = standings,
+                                standingsError = null
+                            )
+                        }
+                    }
+                    .onFailure { throwable ->
+                        _uiState.update {
+                            it.copy(
+                                standingsError = throwable.message ?: "Error al refrescar clasificacion"
+                            )
+                        }
+                    }
+
+                resultsDeferred.await()
+                    .onSuccess { allResults ->
+                        val sortedJornadas = allResults.keys.sorted()
+                        _uiState.update { state ->
+                            val selected = state.selectedJornada
+                                ?.takeIf { it in sortedJornadas }
+                                ?: findDefaultJornada(sortedJornadas, allResults)
+
+                            state.copy(
+                                allMatchResults = allResults,
+                                jornadas = sortedJornadas,
+                                selectedJornada = selected,
+                                resultsError = null
+                            )
+                        }
+                    }
+                    .onFailure { throwable ->
+                        _uiState.update {
+                            it.copy(
+                                resultsError = throwable.message ?: "Error al refrescar resultados"
+                            )
+                        }
+                    }
+            }
+
+            _isRefreshing.value = false
         }
     }
 }

@@ -5,9 +5,10 @@ data class MatchResult(
     val localTeamId: Int,
     val visitorTeam: String,
     val visitorTeamId: Int,
-    val localScore: String, // String because can be "--" when not played
+    val localScore: String,
     val visitorScore: String,
-    val date: String?, // Date string as scraped
-    val venue: String?, // Venue/location
-    val jornada: Int // Round/matchday number
+    val date: String?,
+    val venue: String?,
+    val jornada: Int,
+    val detailUrl: String? = null
 )

@@ -26,6 +26,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -56,6 +57,7 @@ fun GroupDetailScreen(
     )
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isFavorite by viewModel.isFavorite.collectAsState()
     val tabs = listOf("Clasificación", "Resultados")
     var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
@@ -86,85 +88,94 @@ fun GroupDetailScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        androidx.compose.foundation.layout.Column(
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = viewModel::refresh,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            TabRow(
-                selectedTabIndex = selectedTabIndex,
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            androidx.compose.foundation.layout.Column(
+                modifier = Modifier.fillMaxSize()
             ) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index },
-                        text = { Text(title, color = if (selectedTabIndex == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant) }
-                    )
-                }
-            }
-
-            when (selectedTabIndex) {
-                0 -> {
-                    LoadingErrorWrapper(
-                        isLoading = uiState.isLoadingStandings,
-                        error = uiState.standingsError,
-                        onRetry = viewModel::retryStandings,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(12.dp)
-                    ) {
-                        StandingsTable(
-                            standings = uiState.standings,
-                            modifier = Modifier.fillMaxSize(),
-                            onTeamClick = { teamId, teamName ->
-                                onTeamClick(teamId, teamName, groupId)
-                            }
+                TabRow(
+                    selectedTabIndex = selectedTabIndex,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTabIndex == index,
+                            onClick = { selectedTabIndex = index },
+                            text = { Text(title, color = if (selectedTabIndex == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant) }
                         )
                     }
                 }
 
-                else -> {
-                    ResultsTabContent(
-                        jornadas = uiState.jornadas,
-                        selectedJornada = uiState.selectedJornada,
-                        isLoading = uiState.isLoadingResults,
-                        error = uiState.resultsError,
-                        onSelectJornada = viewModel::selectJornada,
-                        onRetry = viewModel::retryResults,
-                        modifier = Modifier.fillMaxSize(),
-                        content = {
-                            if ((uiState.allMatchResults[uiState.selectedJornada] ?: emptyList()).isEmpty()) {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "Sin resultados",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                when (selectedTabIndex) {
+                    0 -> {
+                        LoadingErrorWrapper(
+                            isLoading = uiState.isLoadingStandings,
+                            error = uiState.standingsError,
+                            onRetry = viewModel::retryStandings,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(12.dp)
+                        ) {
+                            StandingsTable(
+                                standings = uiState.standings,
+                                modifier = Modifier.fillMaxSize(),
+                                onTeamClick = { teamId, teamName ->
+                                    onTeamClick(teamId, teamName, groupId)
                                 }
-                            } else {
-                                LazyColumn(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentPadding = PaddingValues(bottom = 12.dp),
-                                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    items(uiState.allMatchResults[uiState.selectedJornada] ?: emptyList()) { match ->
-                                        MatchCard(
-                                            match = match,
-                                            modifier = Modifier.padding(horizontal = 12.dp),
-                                            onTeamClick = { teamId, teamName ->
-                                                onTeamClick(teamId, teamName, groupId)
-                                            }
+                            )
+                        }
+                    }
+
+                    else -> {
+                        ResultsTabContent(
+                            jornadas = uiState.jornadas,
+                            selectedJornada = uiState.selectedJornada,
+                            isLoading = uiState.isLoadingResults,
+                            error = uiState.resultsError,
+                            onSelectJornada = viewModel::selectJornada,
+                            onRetry = viewModel::retryResults,
+                            modifier = Modifier.fillMaxSize(),
+                            content = {
+                                if ((uiState.allMatchResults[uiState.selectedJornada] ?: emptyList()).isEmpty()) {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "Sin resultados",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
+                                    }
+                                } else {
+                                    LazyColumn(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentPadding = PaddingValues(bottom = 12.dp),
+                                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        items(uiState.allMatchResults[uiState.selectedJornada] ?: emptyList()) { match ->
+                                            MatchCard(
+                                                match = match,
+                                                modifier = Modifier.padding(horizontal = 12.dp),
+                                                detail = match.detailUrl?.let { uiState.matchDetails[it] },
+                                                isLoadingDetail = match.detailUrl in uiState.loadingMatchDetails,
+                                                onToggleDetail = match.detailUrl?.let { url -> { viewModel.loadMatchDetail(url) } },
+                                                onTeamClick = { teamId, teamName ->
+                                                    onTeamClick(teamId, teamName, groupId)
+                                                }
+                                            )
+                                        }
                                     }
                                 }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }

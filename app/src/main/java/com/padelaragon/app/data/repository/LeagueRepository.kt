@@ -27,21 +27,23 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import com.padelaragon.app.data.repository.datasource.GroupDataSource
+import com.padelaragon.app.data.repository.datasource.StandingsDataSource
+import com.padelaragon.app.data.repository.datasource.MatchResultDataSource
+import com.padelaragon.app.data.repository.datasource.TeamDataSource
+import com.padelaragon.app.data.repository.datasource.MatchDetailDataSource
 import java.net.URI
 import java.util.concurrent.ConcurrentHashMap
 
-object LeagueRepository {
-    private val fetcher = HtmlFetcher()
-    private val groupParser = GroupParser()
-    private val standingsParser = StandingsParser()
-    private val matchResultParser = MatchResultParser()
-    private val teamDetailParser = TeamDetailParser()
-    private val matchDetailParser = MatchDetailParser()
-    private var db: AppDatabase? = null
-
-    fun init(database: AppDatabase) {
-        db = database
-    }
+class LeagueRepository(
+    private val db: AppDatabase,
+    private val fetcher: HtmlFetcher = HtmlFetcher(),
+    private val groupParser: GroupParser = GroupParser(),
+    private val standingsParser: StandingsParser = StandingsParser(),
+    private val matchResultParser: MatchResultParser = MatchResultParser(),
+    private val teamDetailParser: TeamDetailParser = TeamDetailParser(),
+    private val matchDetailParser: MatchDetailParser = MatchDetailParser()
+) : GroupDataSource, StandingsDataSource, MatchResultDataSource, TeamDataSource, MatchDetailDataSource {
 
     // Caches
     // Groups: stable for the season
@@ -70,26 +72,23 @@ object LeagueRepository {
         groupId.toLong() * 100_000 + jornada
 
     private suspend fun isCacheValid(key: String, ttl: Long): Boolean {
-        val timestamp = db?.cacheTimestampDao()?.getTimestamp(key) ?: return false
+        val timestamp = db.cacheTimestampDao().getTimestamp(key) ?: return false
         return (System.currentTimeMillis() - timestamp) < ttl
     }
 
     private suspend fun updateCacheTimestamp(key: String) {
-        db?.cacheTimestampDao()?.set(CacheTimestamp(key, System.currentTimeMillis()))
+        db.cacheTimestampDao().set(CacheTimestamp(key, System.currentTimeMillis()))
     }
 
-    suspend fun getGroups(): List<LeagueGroup> {
+    override suspend fun getGroups(): List<LeagueGroup> {
         // 1. In-memory cache
         cachedGroups?.let { return it }
 
         // 2. Room cache (permanent - groups don't change during a season)
-        val database = db
-        if (database != null) {
-            val roomGroups = database.leagueGroupDao().getAll().map { it.toModel() }
-            if (roomGroups.isNotEmpty()) {
-                cachedGroups = roomGroups
-                return roomGroups
-            }
+        val roomGroups = db.leagueGroupDao().getAll().map { it.toModel() }
+        if (roomGroups.isNotEmpty()) {
+            cachedGroups = roomGroups
+            return roomGroups
         }
 
         // 3. Network fetch
@@ -100,23 +99,20 @@ object LeagueRepository {
         cachedGroups = groups
 
         // Persist to Room (permanent, no timestamp needed)
-        database?.let { roomDb ->
-            roomDb.leagueGroupDao().deleteAll()
-            roomDb.leagueGroupDao().insertAll(groups.map { LeagueGroupEntity.fromModel(it) })
-        }
+        db.leagueGroupDao().deleteAll()
+        db.leagueGroupDao().insertAll(groups.map { LeagueGroupEntity.fromModel(it) })
 
         return groups
     }
 
-    suspend fun getStandings(groupId: Int): List<StandingRow> {
+    override suspend fun getStandings(groupId: Int): List<StandingRow> {
         // 1. In-memory cache
         cachedStandings[groupId]?.let { return it }
 
         // 2. Room cache
-        val database = db
         val cacheKey = "standings_$groupId"
-        if (database != null && isCacheValid(cacheKey, TTL_STANDINGS)) {
-            val roomStandings = database.standingRowDao().getByGroupId(groupId).map { it.toModel() }
+        if (isCacheValid(cacheKey, TTL_STANDINGS)) {
+            val roomStandings = db.standingRowDao().getByGroupId(groupId).map { it.toModel() }
             if (roomStandings.isNotEmpty()) {
                 cachedStandings[groupId] = roomStandings
                 return roomStandings
@@ -133,18 +129,15 @@ object LeagueRepository {
             cachedStandings[groupId] = standings
 
             // Persist to Room
-            database?.let { roomDb ->
-                roomDb.standingRowDao().deleteByGroupId(groupId)
-                roomDb.standingRowDao().insertAll(standings.map { StandingRowEntity.fromModel(groupId, it) })
-                updateCacheTimestamp(cacheKey)
-            }
+            db.standingRowDao().deleteByGroupId(groupId)
+            db.standingRowDao().insertAll(standings.map { StandingRowEntity.fromModel(groupId, it) })
+            updateCacheTimestamp(cacheKey)
         }
         return standings
     }
 
-    suspend fun getMatchResults(groupId: Int, jornada: Int): List<MatchResult> {
+    override suspend fun getMatchResults(groupId: Int, jornada: Int): List<MatchResult> {
         val key = resultKey(groupId, jornada)
-        val database = db
         val cacheKey = "results_${groupId}_$jornada"
 
         // If this jornada is finalized (all scores set), return cached forever.
@@ -152,25 +145,21 @@ object LeagueRepository {
             cachedResults[key]?.let { return it }
 
             // Cold start: finalized jornadas can be restored from Room.
-            if (database != null) {
-                val roomResults = database.matchResultDao().getByGroupAndJornada(groupId, jornada).map { it.toModel() }
-                if (roomResults.isNotEmpty()) {
-                    cachedResults[key] = roomResults
-                    return roomResults
-                }
+            val roomResults = db.matchResultDao().getByGroupAndJornada(groupId, jornada).map { it.toModel() }
+            if (roomResults.isNotEmpty()) {
+                cachedResults[key] = roomResults
+                return roomResults
             }
         }
 
         // Cold start restoration: if Room already has finalized results, keep forever.
-        if (database != null) {
-            val roomResults = database.matchResultDao().getByGroupAndJornada(groupId, jornada).map { it.toModel() }
-            if (roomResults.isNotEmpty()) {
-                val allFinalized = roomResults.all { it.localScore != "--" && it.visitorScore != "--" }
-                if (allFinalized) {
-                    finalizedJornadas.add(key)
-                    cachedResults[key] = roomResults
-                    return roomResults
-                }
+        val roomResultsColdStart = db.matchResultDao().getByGroupAndJornada(groupId, jornada).map { it.toModel() }
+        if (roomResultsColdStart.isNotEmpty()) {
+            val allFinalized = roomResultsColdStart.all { it.localScore != "--" && it.visitorScore != "--" }
+            if (allFinalized) {
+                finalizedJornadas.add(key)
+                cachedResults[key] = roomResultsColdStart
+                return roomResultsColdStart
             }
         }
 
@@ -182,8 +171,8 @@ object LeagueRepository {
         }
 
         // Cold start: check Room with TTL for non-finalized jornadas.
-        if (database != null && isCacheValid(cacheKey, TTL_RESULTS)) {
-            val roomResults = database.matchResultDao().getByGroupAndJornada(groupId, jornada).map { it.toModel() }
+        if (isCacheValid(cacheKey, TTL_RESULTS)) {
+            val roomResults = db.matchResultDao().getByGroupAndJornada(groupId, jornada).map { it.toModel() }
             if (roomResults.isNotEmpty()) {
                 cachedResults[key] = roomResults
                 return roomResults
@@ -203,28 +192,23 @@ object LeagueRepository {
             }
 
             // Persist to Room
-            database?.let { roomDb ->
-                roomDb.matchResultDao().deleteByGroupAndJornada(groupId, jornada)
-                roomDb.matchResultDao().insertAll(results.map { MatchResultEntity.fromModel(groupId, it) })
-                updateCacheTimestamp(cacheKey)
-            }
+            db.matchResultDao().deleteByGroupAndJornada(groupId, jornada)
+            db.matchResultDao().insertAll(results.map { MatchResultEntity.fromModel(groupId, it) })
+            updateCacheTimestamp(cacheKey)
         }
 
         return results
     }
 
-    suspend fun getJornadas(groupId: Int): List<Int> {
+    override suspend fun getJornadas(groupId: Int): List<Int> {
         // 1. In-memory cache
         cachedJornadas[groupId]?.let { return it }
 
         // 2. Room cache (permanent - jornadas don't change during a season)
-        val database = db
-        if (database != null) {
-            val roomJornadas = database.jornadaDao().getByGroupId(groupId)
-            if (roomJornadas.isNotEmpty()) {
-                cachedJornadas[groupId] = roomJornadas
-                return roomJornadas
-            }
+        val roomJornadas = db.jornadaDao().getByGroupId(groupId)
+        if (roomJornadas.isNotEmpty()) {
+            cachedJornadas[groupId] = roomJornadas
+            return roomJornadas
         }
 
         // 3. Network fetch
@@ -235,10 +219,8 @@ object LeagueRepository {
             cachedJornadas[groupId] = jornadas
 
             // Persist to Room (permanent)
-            database?.let { roomDb ->
-                roomDb.jornadaDao().deleteByGroupId(groupId)
-                roomDb.jornadaDao().insertAll(jornadas.map { JornadaEntity(groupId, it) })
-            }
+            db.jornadaDao().deleteByGroupId(groupId)
+            db.jornadaDao().insertAll(jornadas.map { JornadaEntity(groupId, it) })
         }
         return jornadas
     }
@@ -247,7 +229,7 @@ object LeagueRepository {
      * Fetch all match results for a group.
      * Smart: only fetches jornadas not already finalized in cache.
      */
-    suspend fun getAllMatchResults(groupId: Int): Map<Int, List<MatchResult>> {
+    override suspend fun getAllMatchResults(groupId: Int): Map<Int, List<MatchResult>> {
         val jornadas = getJornadas(groupId)
         if (jornadas.isEmpty()) return emptyMap()
 
@@ -286,7 +268,7 @@ object LeagueRepository {
      * Call from GroupListViewModel after groups are loaded.
      * Respects the semaphore to avoid overwhelming the server.
      */
-    suspend fun prefetchAllGroups() {
+    override suspend fun prefetchAllGroups() {
         val groups = cachedGroups ?: return
         coroutineScope {
             groups.map { group ->
@@ -303,7 +285,7 @@ object LeagueRepository {
         }
     }
 
-    suspend fun prefetchGroups(groupIds: List<Int>) {
+    override suspend fun prefetchGroups(groupIds: List<Int>) {
         val groups = cachedGroups ?: return
         val targetGroups = groups.filter { it.id in groupIds }
         coroutineScope {
@@ -323,43 +305,40 @@ object LeagueRepository {
     /**
      * Refresh standings for a specific group (standings change as matches complete).
      */
-    suspend fun refreshStandings(groupId: Int): List<StandingRow> {
+    override suspend fun refreshStandings(groupId: Int): List<StandingRow> {
         cachedStandings.remove(groupId)
-        db?.cacheTimestampDao()?.delete("standings_$groupId")
+        db.cacheTimestampDao().delete("standings_$groupId")
         return getStandings(groupId)
     }
 
-    suspend fun refreshGroups(): List<LeagueGroup> {
+    override suspend fun refreshGroups(): List<LeagueGroup> {
         cachedGroups = null
-        db?.leagueGroupDao()?.deleteAll()
+        db.leagueGroupDao().deleteAll()
         return getGroups()
     }
 
-    suspend fun refreshMatchResults(groupId: Int): Map<Int, List<MatchResult>> {
+    override suspend fun refreshMatchResults(groupId: Int): Map<Int, List<MatchResult>> {
         // Clear non-finalized results
         val jornadas = cachedJornadas[groupId] ?: getJornadas(groupId)
         for (j in jornadas) {
             val key = resultKey(groupId, j)
             if (key !in finalizedJornadas) {
                 cachedResults.remove(key)
-                db?.cacheTimestampDao()?.delete("results_${groupId}_$j")
+                db.cacheTimestampDao().delete("results_${groupId}_$j")
             }
         }
         return getAllMatchResults(groupId)
     }
 
-    suspend fun getTeamDetail(teamId: Int, teamHref: String = ""): TeamDetail? {
+    override suspend fun getTeamDetail(teamId: Int, teamHref: String): TeamDetail? {
         cachedTeamDetails[teamId]?.let { return it }
 
-        val database = db
-        if (database != null) {
-            val entity = database.teamDetailDao().getByTeamId(teamId)
-            if (entity != null) {
-                val players = database.teamDetailDao().getPlayersByTeamId(teamId).map { it.toModel() }
-                val detail = TeamDetail(category = entity.category, captainName = entity.captainName, players = players)
-                cachedTeamDetails[teamId] = detail
-                return detail
-            }
+        val entity = db.teamDetailDao().getByTeamId(teamId)
+        if (entity != null) {
+            val players = db.teamDetailDao().getPlayersByTeamId(teamId).map { it.toModel() }
+            val detail = TeamDetail(category = entity.category, captainName = entity.captainName, players = players)
+            cachedTeamDetails[teamId] = detail
+            return detail
         }
 
         android.util.Log.d("LeagueRepo", "getTeamDetail(teamId=$teamId) received teamHref='$teamHref'")
@@ -389,7 +368,6 @@ object LeagueRepository {
                                 "LeagueRepo",
                                 "Team detail HTTP ${response.statusCode} from $url (${response.body.length} chars)"
                             )
-                            android.util.Log.d("LeagueRepo", "Response: ${response.body.length} chars")
 
                             if (response.statusCode == 200 && response.body.isNotBlank()) {
                                 val parsed = teamDetailParser.parse(response.body)
@@ -408,14 +386,7 @@ object LeagueRepository {
             val detail = details.firstOrNull { it != null && (it.players.isNotEmpty() || it.captain != null) }
             if (detail != null) {
                 cachedTeamDetails[teamId] = detail
-
-                database?.let { roomDb ->
-                    roomDb.teamDetailDao().insertTeamWithPlayers(
-                        TeamDetailEntity(teamId = teamId, category = detail.category, captainName = detail.captainName),
-                        detail.players.map { PlayerEntity.fromModel(teamId, it) }
-                    )
-                }
-
+                persistTeamDetail(teamId, detail)
                 return detail
             }
         } else {
@@ -427,7 +398,6 @@ object LeagueRepository {
                     "LeagueRepo",
                     "Team detail HTTP ${response.statusCode} from $url (${response.body.length} chars)"
                 )
-                android.util.Log.d("LeagueRepo", "Response: ${response.body.length} chars")
 
                 val parsed = teamDetailParser.parse(response.body)
                 android.util.Log.d("LeagueRepo", "Parsed: players=${parsed.players.size}, captain=${parsed.captain}, category=${parsed.category}")
@@ -438,20 +408,20 @@ object LeagueRepository {
 
             if (detail != null && (detail.players.isNotEmpty() || detail.captain != null)) {
                 cachedTeamDetails[teamId] = detail
-
-                database?.let { roomDb ->
-                    roomDb.teamDetailDao().insertTeamWithPlayers(
-                        TeamDetailEntity(teamId = teamId, category = detail.category, captainName = detail.captainName),
-                        detail.players.map { PlayerEntity.fromModel(teamId, it) }
-                    )
-                }
-
+                persistTeamDetail(teamId, detail)
                 return detail
             }
         }
 
         android.util.Log.w("LeagueRepo", "No team detail found for teamId=$teamId after trying ${urlsToTry.size} URLs")
         return null
+    }
+
+    private suspend fun persistTeamDetail(teamId: Int, detail: TeamDetail) {
+        db.teamDetailDao().insertTeamWithPlayers(
+            TeamDetailEntity(teamId = teamId, category = detail.category, captainName = detail.captainName),
+            detail.players.map { PlayerEntity.fromModel(teamId, it) }
+        )
     }
 
     private fun buildTeamDetailUrl(teamHref: String): String {
@@ -480,7 +450,7 @@ object LeagueRepository {
      * Avoids searching all groups' standings - only fetches the known group.
      * Falls back to full search if team not found in the specified group.
      */
-    suspend fun getTeamInfoForGroup(teamId: Int, teamName: String, groupId: Int): TeamInfo? {
+    override suspend fun getTeamInfoForGroup(teamId: Int, teamName: String, groupId: Int): TeamInfo? {
         val groups = getGroups()
         val groupName = groups.find { it.id == groupId }?.name ?: "Grupo"
 
@@ -527,7 +497,7 @@ object LeagueRepository {
      * Searches all groups' standings + results to find this team.
      * If data is not cached yet, fetches it.
      */
-    suspend fun getTeamInfo(teamId: Int, teamName: String): TeamInfo? {
+    override suspend fun getTeamInfo(teamId: Int, teamName: String): TeamInfo? {
         val groups = getGroups()
 
         // Find which group this team belongs to by checking cached standings
@@ -587,19 +557,16 @@ object LeagueRepository {
         )
     }
 
-    suspend fun getMatchDetail(detailUrl: String): MatchDetail? {
+    override suspend fun getMatchDetail(detailUrl: String): MatchDetail? {
         // 1. In-memory cache (permanent - match details never change)
         cachedMatchDetails[detailUrl]?.let { return it }
 
         // 2. Room cache (permanent, no TTL)
-        val database = db
-        if (database != null) {
-            val entities = database.matchDetailDao().getByDetailUrl(detailUrl)
-            if (entities.isNotEmpty()) {
-                val detail = MatchDetail(entities.map { it.toModel() })
-                cachedMatchDetails[detailUrl] = detail
-                return detail
-            }
+        val entities = db.matchDetailDao().getByDetailUrl(detailUrl)
+        if (entities.isNotEmpty()) {
+            val detail = MatchDetail(entities.map { it.toModel() })
+            cachedMatchDetails[detailUrl] = detail
+            return detail
         }
 
         // 3. Network fetch
@@ -608,14 +575,14 @@ object LeagueRepository {
         val detail = matchDetailParser.parse(html)
         if (detail.pairs.isNotEmpty()) {
             cachedMatchDetails[detailUrl] = detail
-            database?.matchDetailDao()?.insertAll(
+            db.matchDetailDao().insertAll(
                 detail.pairs.map { MatchDetailPairEntity.fromModel(detailUrl, it) }
             )
         }
         return if (detail.pairs.isNotEmpty()) detail else null
     }
 
-    suspend fun prefetchMatchDetails(results: List<MatchResult>) {
+    override suspend fun prefetchMatchDetails(results: List<MatchResult>) {
         val urlsToPrefetch = results
             .mapNotNull { it.detailUrl }
             .filter { it.isNotBlank() && !cachedMatchDetails.containsKey(it) }
@@ -636,9 +603,11 @@ object LeagueRepository {
         return URI(BASE_URL).resolve(url).toString()
     }
 
-    private const val BASE_URL = "https://padelfederacion.es/pAGINAS/ARAPADEL/"
-    private const val LEAGUE_ID = 27951
+    companion object {
+        private const val BASE_URL = "https://padelfederacion.es/pAGINAS/ARAPADEL/"
+        private const val LEAGUE_ID = 27951
 
-    private const val TTL_STANDINGS = 30 * 60 * 1000L
-    private const val TTL_RESULTS = 30 * 60 * 1000L
+        private const val TTL_STANDINGS = 30 * 60 * 1000L
+        private const val TTL_RESULTS = 30 * 60 * 1000L
+    }
 }

@@ -2,18 +2,26 @@ package com.padelaragon.app.ui.navigation
 
 import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.NavHostController
+import com.padelaragon.app.PadelAragonApp
 import com.padelaragon.app.ui.screen.GroupDetailScreen
 import com.padelaragon.app.ui.screen.GroupListScreen
 import com.padelaragon.app.ui.screen.TeamScreen
+import com.padelaragon.app.ui.viewmodel.GroupDetailViewModelFactory
+import com.padelaragon.app.ui.viewmodel.GroupListViewModelFactory
+import com.padelaragon.app.ui.viewmodel.TeamViewModelFactory
 
 @Composable
 fun NavGraph(navController: NavHostController = rememberNavController()) {
+    val app = LocalContext.current.applicationContext as PadelAragonApp
+    val container = app.container
+
     val navigateToTeam: (Int, String, Int) -> Unit = { teamId, teamName, groupId ->
         navController.navigate("team/$teamId/${Uri.encode(teamName)}/$groupId")
     }
@@ -23,7 +31,11 @@ fun NavGraph(navController: NavHostController = rememberNavController()) {
             GroupListScreen(
                 onGroupClick = { groupId, groupName ->
                     navController.navigate("group/$groupId/${Uri.encode(groupName)}")
-                }
+                },
+                viewModelFactory = GroupListViewModelFactory(
+                    container.groupDataSource,
+                    container.favoritesDataSource
+                )
             )
         }
 
@@ -41,7 +53,14 @@ fun NavGraph(navController: NavHostController = rememberNavController()) {
                 groupId = groupId,
                 groupName = groupName,
                 onBack = { navController.popBackStack() },
-                onTeamClick = navigateToTeam
+                onTeamClick = navigateToTeam,
+                viewModelFactory = GroupDetailViewModelFactory(
+                    groupId, groupName,
+                    container.standingsDataSource,
+                    container.matchResultDataSource,
+                    container.matchDetailDataSource,
+                    container.favoritesDataSource
+                )
             )
         }
 
@@ -62,7 +81,14 @@ fun NavGraph(navController: NavHostController = rememberNavController()) {
                 teamName = teamName,
                 groupId = groupId,
                 onBack = { navController.popBackStack() },
-                onTeamClick = navigateToTeam
+                onTeamClick = navigateToTeam,
+                viewModelFactory = TeamViewModelFactory(
+                    teamId, teamName, groupId,
+                    container.teamDataSource,
+                    container.standingsDataSource,
+                    container.matchResultDataSource,
+                    container.matchDetailDataSource
+                )
             )
         }
     }

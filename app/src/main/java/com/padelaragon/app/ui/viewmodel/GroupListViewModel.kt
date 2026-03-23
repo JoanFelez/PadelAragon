@@ -1,11 +1,12 @@
 package com.padelaragon.app.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.padelaragon.app.data.favorites.FavoritesManager
 import com.padelaragon.app.data.model.Gender
 import com.padelaragon.app.data.model.LeagueGroup
-import com.padelaragon.app.data.repository.LeagueRepository
+import com.padelaragon.app.data.repository.datasource.FavoritesDataSource
+import com.padelaragon.app.data.repository.datasource.GroupDataSource
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,8 +15,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
-class GroupListViewModel : ViewModel() {
-    private val repository = LeagueRepository
+class GroupListViewModel(
+    private val groupDataSource: GroupDataSource,
+    private val favoritesDataSource: FavoritesDataSource
+) : ViewModel() {
 
     data class UiState(
         val groups: List<LeagueGroup> = emptyList(),
@@ -31,7 +34,7 @@ class GroupListViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            FavoritesManager.favorites.collect { ids ->
+            favoritesDataSource.favorites.collect { ids ->
                 _uiState.update { it.copy(favoriteIds = ids) }
             }
         }
@@ -42,7 +45,7 @@ class GroupListViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
-            runCatching { repository.getGroups() }
+            runCatching { groupDataSource.getGroups() }
                 .onSuccess { groups ->
                     val sortedGroups = sortGroups(groups)
 
@@ -70,11 +73,11 @@ class GroupListViewModel : ViewModel() {
 
                     viewModelScope.launch {
                         coroutineScope {
-                            val favIds = FavoritesManager.favorites.value.toList()
+                            val favIds = favoritesDataSource.favorites.value.toList()
                             if (favIds.isNotEmpty()) {
-                                launch { runCatching { repository.prefetchGroups(favIds) } }
+                                launch { runCatching { groupDataSource.prefetchGroups(favIds) } }
                             }
-                            launch { runCatching { repository.prefetchAllGroups() } }
+                            launch { runCatching { groupDataSource.prefetchAllGroups() } }
                         }
                     }
                 }
@@ -93,7 +96,7 @@ class GroupListViewModel : ViewModel() {
         viewModelScope.launch {
             _isRefreshing.value = true
 
-            runCatching { repository.refreshGroups() }
+            runCatching { groupDataSource.refreshGroups() }
                 .onSuccess { groups ->
                     _uiState.update {
                         it.copy(
@@ -130,5 +133,18 @@ class GroupListViewModel : ViewModel() {
                     .thenBy { it.name }
             )
         }
+    }
+}
+
+class GroupListViewModelFactory(
+    private val groupDataSource: GroupDataSource,
+    private val favoritesDataSource: FavoritesDataSource
+) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        require(modelClass.isAssignableFrom(GroupListViewModel::class.java)) {
+            "Unknown ViewModel class: ${modelClass.name}"
+        }
+        return GroupListViewModel(groupDataSource, favoritesDataSource) as T
     }
 }

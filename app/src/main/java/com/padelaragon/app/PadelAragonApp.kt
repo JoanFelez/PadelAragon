@@ -5,9 +5,12 @@ import android.util.Log
 import com.google.android.gms.security.ProviderInstaller
 import com.padelaragon.app.data.favorites.FavoritesManager
 import com.padelaragon.app.data.local.AppDatabase
-import com.padelaragon.app.data.repository.LeagueRepository
+import com.padelaragon.app.di.AppContainer
 
 class PadelAragonApp : Application() {
+    lateinit var container: AppContainer
+        private set
+
     override fun onCreate() {
         super.onCreate()
         try {
@@ -18,6 +21,6 @@ class PadelAragonApp : Application() {
         }
         FavoritesManager.init(this)
         val db = AppDatabase.getInstance(this)
-        LeagueRepository.init(db)
+        container = AppContainer(db)
     }
 }

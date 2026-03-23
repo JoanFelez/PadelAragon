@@ -52,9 +52,8 @@ fun GroupDetailScreen(
     groupName: String,
     onBack: () -> Unit,
     onTeamClick: (teamId: Int, teamName: String, groupId: Int) -> Unit,
-    viewModel: GroupDetailViewModel = viewModel(
-        factory = GroupDetailViewModelFactory(groupId, groupName)
-    )
+    viewModelFactory: GroupDetailViewModelFactory,
+    viewModel: GroupDetailViewModel = viewModel(factory = viewModelFactory)
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()

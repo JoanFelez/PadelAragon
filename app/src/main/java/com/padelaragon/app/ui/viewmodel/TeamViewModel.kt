@@ -8,7 +8,10 @@ import com.padelaragon.app.data.model.MatchResult
 import com.padelaragon.app.data.model.PlayerStats
 import com.padelaragon.app.data.model.StandingRow
 import com.padelaragon.app.data.model.TeamDetail
-import com.padelaragon.app.data.repository.LeagueRepository
+import com.padelaragon.app.data.repository.datasource.MatchDetailDataSource
+import com.padelaragon.app.data.repository.datasource.MatchResultDataSource
+import com.padelaragon.app.data.repository.datasource.StandingsDataSource
+import com.padelaragon.app.data.repository.datasource.TeamDataSource
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,9 +23,12 @@ import kotlinx.coroutines.launch
 class TeamViewModel(
     private val teamId: Int,
     private val teamName: String,
-    private val groupId: Int
+    private val groupId: Int,
+    private val teamDataSource: TeamDataSource,
+    private val standingsDataSource: StandingsDataSource,
+    private val matchResultDataSource: MatchResultDataSource,
+    private val matchDetailDataSource: MatchDetailDataSource
 ) : ViewModel() {
-    private val repository = LeagueRepository
 
     data class UiState(
         val teamName: String = "",
@@ -51,7 +57,7 @@ class TeamViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
-            runCatching { repository.getTeamInfoForGroup(teamId, teamName, groupId) }
+            runCatching { teamDataSource.getTeamInfoForGroup(teamId, teamName, groupId) }
                 .onSuccess { info ->
                     if (info != null) {
                         _uiState.update {
@@ -90,13 +96,13 @@ class TeamViewModel(
             _uiState.update { it.copy(playerStats = emptyList()) }
 
             coroutineScope {
-                val standingsRefresh = async { runCatching { repository.refreshStandings(groupId) } }
-                val resultsRefresh = async { runCatching { repository.refreshMatchResults(groupId) } }
+                val standingsRefresh = async { runCatching { standingsDataSource.refreshStandings(groupId) } }
+                val resultsRefresh = async { runCatching { matchResultDataSource.refreshMatchResults(groupId) } }
                 standingsRefresh.await()
                 resultsRefresh.await()
             }
 
-            runCatching { repository.getTeamInfoForGroup(teamId, teamName, groupId) }
+            runCatching { teamDataSource.getTeamInfoForGroup(teamId, teamName, groupId) }
                 .onSuccess { info ->
                     if (info != null) {
                         _uiState.update {
@@ -131,7 +137,7 @@ class TeamViewModel(
         if (detailUrl in _uiState.value.matchDetails || detailUrl in _uiState.value.loadingMatchDetails) return
         viewModelScope.launch {
             _uiState.update { it.copy(loadingMatchDetails = it.loadingMatchDetails + detailUrl) }
-            val detail = runCatching { repository.getMatchDetail(detailUrl) }.getOrNull()
+            val detail = runCatching { matchDetailDataSource.getMatchDetail(detailUrl) }.getOrNull()
             _uiState.update { state ->
                 state.copy(
                     matchDetails = if (detail != null) state.matchDetails + (detailUrl to detail) else state.matchDetails,
@@ -156,7 +162,7 @@ class TeamViewModel(
                     .map { match ->
                         async {
                             val url = match.detailUrl!!
-                            val detail = runCatching { repository.getMatchDetail(url) }.getOrNull()
+                            val detail = runCatching { matchDetailDataSource.getMatchDetail(url) }.getOrNull()
                             if (detail != null) url to detail else null
                         }
                     }
@@ -252,13 +258,21 @@ class TeamViewModel(
 class TeamViewModelFactory(
     private val teamId: Int,
     private val teamName: String,
-    private val groupId: Int
+    private val groupId: Int,
+    private val teamDataSource: TeamDataSource,
+    private val standingsDataSource: StandingsDataSource,
+    private val matchResultDataSource: MatchResultDataSource,
+    private val matchDetailDataSource: MatchDetailDataSource
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         require(modelClass.isAssignableFrom(TeamViewModel::class.java)) {
             "Unknown ViewModel class: ${modelClass.name}"
         }
-        return TeamViewModel(teamId, teamName, groupId) as T
+        return TeamViewModel(
+            teamId, teamName, groupId,
+            teamDataSource, standingsDataSource,
+            matchResultDataSource, matchDetailDataSource
+        ) as T
     }
 }

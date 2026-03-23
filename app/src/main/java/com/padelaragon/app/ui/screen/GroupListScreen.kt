@@ -30,12 +30,14 @@ import com.padelaragon.app.data.model.Gender
 import com.padelaragon.app.data.model.LeagueGroup
 import com.padelaragon.app.ui.components.LoadingErrorWrapper
 import com.padelaragon.app.ui.viewmodel.GroupListViewModel
+import com.padelaragon.app.ui.viewmodel.GroupListViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupListScreen(
     onGroupClick: (groupId: Int, groupName: String) -> Unit,
-    viewModel: GroupListViewModel = viewModel()
+    viewModelFactory: GroupListViewModelFactory,
+    viewModel: GroupListViewModel = viewModel(factory = viewModelFactory)
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()

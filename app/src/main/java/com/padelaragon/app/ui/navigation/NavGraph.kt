@@ -34,7 +34,8 @@ fun NavGraph(navController: NavHostController = rememberNavController()) {
                 },
                 viewModelFactory = GroupListViewModelFactory(
                     container.groupDataSource,
-                    container.favoritesDataSource
+                    container.favoritesDataSource,
+                    container.prefetchGroupsUseCase
                 )
             )
         }

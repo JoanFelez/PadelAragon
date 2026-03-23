@@ -10,6 +10,7 @@ import com.padelaragon.app.data.repository.datasource.FavoritesDataSource
 import com.padelaragon.app.data.repository.datasource.MatchDetailDataSource
 import com.padelaragon.app.data.repository.datasource.MatchResultDataSource
 import com.padelaragon.app.data.repository.datasource.StandingsDataSource
+import com.padelaragon.app.domain.usecase.FindDefaultJornadaUseCase
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +28,8 @@ class GroupDetailViewModel(
     private val standingsDataSource: StandingsDataSource,
     private val matchResultDataSource: MatchResultDataSource,
     private val matchDetailDataSource: MatchDetailDataSource,
-    private val favoritesDataSource: FavoritesDataSource
+    private val favoritesDataSource: FavoritesDataSource,
+    private val findDefaultJornadaUseCase: FindDefaultJornadaUseCase = FindDefaultJornadaUseCase()
 ) : ViewModel() {
 
     data class UiState(
@@ -98,7 +100,7 @@ class GroupDetailViewModel(
                             it.copy(
                                 allMatchResults = allResults,
                                 jornadas = sortedJornadas,
-                                selectedJornada = findDefaultJornada(sortedJornadas, allResults),
+                                selectedJornada = findDefaultJornadaUseCase(sortedJornadas, allResults),
                                 isLoadingResults = false
                             )
                         }
@@ -114,11 +116,6 @@ class GroupDetailViewModel(
             }
         }
     }
-
-    private fun findDefaultJornada(
-        sortedJornadas: List<Int>,
-        allResults: Map<Int, List<MatchResult>>
-    ): Int? = Companion.findDefaultJornada(sortedJornadas, allResults)
 
     fun selectJornada(jornada: Int) {
         _uiState.update { it.copy(selectedJornada = jornada) }
@@ -176,7 +173,7 @@ class GroupDetailViewModel(
                         it.copy(
                             allMatchResults = allResults,
                             jornadas = sortedJornadas,
-                            selectedJornada = findDefaultJornada(sortedJornadas, allResults),
+                            selectedJornada = findDefaultJornadaUseCase(sortedJornadas, allResults),
                             isLoadingResults = false
                         )
                     }
@@ -223,7 +220,7 @@ class GroupDetailViewModel(
                         _uiState.update { state ->
                             val selected = state.selectedJornada
                                 ?.takeIf { it in sortedJornadas }
-                                ?: findDefaultJornada(sortedJornadas, allResults)
+                                ?: findDefaultJornadaUseCase(sortedJornadas, allResults)
 
                             state.copy(
                                 allMatchResults = allResults,
@@ -247,19 +244,11 @@ class GroupDetailViewModel(
     }
 
     internal companion object {
-        /**
-         * Pick the latest jornada that has at least one played match.
-         * If no jornada has results yet, fall back to the first available jornada.
-         */
+        /** Kept for backward compatibility with existing tests. */
         fun findDefaultJornada(
             sortedJornadas: List<Int>,
             allResults: Map<Int, List<MatchResult>>
-        ): Int? {
-            val lastWithResults = sortedJornadas.lastOrNull { jornada ->
-                allResults[jornada]?.any { it.localScore != "--" && it.visitorScore != "--" } == true
-            }
-            return lastWithResults ?: sortedJornadas.firstOrNull()
-        }
+        ): Int? = FindDefaultJornadaUseCase()(sortedJornadas, allResults)
     }
 }
 

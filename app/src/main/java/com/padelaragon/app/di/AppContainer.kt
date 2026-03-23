@@ -14,6 +14,7 @@ import com.padelaragon.app.data.repository.datasource.MatchDetailDataSource
 import com.padelaragon.app.data.repository.datasource.MatchResultDataSource
 import com.padelaragon.app.data.repository.datasource.StandingsDataSource
 import com.padelaragon.app.data.repository.datasource.TeamDataSource
+import com.padelaragon.app.domain.usecase.PrefetchGroupsUseCase
 
 class AppContainer(database: AppDatabase) {
     private val scraping = ScrapingService(database)
@@ -34,4 +35,5 @@ class AppContainer(database: AppDatabase) {
     val teamDataSource: TeamDataSource = teamDetailRepository
     val matchDetailDataSource: MatchDetailDataSource = matchDetailRepository
     val favoritesDataSource: FavoritesDataSource = FavoritesManager
+    val prefetchGroupsUseCase = PrefetchGroupsUseCase(groupRepository, standingsRepository, matchResultRepository)
 }

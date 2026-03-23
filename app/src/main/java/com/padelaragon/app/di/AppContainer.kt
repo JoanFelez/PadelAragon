@@ -2,6 +2,7 @@ package com.padelaragon.app.di
 
 import com.padelaragon.app.data.favorites.FavoritesManager
 import com.padelaragon.app.data.local.AppDatabase
+import com.padelaragon.app.data.network.HtmlFetcher
 import com.padelaragon.app.data.repository.GroupRepository
 import com.padelaragon.app.data.repository.MatchDetailRepository
 import com.padelaragon.app.data.repository.MatchResultRepository
@@ -16,8 +17,8 @@ import com.padelaragon.app.data.repository.datasource.StandingsDataSource
 import com.padelaragon.app.data.repository.datasource.TeamDataSource
 import com.padelaragon.app.domain.usecase.PrefetchGroupsUseCase
 
-class AppContainer(database: AppDatabase) {
-    private val scraping = ScrapingService(database)
+class AppContainer(database: AppDatabase, cacheDir: java.io.File? = null) {
+    private val scraping = ScrapingService(database, HtmlFetcher(cacheDir))
     private val standingsRepository = StandingsRepository(scraping)
     private val matchResultRepository = MatchResultRepository(scraping)
     private val matchDetailRepository = MatchDetailRepository(scraping)

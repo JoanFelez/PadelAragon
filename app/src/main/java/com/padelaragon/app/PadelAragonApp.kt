@@ -21,6 +21,6 @@ class PadelAragonApp : Application() {
         }
         FavoritesManager.init(this)
         val db = AppDatabase.getInstance(this)
-        container = AppContainer(db)
+        container = AppContainer(db, cacheDir)
     }
 }

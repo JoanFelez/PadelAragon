@@ -52,6 +52,15 @@ class GroupListViewModel(
                 .onSuccess { groups ->
                     val sortedGroups = sortGroupsUseCase(groups)
 
+                    // Start prefetch immediately (before UI update)
+                    viewModelScope.launch {
+                        val favIds = favoritesDataSource.favorites.value.toList()
+                        if (favIds.isNotEmpty()) {
+                            launch { runCatching { prefetchGroupsUseCase.prefetchFavorites(favIds) } }
+                        }
+                        launch { runCatching { prefetchGroupsUseCase.prefetchAll() } }
+                    }
+
                     _uiState.update {
                         if (sortedGroups.isEmpty()) {
                             it.copy(
@@ -64,16 +73,6 @@ class GroupListViewModel(
                                 isLoading = false,
                                 error = null
                             )
-                        }
-                    }
-
-                    viewModelScope.launch {
-                        coroutineScope {
-                            val favIds = favoritesDataSource.favorites.value.toList()
-                            if (favIds.isNotEmpty()) {
-                                launch { runCatching { prefetchGroupsUseCase.prefetchFavorites(favIds) } }
-                            }
-                            launch { runCatching { prefetchGroupsUseCase.prefetchAll() } }
                         }
                     }
                 }

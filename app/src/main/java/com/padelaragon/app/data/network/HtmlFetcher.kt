@@ -1,5 +1,6 @@
 package com.padelaragon.app.data.network
 
+import android.util.Log
 import com.padelaragon.app.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -14,13 +15,20 @@ import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLHandshakeException
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
-class HtmlFetcher {
+class HtmlFetcher(cacheDir: java.io.File? = null) {
     private val latin1: Charset = Charsets.ISO_8859_1
 
-    private val client: OkHttpClient = sharedClient
+    private val client: OkHttpClient = if (cacheDir != null) {
+        sharedClient.newBuilder()
+            .cache(okhttp3.Cache(java.io.File(cacheDir, "http_cache"), CACHE_SIZE))
+            .build()
+    } else {
+        sharedClient
+    }
 
     suspend fun get(url: String): String = withContext(Dispatchers.IO) {
         val request = Request.Builder()
@@ -42,19 +50,20 @@ class HtmlFetcher {
         executeWithStatus(request)
     }
 
-    suspend fun post(url: String, params: Map<String, String>): String = withContext(Dispatchers.IO) {
-        val formBodyBuilder = FormBody.Builder(latin1)
-        params.forEach { (key, value) -> formBodyBuilder.add(key, value) }
+    suspend fun post(url: String, params: Map<String, String>): String =
+        withContext(Dispatchers.IO) {
+            val formBodyBuilder = FormBody.Builder(latin1)
+            params.forEach { (key, value) -> formBodyBuilder.add(key, value) }
 
-        val request = Request.Builder()
-            .url(url)
-            .header("User-Agent", MOBILE_USER_AGENT)
-            .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-            .post(formBodyBuilder.build())
-            .build()
+            val request = Request.Builder()
+                .url(url)
+                .header("User-Agent", MOBILE_USER_AGENT)
+                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+                .post(formBodyBuilder.build())
+                .build()
 
-        execute(request)
-    }
+            execute(request)
+        }
 
     private fun execute(request: Request): String {
         android.util.Log.d("HtmlFetcher", "Fetching: ${request.url}")
@@ -65,21 +74,24 @@ class HtmlFetcher {
                 }
                 val bytes = response.body.bytes()
                 val result = bytes.toString(latin1)
-                android.util.Log.d("HtmlFetcher", "Received ${result.length} chars from ${request.url}")
+                android.util.Log.d(
+                    "HtmlFetcher",
+                    "Received ${result.length} chars from ${request.url}"
+                )
                 return result
             }
-        } catch (e: javax.net.ssl.SSLHandshakeException) {
-            android.util.Log.e("HtmlFetcher", "SSL handshake failed for ${request.url}", e)
+        } catch (e: SSLHandshakeException) {
+            Log.e("HtmlFetcher", "SSL handshake failed for ${request.url}", e)
             throw IOException("SSL error connecting to ${request.url}: ${e.message}", e)
         }
     }
 
     private fun executeWithStatus(request: Request): HtmlResponse {
-        android.util.Log.d("HtmlFetcher", "Fetching with status: ${request.url}")
+        Log.d("HtmlFetcher", "Fetching with status: ${request.url}")
         client.newCall(request).execute().use { response ->
             val bytes = response.body.bytes()
             val result = bytes.toString(latin1)
-            android.util.Log.d(
+            Log.d(
                 "HtmlFetcher",
                 "Received ${result.length} chars (HTTP ${response.code}) from ${request.url}"
             )
@@ -95,7 +107,9 @@ class HtmlFetcher {
     companion object {
         private const val MOBILE_USER_AGENT =
             "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 " +
-                "(KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36"
+                    "(KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36"
+
+        private const val CACHE_SIZE = 10L * 1024 * 1024 // 10 MB
 
         private val dispatcher = Dispatcher().apply {
             maxRequests = 64
@@ -117,8 +131,18 @@ class HtmlFetcher {
 
             if (BuildConfig.DEBUG) {
                 val trustManager = object : X509TrustManager {
-                    override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
-                    override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+                    override fun checkClientTrusted(
+                        chain: Array<out X509Certificate>?,
+                        authType: String?
+                    ) {
+                    }
+
+                    override fun checkServerTrusted(
+                        chain: Array<out X509Certificate>?,
+                        authType: String?
+                    ) {
+                    }
+
                     override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
                 }
                 val sslContext = SSLContext.getInstance("TLS")

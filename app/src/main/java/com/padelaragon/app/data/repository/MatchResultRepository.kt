@@ -50,39 +50,34 @@ class MatchResultRepository(
         val key = resultKey(groupId, jornada)
         val cacheKey = "results_${groupId}_$jornada"
 
+        // 1. In-memory cache (finalized jornadas are permanent)
         if (key in finalizedJornadas) {
             cachedResults[key]?.let { return it }
-            val roomResults = scraping.db.matchResultDao().getByGroupAndJornada(groupId, jornada).map { it.toModel() }
-            if (roomResults.isNotEmpty()) {
-                cachedResults[key] = roomResults
-                return roomResults
-            }
         }
 
-        val roomResultsColdStart = scraping.db.matchResultDao().getByGroupAndJornada(groupId, jornada).map { it.toModel() }
-        if (roomResultsColdStart.isNotEmpty()) {
-            val allFinalized = roomResultsColdStart.all { it.localScore != "--" && it.visitorScore != "--" }
-            if (allFinalized) {
-                finalizedJornadas.add(key)
-                cachedResults[key] = roomResultsColdStart
-                return roomResultsColdStart
-            }
-        }
-
+        // 2. In-memory cache with TTL check
         cachedResults[key]?.let { cached ->
-            if (scraping.isCacheValid(cacheKey, TTL_RESULTS)) {
+            if (key in finalizedJornadas || scraping.isCacheValid(cacheKey, TTL_RESULTS)) {
                 return cached
             }
         }
 
-        if (scraping.isCacheValid(cacheKey, TTL_RESULTS)) {
-            val roomResults = scraping.db.matchResultDao().getByGroupAndJornada(groupId, jornada).map { it.toModel() }
-            if (roomResults.isNotEmpty()) {
+        // 3. Single Room query (eliminates duplicate DB reads)
+        val roomResults = scraping.db.matchResultDao().getByGroupAndJornada(groupId, jornada).map { it.toModel() }
+        if (roomResults.isNotEmpty()) {
+            val allFinalized = roomResults.all { it.localScore != "--" && it.visitorScore != "--" }
+            if (allFinalized) {
+                finalizedJornadas.add(key)
+                cachedResults[key] = roomResults
+                return roomResults
+            }
+            if (scraping.isCacheValid(cacheKey, TTL_RESULTS)) {
                 cachedResults[key] = roomResults
                 return roomResults
             }
         }
 
+        // 4. Network fetch
         val url = "${BASE_URL}Ligas_Calendario.asp?Liga=$LEAGUE_ID&grupo=$groupId&jornada=$jornada"
         val html = scraping.withSemaphore { scraping.fetcher.get(url) }
         val results = matchResultParser.parse(html, jornada)

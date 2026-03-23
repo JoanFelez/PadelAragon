@@ -1,4 +1,0 @@
-#Fri Mar 20 13:38:46 CET 2026
-base.0=/home/joanfelez/Escritorio/Proyectos/PadelAragon/app/build/intermediates/dex/debugAndroidTest/mergeProjectDexDebugAndroidTest/0/classes.dex
-path.0=0/classes.dex
-renamed.0=classes.dex

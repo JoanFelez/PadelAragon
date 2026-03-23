@@ -2,6 +2,7 @@ package com.padelaragon.app.data.repository
 
 import com.padelaragon.app.data.local.AppDatabase
 import com.padelaragon.app.data.local.entity.CacheTimestamp
+import com.padelaragon.app.data.local.entity.JornadaEntity
 import com.padelaragon.app.data.local.entity.LeagueGroupEntity
 import com.padelaragon.app.data.local.entity.MatchResultEntity
 import com.padelaragon.app.data.local.entity.PlayerEntity
@@ -76,9 +77,9 @@ object LeagueRepository {
         // 1. In-memory cache
         cachedGroups?.let { return it }
 
-        // 2. Room cache (cold start)
+        // 2. Room cache (permanent - groups don't change during a season)
         val database = db
-        if (database != null && isCacheValid(CACHE_KEY_GROUPS, TTL_GROUPS)) {
+        if (database != null) {
             val roomGroups = database.leagueGroupDao().getAll().map { it.toModel() }
             if (roomGroups.isNotEmpty()) {
                 cachedGroups = roomGroups
@@ -93,11 +94,10 @@ object LeagueRepository {
         val groups = groupParser.parse(html)
         cachedGroups = groups
 
-        // Persist to Room
+        // Persist to Room (permanent, no timestamp needed)
         database?.let { roomDb ->
             roomDb.leagueGroupDao().deleteAll()
             roomDb.leagueGroupDao().insertAll(groups.map { LeagueGroupEntity.fromModel(it) })
-            updateCacheTimestamp(CACHE_KEY_GROUPS)
         }
 
         return groups
@@ -209,11 +209,32 @@ object LeagueRepository {
     }
 
     suspend fun getJornadas(groupId: Int): List<Int> {
+        // 1. In-memory cache
         cachedJornadas[groupId]?.let { return it }
+
+        // 2. Room cache (permanent - jornadas don't change during a season)
+        val database = db
+        if (database != null) {
+            val roomJornadas = database.jornadaDao().getByGroupId(groupId)
+            if (roomJornadas.isNotEmpty()) {
+                cachedJornadas[groupId] = roomJornadas
+                return roomJornadas
+            }
+        }
+
+        // 3. Network fetch
         val url = "${BASE_URL}Ligas_Calendario.asp?Liga=$LEAGUE_ID&grupo=$groupId"
         val html = scrapeSemaphore.withPermit { fetcher.get(url) }
         val jornadas = groupParser.parseJornadas(html)
-        if (jornadas.isNotEmpty()) cachedJornadas[groupId] = jornadas
+        if (jornadas.isNotEmpty()) {
+            cachedJornadas[groupId] = jornadas
+
+            // Persist to Room (permanent)
+            database?.let { roomDb ->
+                roomDb.jornadaDao().deleteByGroupId(groupId)
+                roomDb.jornadaDao().insertAll(jornadas.map { JornadaEntity(groupId, it) })
+            }
+        }
         return jornadas
     }
 
@@ -305,7 +326,7 @@ object LeagueRepository {
 
     suspend fun refreshGroups(): List<LeagueGroup> {
         cachedGroups = null
-        db?.cacheTimestampDao()?.delete(CACHE_KEY_GROUPS)
+        db?.leagueGroupDao()?.deleteAll()
         return getGroups()
     }
 
@@ -326,8 +347,7 @@ object LeagueRepository {
         cachedTeamDetails[teamId]?.let { return it }
 
         val database = db
-        val cacheKey = "team_$teamId"
-        if (database != null && isCacheValid(cacheKey, TTL_TEAM_DETAIL)) {
+        if (database != null) {
             val entity = database.teamDetailDao().getByTeamId(teamId)
             if (entity != null) {
                 val players = database.teamDetailDao().getPlayersByTeamId(teamId).map { it.toModel() }
@@ -378,7 +398,6 @@ object LeagueRepository {
                         TeamDetailEntity(teamId = teamId, category = detail.category, captainName = detail.captainName),
                         detail.players.map { PlayerEntity.fromModel(teamId, it) }
                     )
-                    updateCacheTimestamp(cacheKey)
                 }
 
                 return detail
@@ -525,10 +544,6 @@ object LeagueRepository {
     private const val BASE_URL = "https://padelfederacion.es/pAGINAS/ARAPADEL/"
     private const val LEAGUE_ID = 27951
 
-    private const val TTL_GROUPS = 24 * 60 * 60 * 1000L
     private const val TTL_STANDINGS = 30 * 60 * 1000L
     private const val TTL_RESULTS = 30 * 60 * 1000L
-    private const val TTL_TEAM_DETAIL = 6 * 60 * 60 * 1000L
-
-    private const val CACHE_KEY_GROUPS = "groups"
 }

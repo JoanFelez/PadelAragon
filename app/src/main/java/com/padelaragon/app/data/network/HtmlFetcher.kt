@@ -1,5 +1,6 @@
 package com.padelaragon.app.data.network
 
+import com.padelaragon.app.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.ConnectionPool
@@ -9,7 +10,12 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
 import java.nio.charset.Charset
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 class HtmlFetcher {
     private val latin1: Charset = Charsets.ISO_8859_1
@@ -98,13 +104,30 @@ class HtmlFetcher {
 
         private val connectionPool = ConnectionPool(15, 2, TimeUnit.MINUTES)
 
-        val sharedClient: OkHttpClient = OkHttpClient.Builder()
-            .dispatcher(dispatcher)
-            .connectionPool(connectionPool)
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(15, TimeUnit.SECONDS)
-            .writeTimeout(15, TimeUnit.SECONDS)
-            .callTimeout(30, TimeUnit.SECONDS)
-            .build()
+        val sharedClient: OkHttpClient = buildClient()
+
+        private fun buildClient(): OkHttpClient {
+            val builder = OkHttpClient.Builder()
+                .dispatcher(dispatcher)
+                .connectionPool(connectionPool)
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(15, TimeUnit.SECONDS)
+                .writeTimeout(15, TimeUnit.SECONDS)
+                .callTimeout(30, TimeUnit.SECONDS)
+
+            if (BuildConfig.DEBUG) {
+                val trustManager = object : X509TrustManager {
+                    override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+                    override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+                    override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+                }
+                val sslContext = SSLContext.getInstance("TLS")
+                sslContext.init(null, arrayOf<TrustManager>(trustManager), SecureRandom())
+                builder.sslSocketFactory(sslContext.socketFactory, trustManager)
+                builder.hostnameVerifier { _, _ -> true }
+            }
+
+            return builder.build()
+        }
     }
 }

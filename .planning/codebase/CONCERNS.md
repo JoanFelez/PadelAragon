@@ -1,0 +1,11 @@
+# Concerns & Tech Debt
+| Concern | Severity | Location | Description |
+|---|---|---|---|
+| Main build currently fails | High | @app/src/main/java/com/padelaragon/app/data/repository/LeagueRepository.kt | `./gradlew testDebugUnitTest lintDebug` fails at compile time because `it !in cachedMatchDetails` hits Kotlin's `ConcurrentHashMap.contains` ambiguity (line 621 in current file view). Test work is blocked until the app compiles. |
+| No existing tests or test infrastructure | High | @app/build.gradle.kts | No unit/instrumentation test sources and almost no explicit test dependencies. |
+| Tight singleton coupling | High | @app/src/main/java/com/padelaragon/app/data/repository/LeagueRepository.kt, @app/src/main/java/com/padelaragon/app/data/favorites/FavoritesManager.kt, @app/src/main/java/com/padelaragon/app/PadelAragonApp.kt | ViewModels and app startup depend on global singletons, making isolated tests harder and state leakage between tests more likely. |
+| Live-network scraping dependency | High | @app/src/main/java/com/padelaragon/app/data/repository/LeagueRepository.kt, @app/src/main/java/com/padelaragon/app/data/network/HtmlFetcher.kt | Repository behavior depends on a remote HTML site and page structure, which is brittle and unsuitable for deterministic tests unless responses are recorded/mocked. |
+| No connected device/emulator available in current workspace | Medium | local environment (`adb devices`) | Instrumentation tests cannot be executed right now because `adb devices` returned no connected devices. |
+| Limited Compose test hooks | Medium | @app/src/main/java/com/padelaragon/app/ui/screen/, @app/src/main/java/com/padelaragon/app/ui/components/ | No explicit `Modifier.testTag` usage was found, so UI tests will rely on visible text/content descriptions and may be more brittle. |
+| Room migration coverage gap | Medium | @app/src/main/java/com/padelaragon/app/data/local/AppDatabase.kt | DB version is 3, but `exportSchema = false` means there are no exported schema snapshots for migration verification. |
+| Startup side effects | Medium | @app/src/main/java/com/padelaragon/app/PadelAragonApp.kt | Application startup runs `ProviderInstaller`, favorites init, DB init, and repository init; instrumentation tests must account for this. |

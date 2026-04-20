@@ -1,16 +1,20 @@
 # Project State
 
 ## Current Position
-- **Phase:** 2
-- **Plan:** 1 (Parser Coverage) — complete
-- **Status:** Parser slice done; Phase 2 Plan 2 (ViewModel/Room/Favorites) not yet started
+- **Initiative:** Architecture, SOLID & Performance Refactoring
+- **Phase:** 4 (Repository Interfaces & DI Foundation) — not yet started
+- **Status:** Roadmap created, awaiting user approval
 
 ## Progress
 | Phase | Status | Completion |
 |---|---|---|
-| Phase 1 | Complete | 100% |
-| Phase 2 | In progress | 50% (Plan 1 complete, Plan 2 pending) |
-| Phase 3 | Not started | 0% |
+| Phase 1 (Build/Test) | Complete | 100% |
+| Phase 2 (Test Suite) | Complete | 100% (partial — Plan 1 done) |
+| Phase 3 (Verification) | Complete | 100% |
+| Phase 4 (Interfaces & DI) | Not started | 0% |
+| Phase 5 (Split Repository) | Not started | 0% |
+| Phase 6 (Use Cases) | Not started | 0% |
+| Phase 7 (Performance) | Not started | 0% |
 
 ## Commits
 | Hash | Description |
@@ -19,7 +23,7 @@
 | 374aa7f | test: add fixture-driven tests for MatchDetailParser and TeamDetailParser |
 
 ## Notes
-- Current working tree is already dirty before this task begins. Files currently modified or deleted include `app/src/main/java/com/padelaragon/app/data/repository/LeagueRepository.kt`, `app/src/main/java/com/padelaragon/app/ui/viewmodel/GroupListViewModel.kt`, `app/src/main/java/com/padelaragon/app/ui/viewmodel/TeamViewModel.kt`, `app/src/main/java/com/padelaragon/app/ui/screen/TeamScreen.kt`, `app/src/main/java/com/padelaragon/app/data/network/HtmlFetcher.kt`, `app/src/main/java/com/padelaragon/app/data/model/PlayerStats.kt`, and release artifact files under `app/release/`.
-- Downstream agents should treat "what belongs in the final commit?" as an explicit pre-commit review item, not an assumption.
-- Parser slice (Phase 2 Plan 1) produced 59 passing tests across 5 test classes with 23 HTML fixtures. Zero production files modified.
-- Phase 2 Plan 2 owns ViewModel, Room, and FavoritesManager coverage. The full `./gradlew :app:testDebugUnitTest` gate is a joint verification across both plans.
+- New initiative focuses on clean architecture, SOLID principles, and data loading performance
+- No new DI frameworks — manual constructor injection only
+- No breaking changes to UI behavior
+- Research summary at `.planning/research/SUMMARY-architecture.md`

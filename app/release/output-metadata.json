@@ -11,9 +11,9 @@
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 10100,
-      "versionName": "1.1.0",
-      "outputFile": "PadelAragon-v1.1.0-release.apk"
+      "versionCode": 20001,
+      "versionName": "2.0.1",
+      "outputFile": "PadelAragon-v2.0.1-release.apk"
     }
   ],
   "elementType": "File",
@@ -22,14 +22,14 @@
       "minApi": 28,
       "maxApi": 30,
       "baselineProfiles": [
-        "baselineProfiles/1/PadelAragon-v1.1.0-release.dm"
+        "baselineProfiles/1/PadelAragon-v2.0.1-release.dm"
       ]
     },
     {
       "minApi": 31,
       "maxApi": 2147483647,
       "baselineProfiles": [
-        "baselineProfiles/0/PadelAragon-v1.1.0-release.dm"
+        "baselineProfiles/0/PadelAragon-v2.0.1-release.dm"
       ]
     }
   ],

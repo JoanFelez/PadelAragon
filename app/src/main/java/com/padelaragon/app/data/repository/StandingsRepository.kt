@@ -48,6 +48,7 @@ class StandingsRepository(
     override suspend fun refreshStandings(groupId: Int): List<StandingRow> {
         cachedStandings.remove(groupId)
         scraping.db.cacheTimestampDao().delete("standings_$groupId")
+        scraping.db.standingRowDao().deleteByGroupId(groupId)
         return getStandings(groupId)
     }
 

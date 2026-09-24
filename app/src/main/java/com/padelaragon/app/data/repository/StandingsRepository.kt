@@ -4,7 +4,6 @@ import com.padelaragon.app.data.local.entity.StandingRowEntity
 import com.padelaragon.app.data.model.StandingRow
 import com.padelaragon.app.data.parser.StandingsParser
 import com.padelaragon.app.data.repository.ScrapingService.Companion.BASE_URL
-import com.padelaragon.app.data.repository.ScrapingService.Companion.LEAGUE_ID
 import com.padelaragon.app.data.repository.datasource.StandingsDataSource
 import java.util.concurrent.ConcurrentHashMap
 
@@ -33,7 +32,7 @@ class StandingsRepository(
 
         val url = "${BASE_URL}Ligas_Clasificacion.asp"
         val html = scraping.withSemaphore {
-            scraping.fetcher.post(url, mapOf("Liga" to LEAGUE_ID.toString(), "grupo" to groupId.toString()))
+            scraping.fetcher.post(url, mapOf("Liga" to scraping.league.id.toString(), "grupo" to groupId.toString()))
         }
         val standings = standingsParser.parse(html)
         if (standings.isNotEmpty()) {

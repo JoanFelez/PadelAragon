@@ -2,6 +2,7 @@ package com.padelaragon.app.data.repository
 
 import com.padelaragon.app.data.local.AppDatabase
 import com.padelaragon.app.data.local.entity.CacheTimestamp
+import com.padelaragon.app.data.model.League
 import com.padelaragon.app.data.network.HtmlFetcher
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -12,7 +13,8 @@ import kotlinx.coroutines.sync.withPermit
  */
 class ScrapingService(
     val db: AppDatabase,
-    val fetcher: HtmlFetcher = HtmlFetcher()
+    val fetcher: HtmlFetcher = HtmlFetcher(),
+    val league: League = League.ABSOLUTA
 ) {
     val scrapeSemaphore = Semaphore(15)
 
@@ -30,6 +32,5 @@ class ScrapingService(
 
     companion object {
         const val BASE_URL = "https://padelfederacion.es/pAGINAS/ARAPADEL/"
-        const val LEAGUE_ID = 27951
     }
 }

@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class TeamViewModel(
-    private val teamId: Int,
+    val teamId: Int,
     private val teamName: String,
     private val groupId: Int,
     private val teamDataSource: TeamDataSource,

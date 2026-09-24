@@ -11,10 +11,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -57,6 +59,9 @@ fun TeamScreen(
     groupId: Int,
     onBack: () -> Unit,
     onTeamClick: (teamId: Int, teamName: String, groupId: Int) -> Unit,
+    onPlayerClick: (playerName: String) -> Unit,
+    showPossiblePairsAction: Boolean,
+    onPossiblePairsClick: (TeamDetail, String) -> Unit,
     viewModelFactory: TeamViewModelFactory,
     viewModel: TeamViewModel = viewModel(factory = viewModelFactory)
 ) {
@@ -211,7 +216,24 @@ fun TeamScreen(
                             ) {
                                 uiState.teamDetail?.let { detail ->
                                     item {
-                                        TeamDetailCard(detail = detail)
+                                        TeamDetailCard(detail = detail, onPlayerClick = onPlayerClick)
+                                    }
+                                    if (showPossiblePairsAction) {
+                                        item {
+                                            Button(
+                                                onClick = {
+                                                    onPossiblePairsClick(
+                                                        detail,
+                                                        uiState.groupName
+                                                    )
+                                                },
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(horizontal = 12.dp)
+                                            ) {
+                                                Text("Generar posibles parejas")
+                                            }
+                                        }
                                     }
                                 } ?: item {
                                     Box(
@@ -561,7 +583,7 @@ private fun StandingSummaryCard(standing: StandingRow) {
 }
 
 @Composable
-private fun TeamDetailCard(detail: TeamDetail) {
+private fun TeamDetailCard(detail: TeamDetail, onPlayerClick: (String) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -641,6 +663,7 @@ private fun TeamDetailCard(detail: TeamDetail) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .clickable { onPlayerClick(player.name) }
                             .padding(vertical = 2.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {

@@ -6,7 +6,6 @@ import com.padelaragon.app.data.model.MatchResult
 import com.padelaragon.app.data.parser.GroupParser
 import com.padelaragon.app.data.parser.MatchResultParser
 import com.padelaragon.app.data.repository.ScrapingService.Companion.BASE_URL
-import com.padelaragon.app.data.repository.ScrapingService.Companion.LEAGUE_ID
 import com.padelaragon.app.data.repository.datasource.MatchResultDataSource
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -35,7 +34,7 @@ class MatchResultRepository(
             return roomJornadas
         }
 
-        val url = "${BASE_URL}Ligas_Calendario.asp?Liga=$LEAGUE_ID&grupo=$groupId"
+        val url = "${BASE_URL}Ligas_Calendario.asp?Liga=${scraping.league.id}&grupo=$groupId"
         val html = scraping.withSemaphore { scraping.fetcher.get(url) }
         val jornadas = groupParser.parseJornadas(html)
         if (jornadas.isNotEmpty()) {
@@ -78,7 +77,7 @@ class MatchResultRepository(
         }
 
         // 4. Network fetch
-        val url = "${BASE_URL}Ligas_Calendario.asp?Liga=$LEAGUE_ID&grupo=$groupId&jornada=$jornada"
+        val url = "${BASE_URL}Ligas_Calendario.asp?Liga=${scraping.league.id}&grupo=$groupId&jornada=$jornada"
         val html = scraping.withSemaphore { scraping.fetcher.get(url) }
         val results = matchResultParser.parse(html, jornada)
 

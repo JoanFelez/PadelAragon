@@ -6,7 +6,6 @@ import com.padelaragon.app.data.model.TeamDetail
 import com.padelaragon.app.data.model.TeamInfo
 import com.padelaragon.app.data.parser.TeamDetailParser
 import com.padelaragon.app.data.repository.ScrapingService.Companion.BASE_URL
-import com.padelaragon.app.data.repository.ScrapingService.Companion.LEAGUE_ID
 import com.padelaragon.app.data.repository.datasource.GroupDataSource
 import com.padelaragon.app.data.repository.datasource.MatchResultDataSource
 import com.padelaragon.app.data.repository.datasource.StandingsDataSource
@@ -44,9 +43,9 @@ class TeamDetailRepository(
             listOf(buildTeamDetailUrl(teamHref))
         } else {
             listOf(
-                "${BASE_URL}Ligas_FichaEquipo.asp?Liga=$LEAGUE_ID&IdEquipo=$teamId",
-                "${BASE_URL}Ligas_Equipo.asp?Liga=$LEAGUE_ID&IdEquipo=$teamId",
-                "${BASE_URL}Ligas_Clasificacion.asp?Liga=$LEAGUE_ID&IdEquipo=$teamId"
+                "${BASE_URL}Ligas_FichaEquipo.asp?Liga=${scraping.league.id}&IdEquipo=$teamId",
+                "${BASE_URL}Ligas_Equipo.asp?Liga=${scraping.league.id}&IdEquipo=$teamId",
+                "${BASE_URL}Ligas_Clasificacion.asp?Liga=${scraping.league.id}&IdEquipo=$teamId"
             )
         }
 

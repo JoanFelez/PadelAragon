@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -27,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.padelaragon.app.data.model.Gender
+import com.padelaragon.app.data.model.League
 import com.padelaragon.app.data.model.LeagueGroup
 import com.padelaragon.app.ui.components.LoadingErrorWrapper
 import com.padelaragon.app.ui.viewmodel.GroupListViewModel
@@ -35,6 +37,8 @@ import com.padelaragon.app.ui.viewmodel.GroupListViewModelFactory
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupListScreen(
+    league: League,
+    onLeagueClick: () -> Unit,
     onGroupClick: (groupId: Int, groupName: String) -> Unit,
     viewModelFactory: GroupListViewModelFactory,
     viewModel: GroupListViewModel = viewModel(factory = viewModelFactory)
@@ -46,8 +50,9 @@ fun GroupListScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = "Liga de Aragón 2026", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    Text(text = "Liga de Aragón · ${league.displayName}", color = MaterialTheme.colorScheme.onPrimaryContainer)
                 },
+                actions = { Button(onClick = onLeagueClick) { Text("Cambiar") } },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer

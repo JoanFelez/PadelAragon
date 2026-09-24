@@ -1,0 +1,31 @@
+app/src/main/java/com/padelaragon/app/data/local/AppDatabase.kt
+  s_d024798b52d860::t_f9811e3f8eba4c 66
+app/src/main/java/com/padelaragon/app/ui/navigation/NavGraph.kt
+  s_d024798b52d860::t_c7f2d52a951bb3 8,30,41,122-128,145-156
+app/src/main/java/com/padelaragon/app/ui/navigation/PossiblePairsRetry.kt
+  s_d024798b52d860::t_ab4a49c6520ca6 1-18
+app/src/main/java/com/padelaragon/app/ui/screen/PossiblePairsScreen.kt
+  s_d024798b52d860::t_6c850a90753b12 44-47
+app/src/test/java/com/padelaragon/app/data/local/AppDatabaseMigrationTest.kt
+  s_d024798b52d860::t_246b517386192e 1-46
+app/src/test/java/com/padelaragon/app/domain/usecase/GeneratePossibleCouplesUseCaseTest.kt
+  s_d024798b52d860::t_225862fa9e4d35 27-57
+app/src/test/java/com/padelaragon/app/ui/navigation/PossiblePairsRetryTest.kt
+  s_d024798b52d860::t_42e7266aea9bc1 1-76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d38986f311edde362d9a2d476b986d4066e4c15f",
+  "prompts": {},
+  "sessions": {
+    "s_d024798b52d860": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "601385da-4a46-4773-a51b-45006b0964b9",
+        "model": "unknown"
+      },
+      "human_author": "joanfelez <joanfa@ext.zara.com>"
+    }
+  }
+}

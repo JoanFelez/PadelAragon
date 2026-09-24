@@ -17,10 +17,10 @@ class StandingsRepository(
     override suspend fun getStandings(groupId: Int): List<StandingRow> {
         cachedStandings[groupId]?.let { return it }
 
-        val cacheKey = "standings_$groupId"
+        val cacheKey = "standings_${scraping.league.id}_$groupId"
 
         // Room-first: always try Room before network (avoids network wait on cold start)
-        val roomStandings = scraping.db.standingRowDao().getByGroupId(groupId).map { it.toModel() }
+        val roomStandings = scraping.db.standingRowDao().getByGroupId(scraping.league.id, groupId).map { it.toModel() }
         if (roomStandings.isNotEmpty()) {
             cachedStandings[groupId] = roomStandings
             if (scraping.isCacheValid(cacheKey, TTL_STANDINGS)) {
@@ -37,8 +37,8 @@ class StandingsRepository(
         val standings = standingsParser.parse(html)
         if (standings.isNotEmpty()) {
             cachedStandings[groupId] = standings
-            scraping.db.standingRowDao().deleteByGroupId(groupId)
-            scraping.db.standingRowDao().insertAll(standings.map { StandingRowEntity.fromModel(groupId, it) })
+            scraping.db.standingRowDao().deleteByGroupId(scraping.league.id, groupId)
+            scraping.db.standingRowDao().insertAll(standings.map { StandingRowEntity.fromModel(scraping.league.id, groupId, it) })
             scraping.updateCacheTimestamp(cacheKey)
         }
         return standings
@@ -46,7 +46,7 @@ class StandingsRepository(
 
     override suspend fun refreshStandings(groupId: Int): List<StandingRow> {
         cachedStandings.remove(groupId)
-        scraping.db.cacheTimestampDao().delete("standings_$groupId")
+        scraping.db.cacheTimestampDao().delete("standings_${scraping.league.id}_$groupId")
         return getStandings(groupId)
     }
 

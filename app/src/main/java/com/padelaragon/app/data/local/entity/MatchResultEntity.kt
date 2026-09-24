@@ -3,8 +3,9 @@ package com.padelaragon.app.data.local.entity
 import androidx.room.Entity
 import com.padelaragon.app.data.model.MatchResult
 
-@Entity(tableName = "match_results", primaryKeys = ["groupId", "jornada", "localTeamId", "visitorTeamId"])
+@Entity(tableName = "match_results", primaryKeys = ["leagueId", "groupId", "jornada", "localTeamId", "visitorTeamId"])
 data class MatchResultEntity(
+    val leagueId: Int = 27951,
     val groupId: Int,
     val localTeam: String,
     val localTeamId: Int,
@@ -31,7 +32,9 @@ data class MatchResultEntity(
     )
 
     companion object {
-        fun fromModel(groupId: Int, model: MatchResult): MatchResultEntity = MatchResultEntity(
+        fun fromModel(groupId: Int, model: MatchResult): MatchResultEntity = fromModel(27951, groupId, model)
+        fun fromModel(leagueId: Int, groupId: Int, model: MatchResult): MatchResultEntity = MatchResultEntity(
+            leagueId = leagueId,
             groupId = groupId,
             localTeam = model.localTeam,
             localTeamId = model.localTeamId,

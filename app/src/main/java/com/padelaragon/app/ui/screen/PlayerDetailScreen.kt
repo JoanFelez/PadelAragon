@@ -47,6 +47,15 @@ fun PlayerDetailScreen(
                 modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                if (state.matchDetailsUnavailable) {
+                    item {
+                        Text(
+                            "Parte del historial del jugador no está disponible.",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Button(onClick = viewModel::retryMatchDetails) { Text("Reintentar") }
+                    }
+                }
                 item {
                     Text("Partidos: ${stats.matchesWon} ganados · ${stats.matchesLost} perdidos",
                         style = MaterialTheme.typography.titleMedium)

@@ -42,6 +42,7 @@ class TeamViewModel(
         val playerStats: List<PlayerStats> = emptyList(),
         val loadingMatchDetails: Set<String> = emptySet(),
         val isLoadingStats: Boolean = false,
+        val matchDetailsUnavailable: Boolean = false,
         val isLoading: Boolean = true,
         val error: String? = null
     )
@@ -149,14 +150,15 @@ class TeamViewModel(
         }
     }
 
-    fun loadAllMatchDetails() {
-        if (_uiState.value.isLoadingStats || _uiState.value.playerStats.isNotEmpty()) return
+    fun loadAllMatchDetails(force: Boolean = false) {
+        if (_uiState.value.isLoadingStats || (!force && _uiState.value.playerStats.isNotEmpty())) return
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoadingStats = true) }
+            _uiState.update { it.copy(isLoadingStats = true, matchDetailsUnavailable = false) }
 
             val playedMatches = _uiState.value.matches.filter { it.localScore != "--" && it.detailUrl != null }
-            val currentDetails = _uiState.value.matchDetails.toMutableMap()
+            val currentDetails = if (force) mutableMapOf() else _uiState.value.matchDetails.toMutableMap()
+            var failedDetails = false
 
             coroutineScope {
                 val jobs = playedMatches
@@ -165,6 +167,7 @@ class TeamViewModel(
                         async {
                             val url = match.detailUrl!!
                             val detail = runCatching { matchDetailDataSource.getMatchDetail(url) }.getOrNull()
+                            if (detail == null) failedDetails = true
                             if (detail != null) url to detail else null
                         }
                     }
@@ -178,11 +181,14 @@ class TeamViewModel(
                 it.copy(
                     matchDetails = currentDetails,
                     playerStats = stats,
-                    isLoadingStats = false
+                    isLoadingStats = false,
+                    matchDetailsUnavailable = failedDetails
                 )
             }
         }
     }
+
+    fun retryMatchDetails() = loadAllMatchDetails(force = true)
 
     internal companion object {
         /** Kept for backward compatibility with existing tests. */

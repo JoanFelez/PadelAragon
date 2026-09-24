@@ -8,12 +8,12 @@ import com.padelaragon.app.data.local.entity.LeagueGroupEntity
 
 @Dao
 interface LeagueGroupDao {
-    @Query("SELECT * FROM league_groups")
-    suspend fun getAll(): List<LeagueGroupEntity>
+    @Query("SELECT * FROM league_groups WHERE leagueId = :leagueId")
+    suspend fun getAll(leagueId: Int): List<LeagueGroupEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(groups: List<LeagueGroupEntity>)
 
-    @Query("DELETE FROM league_groups")
-    suspend fun deleteAll()
+    @Query("DELETE FROM league_groups WHERE leagueId = :leagueId")
+    suspend fun deleteAll(leagueId: Int)
 }

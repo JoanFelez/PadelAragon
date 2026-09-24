@@ -29,9 +29,9 @@ class TeamDetailRepository(
     override suspend fun getTeamDetail(teamId: Int, teamHref: String): TeamDetail? {
         cachedTeamDetails[teamId]?.let { return it }
 
-        val entity = scraping.db.teamDetailDao().getByTeamId(teamId)
+        val entity = scraping.db.teamDetailDao().getByTeamId(scraping.league.id, teamId)
         if (entity != null) {
-            val players = scraping.db.teamDetailDao().getPlayersByTeamId(teamId).map { it.toModel() }
+            val players = scraping.db.teamDetailDao().getPlayersByTeamId(scraping.league.id, teamId).map { it.toModel() }
             val detail = TeamDetail(category = entity.category, captainName = entity.captainName, players = players)
             cachedTeamDetails[teamId] = detail
             return detail
@@ -169,8 +169,8 @@ class TeamDetailRepository(
 
     private suspend fun persistTeamDetail(teamId: Int, detail: TeamDetail) {
         scraping.db.teamDetailDao().insertTeamWithPlayers(
-            TeamDetailEntity(teamId = teamId, category = detail.category, captainName = detail.captainName),
-            detail.players.map { PlayerEntity.fromModel(teamId, it) }
+            TeamDetailEntity(leagueId = scraping.league.id, teamId = teamId, category = detail.category, captainName = detail.captainName),
+            detail.players.map { PlayerEntity.fromModel(scraping.league.id, teamId, it) }
         )
     }
 

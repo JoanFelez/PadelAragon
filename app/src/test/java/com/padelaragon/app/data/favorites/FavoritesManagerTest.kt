@@ -1,5 +1,6 @@
 package com.padelaragon.app.data.favorites
 
+import com.padelaragon.app.data.model.League
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -175,6 +176,27 @@ class FavoritesManagerTest {
 
         assertEquals(setOf(20), FavoritesManager.favorites.value)
         assertFalse(FavoritesManager.isFavorite(10))
+    }
+
+    @Test
+    fun `same group id is isolated between league favorites`() {
+        val absoluta = FavoritesManager.forLeague(League.ABSOLUTA)
+        val veteranos = FavoritesManager.forLeague(League.VETERANOS)
+
+        absoluta.toggleFavorite(42)
+
+        assertTrue(absoluta.isFavorite(42))
+        assertFalse(veteranos.isFavorite(42))
+        veteranos.toggleFavorite(42)
+        assertTrue(veteranos.isFavorite(42))
+        assertEquals(
+            setOf("42"),
+            prefs.getStringSet("favorite_group_ids_${League.ABSOLUTA.id}", mutableSetOf())
+        )
+        assertEquals(
+            setOf("42"),
+            prefs.getStringSet("favorite_group_ids_${League.VETERANOS.id}", mutableSetOf())
+        )
     }
 
     // ── Helpers ─────────────────────────────────────────────────

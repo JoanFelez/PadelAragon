@@ -2,6 +2,7 @@ package com.padelaragon.app.data.favorites
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.padelaragon.app.data.model.League
 import com.padelaragon.app.data.repository.datasource.FavoritesDataSource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -65,4 +66,34 @@ object FavoritesManager : FavoritesDataSource {
         }
         return sharedPreferences
     }
+
+    fun forLeague(league: League): FavoritesDataSource = LeagueFavoritesDataSource(prefs(), league)
+}
+
+private class LeagueFavoritesDataSource(
+    private val preferences: SharedPreferences,
+    league: League
+) : FavoritesDataSource {
+    private val key = "favorite_group_ids_${league.id}"
+    private val _favorites = MutableStateFlow(read())
+    override val favorites: StateFlow<Set<Int>> = _favorites.asStateFlow()
+
+    override fun toggleFavorite(groupId: Int): Boolean {
+        val current = _favorites.value
+        val updated = if (groupId in current) current - groupId
+        else {
+            if (current.size >= 3) return false
+            current + groupId
+        }
+        preferences.edit().putStringSet(key, HashSet(updated.map(Int::toString))).apply()
+        _favorites.value = updated
+        return groupId in updated
+    }
+
+    override fun isFavorite(groupId: Int): Boolean = groupId in _favorites.value
+
+    private fun read(): Set<Int> =
+        HashSet(preferences.getStringSet(key, emptySet()) ?: emptySet())
+            .mapNotNull(String::toIntOrNull)
+            .toSet()
 }

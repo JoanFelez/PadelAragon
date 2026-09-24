@@ -21,7 +21,7 @@ class GroupRepository(
     override suspend fun getGroups(): List<LeagueGroup> {
         cachedGroups?.let { return it }
 
-        val roomGroups = scraping.db.leagueGroupDao().getAll().map { it.toModel() }
+        val roomGroups = scraping.db.leagueGroupDao().getAll(scraping.league.id).map { it.toModel() }
         if (roomGroups.isNotEmpty()) {
             cachedGroups = roomGroups
             return roomGroups
@@ -33,15 +33,15 @@ class GroupRepository(
         val groups = groupParser.parse(html)
         cachedGroups = groups
 
-        scraping.db.leagueGroupDao().deleteAll()
-        scraping.db.leagueGroupDao().insertAll(groups.map { LeagueGroupEntity.fromModel(it) })
+        scraping.db.leagueGroupDao().deleteAll(scraping.league.id)
+        scraping.db.leagueGroupDao().insertAll(groups.map { LeagueGroupEntity.fromModel(scraping.league.id, it) })
 
         return groups
     }
 
     override suspend fun refreshGroups(): List<LeagueGroup> {
         cachedGroups = null
-        scraping.db.leagueGroupDao().deleteAll()
+        scraping.db.leagueGroupDao().deleteAll(scraping.league.id)
         return getGroups()
     }
 

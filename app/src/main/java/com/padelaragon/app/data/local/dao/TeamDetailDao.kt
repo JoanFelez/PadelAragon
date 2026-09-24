@@ -10,11 +10,11 @@ import com.padelaragon.app.data.local.entity.TeamDetailEntity
 
 @Dao
 interface TeamDetailDao {
-    @Query("SELECT * FROM team_details WHERE teamId = :teamId")
-    suspend fun getByTeamId(teamId: Int): TeamDetailEntity?
+    @Query("SELECT * FROM team_details WHERE leagueId = :leagueId AND teamId = :teamId")
+    suspend fun getByTeamId(leagueId: Int, teamId: Int): TeamDetailEntity?
 
-    @Query("SELECT * FROM players WHERE teamId = :teamId")
-    suspend fun getPlayersByTeamId(teamId: Int): List<PlayerEntity>
+    @Query("SELECT * FROM players WHERE leagueId = :leagueId AND teamId = :teamId")
+    suspend fun getPlayersByTeamId(leagueId: Int, teamId: Int): List<PlayerEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTeamDetail(detail: TeamDetailEntity)
@@ -22,13 +22,13 @@ interface TeamDetailDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlayers(players: List<PlayerEntity>)
 
-    @Query("DELETE FROM players WHERE teamId = :teamId")
-    suspend fun deletePlayersByTeamId(teamId: Int)
+    @Query("DELETE FROM players WHERE leagueId = :leagueId AND teamId = :teamId")
+    suspend fun deletePlayersByTeamId(leagueId: Int, teamId: Int)
 
     @Transaction
     suspend fun insertTeamWithPlayers(detail: TeamDetailEntity, players: List<PlayerEntity>) {
         insertTeamDetail(detail)
-        deletePlayersByTeamId(detail.teamId)
+        deletePlayersByTeamId(detail.leagueId, detail.teamId)
         insertPlayers(players)
     }
 }

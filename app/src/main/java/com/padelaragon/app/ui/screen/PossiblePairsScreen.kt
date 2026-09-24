@@ -48,7 +48,8 @@ data class PossiblePairsInput(
 @Composable
 fun PossiblePairsScreen(
     input: PossiblePairsInput?,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onRetry: () -> Unit = onBack
 ) {
     var selectedNames by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var showResults by rememberSaveable { mutableStateOf(false) }
@@ -95,18 +96,22 @@ fun PossiblePairsScreen(
         when {
             input == null -> UnavailablePairsData(
                 message = "No se pudieron cargar los datos del equipo para generar parejas.",
+                onRetry = onRetry,
                 modifier = Modifier.padding(innerPadding)
             )
             input.teamDetail.players.isEmpty() -> UnavailablePairsData(
                 message = "No hay jugadores disponibles en la plantilla.",
+                onRetry = onRetry,
                 modifier = Modifier.padding(innerPadding)
             )
             gender == null -> UnavailablePairsData(
                 message = "No se pudo determinar si la categoría es masculina o femenina.",
+                onRetry = onRetry,
                 modifier = Modifier.padding(innerPadding)
             )
             eligiblePlayers.isEmpty() -> UnavailablePairsData(
                 message = "No hay años de nacimiento válidos para calcular las edades.",
+                onRetry = onRetry,
                 modifier = Modifier.padding(innerPadding)
             )
             showResults -> PossiblePairsResults(
@@ -288,7 +293,11 @@ private fun CombinationCard(combination: CoupleCombination) {
 }
 
 @Composable
-private fun UnavailablePairsData(message: String, modifier: Modifier = Modifier) {
+private fun UnavailablePairsData(
+    message: String,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -301,6 +310,7 @@ private fun UnavailablePairsData(message: String, modifier: Modifier = Modifier)
             color = MaterialTheme.colorScheme.error,
             textAlign = TextAlign.Center
         )
+        Button(onClick = onRetry) { Text("Reintentar") }
     }
 }
 

@@ -3,8 +3,9 @@ package com.padelaragon.app.data.local.entity
 import androidx.room.Entity
 import com.padelaragon.app.data.model.StandingRow
 
-@Entity(tableName = "standings", primaryKeys = ["groupId", "teamId"])
+@Entity(tableName = "standings", primaryKeys = ["leagueId", "groupId", "teamId"])
 data class StandingRowEntity(
+    val leagueId: Int = 27951,
     val groupId: Int,
     val position: Int,
     val teamName: String,
@@ -39,7 +40,9 @@ data class StandingRowEntity(
     )
 
     companion object {
-        fun fromModel(groupId: Int, model: StandingRow): StandingRowEntity = StandingRowEntity(
+        fun fromModel(groupId: Int, model: StandingRow): StandingRowEntity = fromModel(27951, groupId, model)
+        fun fromModel(leagueId: Int, groupId: Int, model: StandingRow): StandingRowEntity = StandingRowEntity(
+            leagueId = leagueId,
             groupId = groupId,
             position = model.position,
             teamName = model.teamName,

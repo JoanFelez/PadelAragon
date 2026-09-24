@@ -36,7 +36,7 @@ class AppContainer(
         )
         return LeagueContainer(
             groupRepository, standingsRepository, matchResultRepository,
-            teamDetailRepository, matchDetailRepository
+            teamDetailRepository, matchDetailRepository, FavoritesManager.forLeague(league)
         )
     }
 
@@ -49,7 +49,7 @@ class AppContainer(
     val matchResultDataSource: MatchResultDataSource = default.matchResultDataSource
     val teamDataSource: TeamDataSource = default.teamDataSource
     val matchDetailDataSource: MatchDetailDataSource = default.matchDetailDataSource
-    val favoritesDataSource: FavoritesDataSource = FavoritesManager
+    val favoritesDataSource: FavoritesDataSource = FavoritesManager.forLeague(League.ABSOLUTA)
     val prefetchGroupsUseCase = default.prefetchGroupsUseCase
 }
 
@@ -58,9 +58,9 @@ class LeagueContainer(
     val standingsDataSource: StandingsDataSource,
     val matchResultDataSource: MatchResultDataSource,
     val teamDataSource: TeamDataSource,
-    val matchDetailDataSource: MatchDetailDataSource
+    val matchDetailDataSource: MatchDetailDataSource,
+    val favoritesDataSource: FavoritesDataSource
 ) {
-    val favoritesDataSource: FavoritesDataSource = FavoritesManager
     val prefetchGroupsUseCase = PrefetchGroupsUseCase(
         groupDataSource as GroupRepository,
         standingsDataSource as StandingsRepository,

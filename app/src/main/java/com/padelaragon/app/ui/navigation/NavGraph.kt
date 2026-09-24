@@ -132,7 +132,8 @@ fun NavGraph(navController: NavHostController = rememberNavController()) {
         composable("possible-pairs") {
             PossiblePairsScreen(
                 input = possiblePairsInput,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onRetry = { navController.popBackStack() }
             )
         }
 

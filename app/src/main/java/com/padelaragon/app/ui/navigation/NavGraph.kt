@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
@@ -26,6 +27,7 @@ import com.padelaragon.app.ui.screen.TeamScreen
 import com.padelaragon.app.ui.viewmodel.GroupDetailViewModelFactory
 import com.padelaragon.app.ui.viewmodel.GroupListViewModelFactory
 import com.padelaragon.app.ui.viewmodel.TeamViewModelFactory
+import kotlinx.coroutines.launch
 
 @Composable
 fun NavGraph(navController: NavHostController = rememberNavController()) {
@@ -36,6 +38,7 @@ fun NavGraph(navController: NavHostController = rememberNavController()) {
     }
     val selectedLeague = League.fromId(selectedLeagueId)
     var possiblePairsInput by remember { mutableStateOf<PossiblePairsInput?>(null) }
+    val coroutineScope = rememberCoroutineScope()
 
     if (selectedLeague == null) {
         LeagueChooserScreen { league ->
@@ -116,7 +119,13 @@ fun NavGraph(navController: NavHostController = rememberNavController()) {
                 },
                 showPossiblePairsAction = selectedLeague == League.VETERANOS,
                 onPossiblePairsClick = { teamDetail, groupName ->
-                    possiblePairsInput = PossiblePairsInput(teamDetail, groupName)
+                    possiblePairsInput = PossiblePairsInput(
+                        teamDetail = teamDetail,
+                        groupName = groupName,
+                        teamId = teamId,
+                        teamName = teamName,
+                        groupId = groupId
+                    )
                     navController.navigate("possible-pairs")
                 },
                 viewModelFactory = TeamViewModelFactory(
@@ -133,7 +142,18 @@ fun NavGraph(navController: NavHostController = rememberNavController()) {
             PossiblePairsScreen(
                 input = possiblePairsInput,
                 onBack = { navController.popBackStack() },
-                onRetry = { navController.popBackStack() }
+                onRetry = {
+                    possiblePairsInput?.let { input ->
+                        coroutineScope.launch {
+                            val refreshedInput = runCatching {
+                                reloadPossiblePairsInput(input, container.teamDataSource)
+                            }.getOrNull()
+                            if (refreshedInput != null) {
+                                possiblePairsInput = refreshedInput
+                            }
+                        }
+                    }
+                }
             )
         }
 

@@ -63,7 +63,7 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        private val MIGRATION_3_4 = object : Migration(3, 4) {
+        internal val MIGRATION_3_4 = object : Migration(3, 4) {
                 override fun migrate(db: SupportSQLiteDatabase) {
                     listOf(
                         "league_groups", "standings", "match_results", "match_detail_pairs",

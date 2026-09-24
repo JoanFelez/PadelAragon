@@ -25,6 +25,37 @@ class GeneratePossibleCouplesUseCaseTest {
     }
 
     @Test
+    fun `uses female thresholds for a boundary-valid vector`() {
+        val result = useCase(
+            listOf(
+                AgedPlayer("A", 40), AgedPlayer("B", 45),
+                AgedPlayer("C", 44), AgedPlayer("D", 46),
+                AgedPlayer("E", 47), AgedPlayer("F", 48)
+            ),
+            Gender.FEMENINA
+        ) as GeneratePossibleCouplesUseCase.Result.Success
+
+        assertTrue(result.combinations.any { combination ->
+            combination.pairs.map { it.requiredSum } == listOf(85, 90, 95) &&
+                combination.pairs.map { it.ageSum } == listOf(85, 90, 95)
+        })
+    }
+
+    @Test
+    fun `rejects female vector that misses a required threshold`() {
+        val result = useCase(
+            listOf(
+                AgedPlayer("A", 40), AgedPlayer("B", 44),
+                AgedPlayer("C", 44), AgedPlayer("D", 45),
+                AgedPlayer("E", 46), AgedPlayer("F", 48)
+            ),
+            Gender.FEMENINA
+        )
+
+        assertEquals(GeneratePossibleCouplesUseCase.Result.NoCombinationsPossible, result)
+    }
+
+    @Test
     fun `reports no combinations separately from invalid selection`() {
         val result = useCase((1..6).map { AgedPlayer("P$it", 20) }, Gender.FEMENINA)
         assertEquals(GeneratePossibleCouplesUseCase.Result.NoCombinationsPossible, result)

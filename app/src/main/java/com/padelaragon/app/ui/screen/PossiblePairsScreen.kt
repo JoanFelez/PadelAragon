@@ -41,7 +41,10 @@ import java.time.Year
 
 data class PossiblePairsInput(
     val teamDetail: TeamDetail,
-    val groupName: String
+    val groupName: String,
+    val teamId: Int,
+    val teamName: String,
+    val groupId: Int
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

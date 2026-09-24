@@ -1,0 +1,55 @@
+app/src/main/java/com/padelaragon/app/data/model/League.kt
+  s_216b7ff53e0243::t_f168ac71da65b5 1-11
+app/src/main/java/com/padelaragon/app/data/model/PlayerDetailStats.kt
+  s_216b7ff53e0243::t_032c3ecf7bfcbf 1-24
+app/src/main/java/com/padelaragon/app/data/repository/GroupRepository.kt
+  s_216b7ff53e0243::t_566bb4b151d809 30
+app/src/main/java/com/padelaragon/app/data/repository/MatchResultRepository.kt
+  s_216b7ff53e0243::t_76eeadb919d9db 37,80
+app/src/main/java/com/padelaragon/app/data/repository/ScrapingService.kt
+  s_216b7ff53e0243::t_ed1623a99f20c9 5,16-17
+app/src/main/java/com/padelaragon/app/data/repository/StandingsRepository.kt
+  s_216b7ff53e0243::t_401d9b1983582b 35
+app/src/main/java/com/padelaragon/app/data/repository/TeamDetailRepository.kt
+  s_216b7ff53e0243::t_bdb73033f2fed3 46-48
+app/src/main/java/com/padelaragon/app/di/AppContainer.kt
+  s_216b7ff53e0243::t_908d5ae64ce020 6,21-54,56-62,64-68
+app/src/main/java/com/padelaragon/app/domain/usecase/ComputePlayerDetailStatsUseCase.kt
+  s_216b7ff53e0243::t_9e1b838c185d7e 1-59
+app/src/main/java/com/padelaragon/app/domain/usecase/GeneratePossibleCouplesUseCase.kt
+  s_216b7ff53e0243::t_a2a8df049dd6e9 1-100
+app/src/main/java/com/padelaragon/app/ui/navigation/NavGraph.kt
+  s_216b7ff53e0243::t_c4994070bf3fe3 5-9,18,20-23,33-47,56-57,112-154
+app/src/main/java/com/padelaragon/app/ui/screen/GroupListScreen.kt
+  s_216b7ff53e0243::t_15cbc216355f0f 15,31,40-41,53,55
+app/src/main/java/com/padelaragon/app/ui/screen/LeagueChooserScreen.kt
+  s_216b7ff53e0243::t_3d66b15f6150f3 1-32
+app/src/main/java/com/padelaragon/app/ui/screen/PlayerDetailScreen.kt
+  s_216b7ff53e0243::t_47fcda4d1bb205 1-69
+app/src/main/java/com/padelaragon/app/ui/screen/PossiblePairsScreen.kt
+  s_216b7ff53e0243::t_0f4f1767bc7412 1-320
+app/src/main/java/com/padelaragon/app/ui/screen/TeamScreen.kt
+  s_216b7ff53e0243::t_c89472bdecc79e 14,19,62-64,219-236,586,666
+app/src/main/java/com/padelaragon/app/ui/viewmodel/TeamViewModel.kt
+  s_216b7ff53e0243::t_4ce86934da284f 25
+app/src/test/java/com/padelaragon/app/domain/usecase/ComputePlayerDetailStatsUseCaseTest.kt
+  s_216b7ff53e0243::t_30228ad41be890 1-32
+app/src/test/java/com/padelaragon/app/domain/usecase/GeneratePossibleCouplesUseCaseTest.kt
+  s_216b7ff53e0243::t_b5345eea1651d1 1-58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c6afb3dba0d84bebbbec0b527d7ce65cc598331c",
+  "prompts": {},
+  "sessions": {
+    "s_216b7ff53e0243": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "74a42472-70e5-4530-879e-acba20e1d72c",
+        "model": "unknown"
+      },
+      "human_author": "joanfelez <joanfa@ext.zara.com>"
+    }
+  }
+}

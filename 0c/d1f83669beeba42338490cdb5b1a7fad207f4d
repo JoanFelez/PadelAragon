@@ -1,0 +1,21 @@
+CHANGELOG.md
+  s_d024798b52d860::t_2dbd133ab30e9e 1-16
+app/build.gradle.kts
+  s_d024798b52d860::t_324f414212fabc 2-3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0cd1f83669beeba42338490cdb5b1a7fad207f4d",
+  "prompts": {},
+  "sessions": {
+    "s_d024798b52d860": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "601385da-4a46-4773-a51b-45006b0964b9",
+        "model": "unknown"
+      },
+      "human_author": "joanfelez <joanfa@ext.zara.com>"
+    }
+  }
+}

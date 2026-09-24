@@ -1,0 +1,64 @@
+app/src/main/java/com/padelaragon/app/data/favorites/FavoritesManager.kt
+  h_8f9a3a7c055732 5,69-98
+app/src/main/java/com/padelaragon/app/data/local/AppDatabase.kt
+  h_8f9a3a7c055732 7-8,36,59,65-87
+app/src/main/java/com/padelaragon/app/data/local/dao/JornadaDao.kt
+  h_8f9a3a7c055732 11-12,17-18
+app/src/main/java/com/padelaragon/app/data/local/dao/LeagueGroupDao.kt
+  h_8f9a3a7c055732 11-12,17-18
+app/src/main/java/com/padelaragon/app/data/local/dao/MatchDetailDao.kt
+  h_8f9a3a7c055732 11-12,17-18
+app/src/main/java/com/padelaragon/app/data/local/dao/MatchResultDao.kt
+  h_8f9a3a7c055732 11-12,14-15,20-21,23-24
+app/src/main/java/com/padelaragon/app/data/local/dao/StandingRowDao.kt
+  h_8f9a3a7c055732 11-12,17-18
+app/src/main/java/com/padelaragon/app/data/local/dao/TeamDetailDao.kt
+  h_8f9a3a7c055732 13-14,16-17,25-26,31
+app/src/main/java/com/padelaragon/app/data/local/entity/JornadaEntity.kt
+  h_8f9a3a7c055732 5,7
+app/src/main/java/com/padelaragon/app/data/local/entity/LeagueGroupEntity.kt
+  h_8f9a3a7c055732 8,10-11,26-28
+app/src/main/java/com/padelaragon/app/data/local/entity/MatchDetailPairEntity.kt
+  h_8f9a3a7c055732 7,9,37-39
+app/src/main/java/com/padelaragon/app/data/local/entity/MatchResultEntity.kt
+  h_8f9a3a7c055732 6,8,35-37
+app/src/main/java/com/padelaragon/app/data/local/entity/PlayerEntity.kt
+  h_8f9a3a7c055732 6,8,23-25
+app/src/main/java/com/padelaragon/app/data/local/entity/StandingRowEntity.kt
+  h_8f9a3a7c055732 6,8,43-45
+app/src/main/java/com/padelaragon/app/data/local/entity/TeamDetailEntity.kt
+  h_8f9a3a7c055732 6,8-9
+app/src/main/java/com/padelaragon/app/data/repository/GroupRepository.kt
+  h_8f9a3a7c055732 24,36-37,44
+app/src/main/java/com/padelaragon/app/data/repository/MatchDetailRepository.kt
+  h_8f9a3a7c055732 25,38
+app/src/main/java/com/padelaragon/app/data/repository/MatchResultRepository.kt
+  h_8f9a3a7c055732 31,42-43,50,65,90-91,135
+app/src/main/java/com/padelaragon/app/data/repository/StandingsRepository.kt
+  h_8f9a3a7c055732 20,23,40-41,49
+app/src/main/java/com/padelaragon/app/data/repository/TeamDetailRepository.kt
+  h_8f9a3a7c055732 32,34,172-173
+app/src/main/java/com/padelaragon/app/di/AppContainer.kt
+  h_8f9a3a7c055732 39,52,61-62
+app/src/main/java/com/padelaragon/app/ui/navigation/NavGraph.kt
+  h_8f9a3a7c055732 135-136
+app/src/main/java/com/padelaragon/app/ui/screen/PlayerDetailScreen.kt
+  h_8f9a3a7c055732 50-58
+app/src/main/java/com/padelaragon/app/ui/screen/PossiblePairsScreen.kt
+  h_8f9a3a7c055732 51-52,99,104,109,114,296-300,313
+app/src/main/java/com/padelaragon/app/ui/viewmodel/TeamViewModel.kt
+  h_8f9a3a7c055732 45,153-154,157,160-161,170,184-185,191-192
+app/src/test/java/com/padelaragon/app/data/favorites/FavoritesManagerTest.kt
+  h_8f9a3a7c055732 3,181-201
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "db95c38d7d50b717caef728e9546126961f0b215",
+  "prompts": {},
+  "humans": {
+    "h_8f9a3a7c055732": {
+      "author": "joanfelez <joanfa@ext.zara.com>"
+    }
+  }
+}

@@ -22,7 +22,7 @@ class MatchDetailRepository(
     override suspend fun getMatchDetail(detailUrl: String): MatchDetail? {
         cachedMatchDetails[detailUrl]?.let { return it }
 
-        val entities = scraping.db.matchDetailDao().getByDetailUrl(detailUrl)
+        val entities = scraping.db.matchDetailDao().getByDetailUrl(scraping.league.id, detailUrl)
         if (entities.isNotEmpty()) {
             val detail = MatchDetail(entities.map { it.toModel() })
             cachedMatchDetails[detailUrl] = detail
@@ -35,7 +35,7 @@ class MatchDetailRepository(
         if (detail.pairs.isNotEmpty()) {
             cachedMatchDetails[detailUrl] = detail
             scraping.db.matchDetailDao().insertAll(
-                detail.pairs.map { MatchDetailPairEntity.fromModel(detailUrl, it) }
+                detail.pairs.map { MatchDetailPairEntity.fromModel(scraping.league.id, detailUrl, it) }
             )
         }
         return if (detail.pairs.isNotEmpty()) detail else null

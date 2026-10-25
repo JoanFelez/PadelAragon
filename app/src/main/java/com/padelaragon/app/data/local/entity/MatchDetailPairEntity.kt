@@ -4,8 +4,9 @@ import androidx.room.Entity
 import com.padelaragon.app.data.model.PairDetail
 import com.padelaragon.app.data.model.SetScore
 
-@Entity(tableName = "match_detail_pairs", primaryKeys = ["detailUrl", "pairNumber"])
+@Entity(tableName = "match_detail_pairs", primaryKeys = ["leagueId", "detailUrl", "pairNumber"])
 data class MatchDetailPairEntity(
+    val leagueId: Int = 27951,
     val detailUrl: String,
     val pairNumber: Int,
     val localPlayer1: String,
@@ -33,7 +34,9 @@ data class MatchDetailPairEntity(
     )
 
     companion object {
-        fun fromModel(detailUrl: String, model: PairDetail): MatchDetailPairEntity = MatchDetailPairEntity(
+        fun fromModel(detailUrl: String, model: PairDetail): MatchDetailPairEntity = fromModel(27951, detailUrl, model)
+        fun fromModel(leagueId: Int, detailUrl: String, model: PairDetail): MatchDetailPairEntity = MatchDetailPairEntity(
+            leagueId = leagueId,
             detailUrl = detailUrl,
             pairNumber = model.pairNumber,
             localPlayer1 = model.localPlayer1,

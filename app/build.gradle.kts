@@ -1,6 +1,6 @@
 val versionMajor = 2
-val versionMinor = 0
-val versionPatch = 1
+val versionMinor = 1
+val versionPatch = 0
 
 plugins {
     id("com.android.application")

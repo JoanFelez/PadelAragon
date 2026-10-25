@@ -4,7 +4,6 @@ import com.padelaragon.app.data.local.entity.LeagueGroupEntity
 import com.padelaragon.app.data.model.LeagueGroup
 import com.padelaragon.app.data.parser.GroupParser
 import com.padelaragon.app.data.repository.ScrapingService.Companion.BASE_URL
-import com.padelaragon.app.data.repository.ScrapingService.Companion.LEAGUE_ID
 import com.padelaragon.app.data.repository.datasource.GroupDataSource
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -22,27 +21,27 @@ class GroupRepository(
     override suspend fun getGroups(): List<LeagueGroup> {
         cachedGroups?.let { return it }
 
-        val roomGroups = scraping.db.leagueGroupDao().getAll().map { it.toModel() }
+        val roomGroups = scraping.db.leagueGroupDao().getAll(scraping.league.id).map { it.toModel() }
         if (roomGroups.isNotEmpty()) {
             cachedGroups = roomGroups
             return roomGroups
         }
 
-        val url = "${BASE_URL}Ligas_Calendario.asp?Liga=$LEAGUE_ID"
+        val url = "${BASE_URL}Ligas_Calendario.asp?Liga=${scraping.league.id}"
         android.util.Log.d("GroupRepo", "Fetching groups from: $url")
         val html = scraping.withSemaphore { scraping.fetcher.get(url) }
         val groups = groupParser.parse(html)
         cachedGroups = groups
 
-        scraping.db.leagueGroupDao().deleteAll()
-        scraping.db.leagueGroupDao().insertAll(groups.map { LeagueGroupEntity.fromModel(it) })
+        scraping.db.leagueGroupDao().deleteAll(scraping.league.id)
+        scraping.db.leagueGroupDao().insertAll(groups.map { LeagueGroupEntity.fromModel(scraping.league.id, it) })
 
         return groups
     }
 
     override suspend fun refreshGroups(): List<LeagueGroup> {
         cachedGroups = null
-        scraping.db.leagueGroupDao().deleteAll()
+        scraping.db.leagueGroupDao().deleteAll(scraping.league.id)
         return getGroups()
     }
 

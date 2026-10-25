@@ -8,12 +8,12 @@ import com.padelaragon.app.data.local.entity.MatchDetailPairEntity
 
 @Dao
 interface MatchDetailDao {
-    @Query("SELECT * FROM match_detail_pairs WHERE detailUrl = :detailUrl ORDER BY pairNumber")
-    suspend fun getByDetailUrl(detailUrl: String): List<MatchDetailPairEntity>
+    @Query("SELECT * FROM match_detail_pairs WHERE leagueId = :leagueId AND detailUrl = :detailUrl ORDER BY pairNumber")
+    suspend fun getByDetailUrl(leagueId: Int, detailUrl: String): List<MatchDetailPairEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(pairs: List<MatchDetailPairEntity>)
 
-    @Query("DELETE FROM match_detail_pairs WHERE detailUrl = :detailUrl")
-    suspend fun deleteByDetailUrl(detailUrl: String)
+    @Query("DELETE FROM match_detail_pairs WHERE leagueId = :leagueId AND detailUrl = :detailUrl")
+    suspend fun deleteByDetailUrl(leagueId: Int, detailUrl: String)
 }

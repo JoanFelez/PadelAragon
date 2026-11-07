@@ -1,0 +1,19 @@
+scraper/build.gradle.kts
+  s_bd23133e43b027::t_c442bdad6ed692 21,26-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "9faad783c0ccb373d0007968f5537dc0caf676e3",
+  "prompts": {},
+  "sessions": {
+    "s_bd23133e43b027": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "f8f98006-a284-4730-9c8f-912a33f455eb",
+        "model": "unknown"
+      },
+      "human_author": "Joan Felez Albero <joanfa@ext.zara.com>"
+    }
+  }
+}

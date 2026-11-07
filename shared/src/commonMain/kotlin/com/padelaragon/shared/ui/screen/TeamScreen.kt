@@ -244,7 +244,7 @@ fun TeamScreen(
                         }
 
                         1 -> {
-                            val isVeteranos = league == League.VETERANOS
+                            val isVeteranos = league?.id == League.VETERANOS.id
                             var selectedPlayerNames by remember(uiState.teamDetail) {
                                 mutableStateOf(setOf<String>())
                             }

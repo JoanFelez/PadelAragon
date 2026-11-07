@@ -66,7 +66,7 @@ class FavoritesViewModelFactory(
 
     companion object {
         fun from(container: MultiLeagueContainer) = FavoritesViewModelFactory(
-            League.entries.map { league ->
+            container.leagues.value.map { league ->
                 val leagueContainer = container[league]
                 FavoritesViewModel.LeagueSources(
                     league, leagueContainer.groupDataSource, leagueContainer.favoritesDataSource

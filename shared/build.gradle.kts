@@ -1,4 +1,5 @@
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -9,6 +10,14 @@ plugins {
     alias(libs.plugins.buildkonfig)
     alias(libs.plugins.ksp)
 }
+
+val localProps = Properties().apply {
+    rootProject.file("local.properties").takeIf { it.isFile }?.inputStream()?.use { load(it) }
+}
+
+// Empty default means scrape-only mode; never commit values (local.properties is gitignored).
+fun backendDefault(propKey: String, envKey: String): String =
+    localProps.getProperty(propKey)?.takeIf { it.isNotBlank() } ?: System.getenv(envKey).orEmpty()
 
 val appVersion = "${property("appVersionMajor")}.${property("appVersionMinor")}.${property("appVersionPatch")}"
 
@@ -82,5 +91,7 @@ buildkonfig {
     packageName = "com.padelaragon.shared"
     defaultConfigs {
         buildConfigField(Type.STRING, "APP_VERSION", appVersion)
+        buildConfigField(Type.STRING, "BACKEND_URL", backendDefault("backend.url", "PADEL_BACKEND_URL"))
+        buildConfigField(Type.STRING, "APP_KEY", backendDefault("backend.appKey", "PADEL_APP_KEY"))
     }
 }

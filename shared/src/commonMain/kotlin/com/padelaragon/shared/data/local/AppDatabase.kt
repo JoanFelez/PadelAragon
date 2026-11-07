@@ -6,6 +6,7 @@ import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import kotlinx.coroutines.Dispatchers
+import com.padelaragon.shared.data.local.dao.BundleImportDao
 import com.padelaragon.shared.data.local.dao.CacheTimestampDao
 import com.padelaragon.shared.data.local.dao.JornadaDao
 import com.padelaragon.shared.data.local.dao.LeagueGroupDao
@@ -45,6 +46,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun teamDetailDao(): TeamDetailDao
     abstract fun jornadaDao(): JornadaDao
     abstract fun cacheTimestampDao(): CacheTimestampDao
+    abstract fun bundleImportDao(): BundleImportDao
 }
 
 // Room's KSP processor generates the actual implementation of this constructor.

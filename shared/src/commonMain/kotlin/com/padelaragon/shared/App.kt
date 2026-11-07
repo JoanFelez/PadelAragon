@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.padelaragon.shared.data.model.League
+import com.padelaragon.shared.data.sync.SyncKind
 import com.padelaragon.shared.di.MultiLeagueContainer
 import com.padelaragon.shared.domain.usecase.StartupPreloader
 import com.padelaragon.shared.ui.navigation.AppNavigation
@@ -34,14 +35,16 @@ fun App(
     screens: AppScreens = AppScreens(),
     blockingFirstRunSync: Boolean = false
 ) {
-    val preloader = remember { StartupPreloader { league -> preloadLeague(container, league) } }
+    val preloader = remember { StartupPreloader(container.leagues.value) { league -> syncLeague(container, league) } }
     val progress by preloader.progress.collectAsState()
     var hasCache by remember { mutableStateOf<Boolean?>(null) }
 
     LaunchedEffect(container) {
         hasCache = hasCachedData(container)
-        syncFavoritesFirst(container)
-        preloader.preloadAll()
+        container.leagueCatalog.refresh()
+        val leagues = container.leagues.value
+        syncFavoritesFirst(container, leagues)
+        preloader.preloadAll(leagues)
     }
 
     PadelAragonTheme {
@@ -54,24 +57,16 @@ fun App(
 }
 
 private suspend fun hasCachedData(container: MultiLeagueContainer): Boolean = runCatching {
-    League.entries.any { container[it].groupDataSource.observeGroups().first().isNotEmpty() }
+    container.leagues.value.any { container[it].groupDataSource.observeGroups().first().isNotEmpty() }
 }.getOrDefault(false)
 
-private suspend fun syncFavoritesFirst(container: MultiLeagueContainer) {
-    League.entries.forEach { league ->
-        val leagueContainer = container[league]
-        val favoriteIds = leagueContainer.favoritesDataSource.favorites.value
-        if (favoriteIds.isNotEmpty()) {
-            runCatching {
-                leagueContainer.groupDataSource.getGroups()
-                leagueContainer.prefetchGroupsUseCase.prefetchFavorites(favoriteIds.toList())
-            }
-        }
-    }
+private suspend fun syncFavoritesFirst(container: MultiLeagueContainer, leagues: List<League>) {
+    leagues.filter { container[it].favoritesDataSource.favorites.value.isNotEmpty() }
+        .forEach { container.syncEngine.sync(it) }
 }
 
-private suspend fun preloadLeague(container: MultiLeagueContainer, league: League) {
-    val leagueContainer = container[league]
-    leagueContainer.groupDataSource.getGroups()
-    leagueContainer.prefetchGroupsUseCase.prefetchAll()
+/** Failure is reported to the preloader so the first-run progress screen can finish. */
+private suspend fun syncLeague(container: MultiLeagueContainer, league: League) {
+    val result = container.syncEngine.sync(league)
+    if (result.kind == SyncKind.FAILED) error(result.message ?: "Sync failed")
 }

@@ -34,7 +34,7 @@ class StartupPreloader(
     val progress: StateFlow<Progress> = _progress.asStateFlow()
 
     /** Fetches groups + standings + match results for every league, in parallel. Never throws. */
-    suspend fun preloadAll() {
+    suspend fun preloadAll(leagues: List<League> = this.leagues) {
         _progress.value = Progress(totalLeagues = leagues.size)
         coroutineScope {
             leagues.forEach { league ->

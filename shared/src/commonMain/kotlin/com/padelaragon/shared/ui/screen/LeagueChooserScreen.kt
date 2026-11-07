@@ -26,7 +26,7 @@ import com.padelaragon.shared.data.model.League
  * master-detail categories view, scoped to that league.
  */
 @Composable
-fun LeagueChooserScreen(onLeagueSelected: (League) -> Unit) {
+fun LeagueChooserScreen(leagues: List<League> = League.entries, onLeagueSelected: (League) -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -48,7 +48,7 @@ fun LeagueChooserScreen(onLeagueSelected: (League) -> Unit) {
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            League.entries.forEach { league ->
+            leagues.forEach { league ->
                 LeagueCard(league = league, onClick = { onLeagueSelected(league) })
             }
         }

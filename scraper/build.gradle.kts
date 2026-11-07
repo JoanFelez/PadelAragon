@@ -22,3 +22,8 @@ application {
 tasks.test {
     systemProperty("contracts.dir", rootProject.file("contracts/fixtures").absolutePath)
 }
+
+// :shared now pulls UI libraries whose desktop/jvm variants ship identically named jars.
+tasks.withType<AbstractCopyTask>().configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

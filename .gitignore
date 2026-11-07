@@ -25,3 +25,8 @@ Thumbs.db
 
 # Log files
 *.log
+
+# Build outputs of all modules
+*/build/
+out/
+androidApp/release/

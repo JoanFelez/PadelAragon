@@ -1,0 +1,49 @@
+gradle/libs.versions.toml
+  s_bdcd4b49a1e9e2::t_150c6b510895a9 22,25
+shared/build.gradle.kts
+  s_bdcd4b49a1e9e2::t_d8c4f2c406e931 46
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/chat/ChatApi.kt
+  s_bdcd4b49a1e9e2::t_59fbb72359226d 1-116
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/chat/ChatModels.kt
+  s_bdcd4b49a1e9e2::t_a69ec1eeda7e11 1-32
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/chat/ChatPreferences.kt
+  s_bdcd4b49a1e9e2::t_b00972f9bba9b4 1-14
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/chat/ChatStore.kt
+  s_bdcd4b49a1e9e2::t_0fd99a7ffdf492 1-81
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/chat/SseParser.kt
+  s_bdcd4b49a1e9e2::t_1d9566ca90ffd5 1-92
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/local/AppDatabase.kt
+  s_bdcd4b49a1e9e2::t_d0ba875e167f0a 9-10,37-38,40,53
+shared/src/commonMain/kotlin/com/padelaragon/shared/di/AppContainer.kt
+  s_bdcd4b49a1e9e2::t_550cf7df265cf0 3-6,78-80
+shared/src/commonMain/kotlin/com/padelaragon/shared/ui/chat/ChatScreen.kt
+  s_bdcd4b49a1e9e2::t_2818de8d45c21e 1,4,6-8,10,12-28,30-31,33,35-36,38,42-47,50,52-61,65-78,82-101,104-105,110-206,208-217,222-223,225-248
+shared/src/commonMain/kotlin/com/padelaragon/shared/ui/chat/ChatTexts.kt
+  s_bdcd4b49a1e9e2::t_72a5511122f63f 1-23
+shared/src/commonMain/kotlin/com/padelaragon/shared/ui/navigation/AppNavigation.kt
+  s_bdcd4b49a1e9e2::t_c7c0df6c22085f 35,134
+shared/src/commonMain/kotlin/com/padelaragon/shared/ui/navigation/AppScreens.kt
+  s_bdcd4b49a1e9e2::t_610799e82672e3 7-8,11-12
+shared/src/commonMain/kotlin/com/padelaragon/shared/ui/viewmodel/ChatViewModel.kt
+  s_bdcd4b49a1e9e2::t_22a8e26eac0d30 1-182
+shared/src/desktopTest/kotlin/com/padelaragon/shared/data/chat/ChatApiTest.kt
+  s_bdcd4b49a1e9e2::t_25243e2216f0cb 1-114
+shared/src/desktopTest/kotlin/com/padelaragon/shared/ui/viewmodel/ChatViewModelTest.kt
+  s_bdcd4b49a1e9e2::t_2f1837728d37d6 1-192
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "366958540d8e73dd58a1bdece1091af7a31880ea",
+  "prompts": {},
+  "sessions": {
+    "s_bdcd4b49a1e9e2": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "24d19b83-a62c-4c14-98b0-3511fd64ba3a",
+        "model": "unknown"
+      },
+      "human_author": "Joan Felez Albero <joanfa@ext.zara.com>"
+    }
+  }
+}

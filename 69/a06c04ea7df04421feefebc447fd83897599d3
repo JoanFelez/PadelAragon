@@ -1,0 +1,59 @@
+.github/workflows/scrape.yml
+  s_637dc5629f33a1::t_5bd847bba360fc 1-67
+build.gradle.kts
+  s_637dc5629f33a1::t_3d6bc141d23c41 7
+gradle/libs.versions.toml
+  s_637dc5629f33a1::t_88ee06cc703a8a 16,26,42
+scraper/build.gradle.kts
+  s_637dc5629f33a1::t_b8ae86a7c328e5 3,13,15,21-24
+scraper/src/main/kotlin/com/padelaragon/scraper/Args.kt
+  s_637dc5629f33a1::t_4fc5632e158068 1-55
+scraper/src/main/kotlin/com/padelaragon/scraper/BackendClient.kt
+  s_637dc5629f33a1::t_53c35044ba55e4 1-55
+scraper/src/main/kotlin/com/padelaragon/scraper/Incremental.kt
+  s_637dc5629f33a1::t_fe9719ddaeb102 1-40
+scraper/src/main/kotlin/com/padelaragon/scraper/LeagueScraper.kt
+  s_637dc5629f33a1::t_1640a0c952834f 1-180
+scraper/src/main/kotlin/com/padelaragon/scraper/Main.kt
+  s_637dc5629f33a1::t_8bec84ae144c11 4-10,13-84
+scraper/src/main/kotlin/com/padelaragon/scraper/PageSource.kt
+  s_637dc5629f33a1::t_08c946011d4baf 1-41
+scraper/src/main/kotlin/com/padelaragon/scraper/Publisher.kt
+  s_637dc5629f33a1::t_4d09d7a2f349fa 1-100
+scraper/src/test/kotlin/com/padelaragon/scraper/ArgsTest.kt
+  s_637dc5629f33a1::t_670e55255f606e 1-41
+scraper/src/test/kotlin/com/padelaragon/scraper/Fixtures.kt
+  s_637dc5629f33a1::t_0c86c98402eec0 1-12
+scraper/src/test/kotlin/com/padelaragon/scraper/IncrementalTest.kt
+  s_637dc5629f33a1::t_748eb8a9943153 1-48
+scraper/src/test/kotlin/com/padelaragon/scraper/PublisherTest.kt
+  s_637dc5629f33a1::t_34e49be8865713 1-74
+scraper/src/test/kotlin/com/padelaragon/scraper/RunScraperTest.kt
+  s_637dc5629f33a1::t_caef5f2c068599 4-11,14-22
+shared/build.gradle.kts
+  s_637dc5629f33a1::t_a714db9a5dda0f 7,32,69
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/remote/FederationUrls.kt
+  s_637dc5629f33a1::t_50f872e82e324d 1-37
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/remote/dto/BundleDtos.kt
+  s_637dc5629f33a1::t_99c31553bc7883 1-116
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/remote/dto/BundleMappers.kt
+  s_637dc5629f33a1::t_10418677d84286 1-79
+shared/src/desktopTest/kotlin/com/padelaragon/shared/data/remote/BundleContractTest.kt
+  s_637dc5629f33a1::t_2bd8d96549a660 1-79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "69a06c04ea7df04421feefebc447fd83897599d3",
+  "prompts": {},
+  "sessions": {
+    "s_637dc5629f33a1": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "b6bd87ea-8e9b-4612-b9b8-7e47babf9f49",
+        "model": "unknown"
+      },
+      "human_author": "Joan Felez Albero <joanfa@ext.zara.com>"
+    }
+  }
+}

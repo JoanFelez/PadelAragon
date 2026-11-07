@@ -1,0 +1,265 @@
+androidApp/src/main/java/com/padelaragon/app/PadelAragonApp.kt
+  s_2853c1ebc93efb::t_7404fc3cdb2d58 4,6-14,17,20-22,25,28,30,33-34
+androidApp/src/main/java/com/padelaragon/app/ui/components/MatchCard.kt
+  s_2853c1ebc93efb::t_00fea3056fac4d 35-36,192
+androidApp/src/main/java/com/padelaragon/app/ui/components/StandingsTable.kt
+  s_2853c1ebc93efb::t_46dd8243f2c4f3 31
+androidApp/src/main/java/com/padelaragon/app/ui/screen/GroupListScreen.kt
+  s_2853c1ebc93efb::t_651eaf8ef12e04 29-30
+androidApp/src/main/java/com/padelaragon/app/ui/screen/TeamScreen.kt
+  s_2853c1ebc93efb::t_e34d4fc34a0fc8 44-46
+androidApp/src/main/java/com/padelaragon/app/ui/viewmodel/GroupDetailViewModel.kt
+  s_2853c1ebc93efb::t_afc56a4837af2c 6-13
+androidApp/src/main/java/com/padelaragon/app/ui/viewmodel/GroupListViewModel.kt
+  s_2853c1ebc93efb::t_227a9eee91fb7f 6-10
+androidApp/src/main/java/com/padelaragon/app/ui/viewmodel/TeamViewModel.kt
+  s_2853c1ebc93efb::t_99ded450a22690 6-15
+androidApp/src/test/java/com/padelaragon/app/ui/viewmodel/GroupDetailViewModelJornadaTest.kt
+  s_2853c1ebc93efb::t_67a6f951766b19 3
+androidApp/src/test/java/com/padelaragon/app/ui/viewmodel/GroupListViewModelSortTest.kt
+  s_2853c1ebc93efb::t_a7c9081c0b9726 3-4
+androidApp/src/test/java/com/padelaragon/app/ui/viewmodel/TeamViewModelPlayerStatsTest.kt
+  s_2853c1ebc93efb::t_0dc917973b7415 3-7
+gradle/libs.versions.toml
+  s_2853c1ebc93efb::t_f576ba655deb05 11-15,25-34
+shared/build.gradle.kts
+  s_2853c1ebc93efb::t_93bb016fee8c9f 9,30-35,40-42,46-54,60-68
+shared/src/androidMain/kotlin/com/padelaragon/shared/data/favorites/FavoritesSettings.android.kt
+  s_2853c1ebc93efb::t_e2d27dc111c166 1-20
+shared/src/androidMain/kotlin/com/padelaragon/shared/data/local/AppDatabase.android.kt
+  s_2853c1ebc93efb::t_9ad45618c37d73 1-17
+shared/src/androidMain/kotlin/com/padelaragon/shared/data/network/HttpClient.android.kt
+  s_2853c1ebc93efb::t_f3ff34b5eeae38 1-19
+shared/src/androidMain/kotlin/com/padelaragon/shared/util/Logger.android.kt
+  s_2853c1ebc93efb::t_6f33d92d6b9fee 1-19
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/favorites/FavoritesSettings.kt
+  s_2853c1ebc93efb::t_d9acb8144c5ce9 1-10
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/favorites/FavoritesStore.kt
+  s_2853c1ebc93efb::t_36d4b94fbc171f 1,3-5,10-14,16,20-22,25-28,30,32-33,37-38,40-41,43,45-53
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/local/AppDatabase.kt
+  s_2853c1ebc93efb::t_0a2bf46ecfe814 1,4,6-23,36,39,48,50-53,55-67
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/local/dao/CacheTimestampDao.kt
+  s_2853c1ebc93efb::t_823bff610da11b 1,7,14-16
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/local/dao/JornadaDao.kt
+  s_2853c1ebc93efb::t_3ab83e5520bfe9 1,7-9,13-14,19-26
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/local/dao/LeagueGroupDao.kt
+  s_2853c1ebc93efb::t_b3cd73de2976be 1,7-9,13-17,22-29
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/local/dao/MatchDetailDao.kt
+  s_2853c1ebc93efb::t_60d8b6f29c2a3b 1,7-9,21-26
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/local/dao/MatchResultDao.kt
+  s_2853c1ebc93efb::t_9005ef37bbd42f 1,7-9,13-14,16-20,25-29,31-35
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/local/dao/StandingRowDao.kt
+  s_2853c1ebc93efb::t_b573572ab11a01 1,7-9,13-17,22-29
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/local/dao/TeamDetailDao.kt
+  s_2853c1ebc93efb::t_110a2c615a7dc3 1,8-9,13-14,16-17,25-26,31
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/local/entity/CacheTimestamp.kt
+  s_2853c1ebc93efb::t_34cc43fc3d3b24 1,9-10
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/local/entity/JornadaEntity.kt
+  s_2853c1ebc93efb::t_fb2b389eeb2d49 1,5,7
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/local/entity/LeagueGroupEntity.kt
+  s_2853c1ebc93efb::t_051e719d211b2e 1,4-5,7,9-10,25-26
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/local/entity/MatchDetailPairEntity.kt
+  s_2853c1ebc93efb::t_2d02fefff160c3 1,4-5
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/local/entity/MatchResultEntity.kt
+  s_2853c1ebc93efb::t_e97bac07582a99 1,4,6,8,35-36
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/local/entity/PlayerEntity.kt
+  s_2853c1ebc93efb::t_fd0b733139b065 1,4,6,8,23-24
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/local/entity/StandingRowEntity.kt
+  s_2853c1ebc93efb::t_2e7455a56a488a 1,4,6,8,43-44
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/local/entity/TeamDetailEntity.kt
+  s_2853c1ebc93efb::t_d6a6f9871a793e 1,5,7-8
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/model/League.kt
+  s_2853c1ebc93efb::t_986467679398cf 1-15
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/model/LeagueGroup.kt
+  s_2853c1ebc93efb::t_02a858d25bde79 1
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/model/MatchDetail.kt
+  s_2853c1ebc93efb::t_ee416786086961 1
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/model/MatchResult.kt
+  s_2853c1ebc93efb::t_a7bcb42c2138fa 1
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/model/PlayerDetailStats.kt
+  s_2853c1ebc93efb::t_e27ca9b1478a13 1-56
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/model/PlayerStats.kt
+  s_2853c1ebc93efb::t_4b7f61f8f149a5 1-12,16-24
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/model/StandingRow.kt
+  s_2853c1ebc93efb::t_d84abea23b61d3 1
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/model/TeamDetail.kt
+  s_2853c1ebc93efb::t_b3b18513414e15 1
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/model/TeamInfo.kt
+  s_2853c1ebc93efb::t_a2551911ead92c 1
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/network/HtmlFetcher.kt
+  s_2853c1ebc93efb::t_e8e4b3fde8817a 1-21,23-30,32-59,61-62,64-71,74-95,98-119,121,123-132,135-137,140-148,157-161,166-172,175-191,193,197-198
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/parser/GroupParser.kt
+  s_2853c1ebc93efb::t_59223af738fcea 1,3-9,15,21,57,66,68,75,78,101,115
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/parser/MatchDetailParser.kt
+  s_2853c1ebc93efb::t_1950a9ca7f982b 1,3-7,12
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/parser/MatchResultParser.kt
+  s_2853c1ebc93efb::t_8c6487f01c37e8 1,3-5,10
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/parser/StandingsParser.kt
+  s_2853c1ebc93efb::t_2686c08e00d22b 1,3-6,11,22
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/parser/TeamDetailParser.kt
+  s_2853c1ebc93efb::t_855f0f1f043a6c 1,3-9,15,20,27,30
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/repository/GroupRepository.kt
+  s_2853c1ebc93efb::t_3e1eece09df059 1,3-9,11-12,16,23,25-26,28-32,34-35,37,39,41-42,44,46,59-69,71,74-76
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/repository/MatchDetailRepository.kt
+  s_2853c1ebc93efb::t_16286fd26aa49f 1-10,15,22,24,26-30,34-36,39,43-45,48-53
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/repository/MatchResultRepository.kt
+  s_2853c1ebc93efb::t_71f3eab76b4121 1-10,14-15,18,24-25,27-29,31-33,36-41,43,47-52,54,60-63,65,67-76,78-80,82,84-96,99-108,110,114
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/repository/ScrapingService.kt
+  s_2853c1ebc93efb::t_fc979a97103d0e 1,3-15,18-19,23-25,27,31-50,53-63,68-76
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/repository/StandingsRepository.kt
+  s_2853c1ebc93efb::t_8640d94a001dcf 1,3-10,13,18-21,24-28,30-31,33-42,44-48,54
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/repository/TeamDetailRepository.kt
+  s_2853c1ebc93efb::t_6ae2db9b6b6de9 1-15,21,29,32-36,38-45,47-48,54-56,65,70,84,87,110,134,155,177-182,192-196
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/repository/datasource/FavoritesDataSource.kt
+  s_2853c1ebc93efb::t_f3194b427a8680 1
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/repository/datasource/GroupDataSource.kt
+  s_2853c1ebc93efb::t_754b8fd234b727 1,3-4,7
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/repository/datasource/MatchDetailDataSource.kt
+  s_2853c1ebc93efb::t_a8be44cb3baa8a 1,3-4
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/repository/datasource/MatchResultDataSource.kt
+  s_2853c1ebc93efb::t_55dc4b3b2ecce6 1,3-4,7-8,11-12
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/repository/datasource/StandingsDataSource.kt
+  s_2853c1ebc93efb::t_e8578ffb9a04d1 1,3-4,7-10,12-13
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/repository/datasource/TeamDataSource.kt
+  s_2853c1ebc93efb::t_9c0a9d47a7b782 1,3-4
+shared/src/commonMain/kotlin/com/padelaragon/shared/di/AppContainer.kt
+  s_2853c1ebc93efb::t_4306dcd15ae538 1-33,35-37,39,51,54-80
+shared/src/commonMain/kotlin/com/padelaragon/shared/domain/usecase/ComputePlayerDetailStatsUseCase.kt
+  s_2853c1ebc93efb::t_ca6fe624e4d62d 1-101
+shared/src/commonMain/kotlin/com/padelaragon/shared/domain/usecase/ComputePlayerStatsUseCase.kt
+  s_2853c1ebc93efb::t_6b16c232bb8478 1,3-6,14,17-23,52-54,59-66,71-72,75-78
+shared/src/commonMain/kotlin/com/padelaragon/shared/domain/usecase/FindDefaultJornadaUseCase.kt
+  s_2853c1ebc93efb::t_4e745a1890c12f 1,3
+shared/src/commonMain/kotlin/com/padelaragon/shared/domain/usecase/GeneratePossibleCouplesUseCase.kt
+  s_2853c1ebc93efb::t_9da73a11ed4487 1-131
+shared/src/commonMain/kotlin/com/padelaragon/shared/domain/usecase/PrefetchGroupsUseCase.kt
+  s_2853c1ebc93efb::t_1ffd882f667ada 1,3-7
+shared/src/commonMain/kotlin/com/padelaragon/shared/domain/usecase/SortGroupsUseCase.kt
+  s_2853c1ebc93efb::t_f5f138c8c35b00 1,3-4
+shared/src/commonMain/kotlin/com/padelaragon/shared/domain/usecase/StartupPreloader.kt
+  s_2853c1ebc93efb::t_2eb1a6072c241d 1-55
+shared/src/commonMain/kotlin/com/padelaragon/shared/util/Logger.kt
+  s_2853c1ebc93efb::t_17c5f35a551ff0 1-12
+shared/src/desktopMain/kotlin/com/padelaragon/shared/data/favorites/FavoritesSettings.desktop.kt
+  s_2853c1ebc93efb::t_2c06a6909180b6 1-9
+shared/src/desktopMain/kotlin/com/padelaragon/shared/data/local/AppDatabase.desktop.kt
+  s_2853c1ebc93efb::t_f8a08ad3622b95 1-17
+shared/src/desktopMain/kotlin/com/padelaragon/shared/data/network/HttpClient.desktop.kt
+  s_2853c1ebc93efb::t_8b7611ce37ad13 1-112
+shared/src/desktopMain/kotlin/com/padelaragon/shared/util/Logger.desktop.kt
+  s_2853c1ebc93efb::t_2a5f5c9b2cc8e8 1-17
+shared/src/desktopMain/resources/certs/itx-root-ca.pem
+  s_2853c1ebc93efb::t_6491f031d3e76d 1-34
+shared/src/desktopMain/resources/certs/itx-ssl-proxy-intermediate.pem
+  s_2853c1ebc93efb::t_09b4263e85a423 1-29
+shared/src/desktopTest/kotlin/com/padelaragon/shared/FixtureLoader.kt
+  s_2853c1ebc93efb::t_feec9c4c6c4dc8 1
+shared/src/desktopTest/kotlin/com/padelaragon/shared/data/favorites/FavoritesStoreTest.kt
+  s_2853c1ebc93efb::t_00345643f0a46e 1-68
+shared/src/desktopTest/kotlin/com/padelaragon/shared/data/local/JornadaEntityTest.kt
+  s_2853c1ebc93efb::t_4ca58f3175ab8f 1,3,18,26-29,38
+shared/src/desktopTest/kotlin/com/padelaragon/shared/data/local/LeagueGroupEntityTest.kt
+  s_2853c1ebc93efb::t_2fae08790806a3 1,3-5,24,40,56,71,83,94
+shared/src/desktopTest/kotlin/com/padelaragon/shared/data/local/MatchDetailPairEntityTest.kt
+  s_2853c1ebc93efb::t_df3818175754be 1,3-5
+shared/src/desktopTest/kotlin/com/padelaragon/shared/data/local/MatchResultEntityTest.kt
+  s_2853c1ebc93efb::t_3de3bfe6abaa42 1,3-4,30,54,70,84,92,104
+shared/src/desktopTest/kotlin/com/padelaragon/shared/data/local/StandingRowEntityTest.kt
+  s_2853c1ebc93efb::t_b5ac550ea4fd83 1,3-4,28,59,72
+shared/src/desktopTest/kotlin/com/padelaragon/shared/data/local/TeamDetailEntityTest.kt
+  s_2853c1ebc93efb::t_01200128cb8453 1,3-5,23,32,43,58,72,84,92,99-101
+shared/src/desktopTest/kotlin/com/padelaragon/shared/data/network/HtmlFetcherTest.kt
+  s_2853c1ebc93efb::t_09acebbe033683 1-118
+shared/src/desktopTest/kotlin/com/padelaragon/shared/data/parser/GroupParserTest.kt
+  s_2853c1ebc93efb::t_7f0863a64fe9cf 1,3-4
+shared/src/desktopTest/kotlin/com/padelaragon/shared/data/parser/MatchDetailParserTest.kt
+  s_2853c1ebc93efb::t_a2ae5ee7feabd3 1,3
+shared/src/desktopTest/kotlin/com/padelaragon/shared/data/parser/MatchResultParserTest.kt
+  s_2853c1ebc93efb::t_40e68df128dd0a 1,3
+shared/src/desktopTest/kotlin/com/padelaragon/shared/data/parser/StandingsParserTest.kt
+  s_2853c1ebc93efb::t_df0458e55cfcf7 1,3
+shared/src/desktopTest/kotlin/com/padelaragon/shared/data/parser/TeamDetailParserTest.kt
+  s_2853c1ebc93efb::t_cbad7d5131c27a 1,3
+shared/src/desktopTest/kotlin/com/padelaragon/shared/data/repository/StandingsSwrTest.kt
+  s_2853c1ebc93efb::t_9d4a4dcd83d99f 1-19,25-26,28,30-38,42-53,56-58,61-62,66-69,71-74,78-80,82-83,85-87,91-96,100-102,104-105
+shared/src/desktopTest/kotlin/com/padelaragon/shared/domain/usecase/ComputePlayerDetailStatsUseCaseTest.kt
+  s_2853c1ebc93efb::t_7a4c924f36df28 1-251
+shared/src/desktopTest/kotlin/com/padelaragon/shared/domain/usecase/GeneratePossibleCouplesUseCaseTest.kt
+  s_2853c1ebc93efb::t_f0a782e5e2b50e 1-105
+shared/src/desktopTest/kotlin/com/padelaragon/shared/domain/usecase/StartupPreloaderTest.kt
+  s_2853c1ebc93efb::t_57b8978c789c53 1-48
+shared/src/desktopTest/resources/fixtures/empty_page.html
+  s_2853c1ebc93efb::t_bfe6b2c050a3d2 1-3
+shared/src/desktopTest/resources/fixtures/group_list.html
+  s_2853c1ebc93efb::t_9382614dba7747 1-17
+shared/src/desktopTest/resources/fixtures/match_detail.html
+  s_2853c1ebc93efb::t_e8bb238818ab92 1-26
+shared/src/desktopTest/resources/fixtures/match_results.html
+  s_2853c1ebc93efb::t_f980178e548536 1-20
+shared/src/desktopTest/resources/fixtures/parser/group/empty_options.html
+  s_2853c1ebc93efb::t_da372c99a45725 1-8
+shared/src/desktopTest/resources/fixtures/parser/group/no_group_selector.html
+  s_2853c1ebc93efb::t_ad6a1958f11358 1-3
+shared/src/desktopTest/resources/fixtures/parser/group/no_optgroups.html
+  s_2853c1ebc93efb::t_1f6cc4830cc16c 1-6
+shared/src/desktopTest/resources/fixtures/parser/group/valid_groups.html
+  s_2853c1ebc93efb::t_c11d4bc67d7fb9 1-17
+shared/src/desktopTest/resources/fixtures/parser/match-detail/no_match_detail.html
+  s_2853c1ebc93efb::t_b358c1023d730e 1-3
+shared/src/desktopTest/resources/fixtures/parser/match-detail/non_numeric_scores.html
+  s_2853c1ebc93efb::t_fd6aa3a75366ea 1-10
+shared/src/desktopTest/resources/fixtures/parser/match-detail/single_player_per_side.html
+  s_2853c1ebc93efb::t_87250732fb7d56 1-13
+shared/src/desktopTest/resources/fixtures/parser/match-detail/three_pairs.html
+  s_2853c1ebc93efb::t_0b4cfadb923144 1-39
+shared/src/desktopTest/resources/fixtures/parser/match-detail/valid_two_pairs.html
+  s_2853c1ebc93efb::t_53242a9af3137f 1-26
+shared/src/desktopTest/resources/fixtures/parser/results/bye_team.html
+  s_2853c1ebc93efb::t_602855c6852b54 1-11
+shared/src/desktopTest/resources/fixtures/parser/results/missing_scores.html
+  s_2853c1ebc93efb::t_acff64cc1f1ac3 1-11
+shared/src/desktopTest/resources/fixtures/parser/results/no_results_table.html
+  s_2853c1ebc93efb::t_6b59574edb5e68 1-3
+shared/src/desktopTest/resources/fixtures/parser/results/valid_results.html
+  s_2853c1ebc93efb::t_d4a76cfb2ab021 1-20
+shared/src/desktopTest/resources/fixtures/parser/standings/missing_team_link.html
+  s_2853c1ebc93efb::t_9464197f4c67f9 1-11
+shared/src/desktopTest/resources/fixtures/parser/standings/no_standings_table.html
+  s_2853c1ebc93efb::t_a021615715385a 1-3
+shared/src/desktopTest/resources/fixtures/parser/standings/partial_row.html
+  s_2853c1ebc93efb::t_02ab2df45558bb 1-12
+shared/src/desktopTest/resources/fixtures/parser/standings/valid_standings.html
+  s_2853c1ebc93efb::t_da66ed0fca474f 1-30
+shared/src/desktopTest/resources/fixtures/parser/team-detail/captain_by_image.html
+  s_2853c1ebc93efb::t_612e26dc2a9492 1-19
+shared/src/desktopTest/resources/fixtures/parser/team-detail/captain_from_metadata.html
+  s_2853c1ebc93efb::t_6fb394ff372ec2 1-20
+shared/src/desktopTest/resources/fixtures/parser/team-detail/empty_rows_mixed.html
+  s_2853c1ebc93efb::t_1e37dd2ec9290f 1-13
+shared/src/desktopTest/resources/fixtures/parser/team-detail/generic_table_fullname.html
+  s_2853c1ebc93efb::t_b50c508799c240 1-16
+shared/src/desktopTest/resources/fixtures/parser/team-detail/no_team_data.html
+  s_2853c1ebc93efb::t_9011d9ac4c1b16 1-3
+shared/src/desktopTest/resources/fixtures/parser/team-detail/valid_team.html
+  s_2853c1ebc93efb::t_4e86fce247af98 1-26
+shared/src/desktopTest/resources/fixtures/standings.html
+  s_2853c1ebc93efb::t_4c927acdf3edcc 1-30
+shared/src/desktopTest/resources/fixtures/team_detail.html
+  s_2853c1ebc93efb::t_e0d19094cd48c5 1-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "ce88a046dd2f34ef63dd37587e9d349044f6d590",
+  "prompts": {},
+  "sessions": {
+    "s_2853c1ebc93efb": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "147ab39b-e264-4363-b75d-5553fa4e5489",
+        "model": "unknown"
+      },
+      "human_author": "Joan Felez Albero <joanfa@ext.zara.com>"
+    }
+  }
+}

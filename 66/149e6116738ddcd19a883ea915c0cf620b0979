@@ -1,0 +1,21 @@
+.github/workflows/release.yml
+  s_9119dee9d71156::t_f941bd43726bad 1-175
+androidApp/build.gradle.kts
+  s_9119dee9d71156::t_18d728713d2ac9 28-50,53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "66149e6116738ddcd19a883ea915c0cf620b0979",
+  "prompts": {},
+  "sessions": {
+    "s_9119dee9d71156": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "fe8a20c2-c33c-4890-9a0a-4129ab07f695",
+        "model": "unknown"
+      },
+      "human_author": "Joan Felez Albero <joanfa@ext.zara.com>"
+    }
+  }
+}

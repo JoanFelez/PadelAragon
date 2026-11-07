@@ -30,3 +30,9 @@ Thumbs.db
 */build/
 out/
 androidApp/release/
+
+# Backend
+backend/rules/
+backend/worker/node_modules/
+backend/worker/.dev.vars
+backend/worker/.wrangler/

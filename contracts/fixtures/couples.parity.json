@@ -1,0 +1,156 @@
+{
+  "thresholds": {
+    "MASCULINA": [
+      95,
+      100,
+      105
+    ],
+    "FEMENINA": [
+      85,
+      90,
+      95
+    ]
+  },
+  "cases": [
+    {
+      "name": "exact thresholds masculina",
+      "gender": "MASCULINA",
+      "players": [
+        {
+          "name": "P1",
+          "age": 45
+        },
+        {
+          "name": "P2",
+          "age": 50
+        },
+        {
+          "name": "P3",
+          "age": 48
+        },
+        {
+          "name": "P4",
+          "age": 52
+        },
+        {
+          "name": "P5",
+          "age": 50
+        },
+        {
+          "name": "P6",
+          "age": 55
+        }
+      ],
+      "expectedCount": 2,
+      "expectedMinTotalAge": 300
+    },
+    {
+      "name": "pool of 8 masculina",
+      "gender": "MASCULINA",
+      "players": [
+        {
+          "name": "P1",
+          "age": 45
+        },
+        {
+          "name": "P2",
+          "age": 50
+        },
+        {
+          "name": "P3",
+          "age": 48
+        },
+        {
+          "name": "P4",
+          "age": 52
+        },
+        {
+          "name": "P5",
+          "age": 50
+        },
+        {
+          "name": "P6",
+          "age": 55
+        },
+        {
+          "name": "P7",
+          "age": 60
+        },
+        {
+          "name": "P8",
+          "age": 40
+        }
+      ],
+      "expectedCount": 99,
+      "expectedMinTotalAge": 300
+    },
+    {
+      "name": "femenina 7",
+      "gender": "FEMENINA",
+      "players": [
+        {
+          "name": "P1",
+          "age": 42
+        },
+        {
+          "name": "P2",
+          "age": 43
+        },
+        {
+          "name": "P3",
+          "age": 44
+        },
+        {
+          "name": "P4",
+          "age": 46
+        },
+        {
+          "name": "P5",
+          "age": 47
+        },
+        {
+          "name": "P6",
+          "age": 48
+        },
+        {
+          "name": "P7",
+          "age": 50
+        }
+      ],
+      "expectedCount": 48,
+      "expectedMinTotalAge": 270
+    },
+    {
+      "name": "too young",
+      "gender": "MASCULINA",
+      "players": [
+        {
+          "name": "P1",
+          "age": 40
+        },
+        {
+          "name": "P2",
+          "age": 40
+        },
+        {
+          "name": "P3",
+          "age": 40
+        },
+        {
+          "name": "P4",
+          "age": 40
+        },
+        {
+          "name": "P5",
+          "age": 40
+        },
+        {
+          "name": "P6",
+          "age": 40
+        }
+      ],
+      "expectedCount": 0,
+      "expectedMinTotalAge": null
+    }
+  ]
+}

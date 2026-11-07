@@ -15,6 +15,7 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,12 +31,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.padelaragon.shared.data.model.League
 import com.padelaragon.shared.di.MultiLeagueContainer
 import com.padelaragon.shared.ui.screen.FavoritesScreen
 import com.padelaragon.shared.ui.screen.GroupsScreen
 import com.padelaragon.shared.ui.screen.LeagueChooserScreen
 import com.padelaragon.shared.ui.screen.PlayerDetailScreen
+import com.padelaragon.shared.ui.screen.SettingsScreen
 import com.padelaragon.shared.ui.screen.TeamScreen
 import com.padelaragon.shared.ui.viewmodel.FavoritesViewModelFactory
 import com.padelaragon.shared.ui.viewmodel.GroupDetailViewModelFactory
@@ -116,7 +117,8 @@ fun AppNavigation(container: MultiLeagueContainer, screens: AppScreens = AppScre
             modifier = Modifier.fillMaxSize()
         ) {
             composable<LeaguesRoute> {
-                LeagueChooserScreen(onLeagueSelected = { league -> navController.navigate(GroupsRoute(league.id)) })
+                val leagues by container.leagues.collectAsState()
+                LeagueChooserScreen(leagues = leagues, onLeagueSelected = { league -> navController.navigate(GroupsRoute(league.id)) })
             }
 
             composable<FavoritesRoute> {
@@ -129,11 +131,11 @@ fun AppNavigation(container: MultiLeagueContainer, screens: AppScreens = AppScre
             }
 
             composable<ChatRoute> { Box(Modifier.fillMaxSize()) { screens.chat() } }
-            composable<SettingsRoute> { Box(Modifier.fillMaxSize()) { screens.settings() } }
+            composable<SettingsRoute> { Box(Modifier.fillMaxSize()) { screens.settings?.invoke() ?: SettingsScreen(container, screens.settingsExtras) } }
 
             composable<GroupsRoute> { entry ->
                 val route = entry.toRoute<GroupsRoute>()
-                val league = League.fromId(route.leagueId) ?: return@composable
+                val league = container.leagueCatalog.byId(route.leagueId) ?: return@composable
                 val leagueContainer = container[league]
                 GroupsScreen(
                     title = league.displayName,
@@ -162,7 +164,7 @@ fun AppNavigation(container: MultiLeagueContainer, screens: AppScreens = AppScre
 
             composable<TeamRoute> { entry ->
                 val route = entry.toRoute<TeamRoute>()
-                val league = League.fromId(route.leagueId) ?: return@composable
+                val league = container.leagueCatalog.byId(route.leagueId) ?: return@composable
                 val leagueContainer = container[league]
                 TeamScreen(
                     teamId = route.teamId,

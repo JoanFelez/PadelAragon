@@ -15,8 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.padelaragon.shared.appVersion
-import com.padelaragon.shared.platformName
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,18 +48,6 @@ fun ChatPlaceholderScreen() = TabScaffold("Chat") {
     Text(
         "Pregunta sobre el reglamento y la liga con el asistente de PadelAragon.",
         style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
-}
-
-/** Shown until the settings feature replaces it through [com.padelaragon.shared.ui.navigation.AppScreens.settings]. */
-@Composable
-fun SettingsPlaceholderScreen() = TabScaffold("Ajustes") {
-    Text("PadelAragon", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-    Text("Versión $appVersion · $platformName", style = MaterialTheme.typography.bodyMedium)
-    Text(
-        "Origen de los datos: padelfederacion.es (consulta directa desde el dispositivo, con caché local).",
-        style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }

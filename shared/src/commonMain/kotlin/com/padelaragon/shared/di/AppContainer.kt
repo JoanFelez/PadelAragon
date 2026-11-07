@@ -21,7 +21,15 @@ import com.padelaragon.shared.data.repository.datasource.MatchResultDataSource
 import com.padelaragon.shared.data.repository.datasource.StandingsDataSource
 import com.padelaragon.shared.data.repository.datasource.TeamDataSource
 import com.padelaragon.shared.domain.usecase.PrefetchGroupsUseCase
+import com.padelaragon.shared.data.remote.BackendApi
+import com.padelaragon.shared.data.sync.BundleImporter
+import com.padelaragon.shared.data.sync.LeagueCatalog
+import com.padelaragon.shared.data.sync.SyncEngine
+import com.padelaragon.shared.data.sync.SyncSettings
 import com.russhwolf.settings.Settings
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.updateAndGet
 
 /**
  * Per-league dependency container. One instance is built per [League], sharing the database,
@@ -52,19 +60,42 @@ class AppContainer(val league: League, scraping: ScrapingService, settings: Sett
     val prefetchGroupsUseCase = PrefetchGroupsUseCase(groupRepository, standingsRepository, matchResultRepository)
 }
 
-/** One [AppContainer] per [League], built once at startup and shared by the whole UI. */
+/**
+ * One [AppContainer] per [League], created on first use and shared by the whole UI. Also owns the
+ * sync layer: [syncSettings], [leagueCatalog] (league list) and [syncEngine] (backend or scraping).
+ */
 class MultiLeagueContainer(
     database: AppDatabase,
-    settings: Settings,
-    private val fetcher: HtmlFetcher = HtmlFetcher()
+    private val settings: Settings,
+    private val fetcher: HtmlFetcher = HtmlFetcher(),
+    api: BackendApi = BackendApi()
 ) {
-    private val scraping = ScrapingService(database, fetcher)
+    val syncSettings = SyncSettings(settings)
+    private val scraping = ScrapingService(
+        database, fetcher, backgroundScrapingAllowed = { syncEngine.backgroundScrapingAllowed() }
+    )
 
-    val containers: Map<League, AppContainer> = League.entries.associateWith { league ->
-        AppContainer(league, scraping, settings)
-    }
+    private val containerMap = MutableStateFlow<Map<Int, AppContainer>>(emptyMap())
 
-    operator fun get(league: League): AppContainer = containers.getValue(league)
+    val leagueCatalog = LeagueCatalog(api, syncSettings)
+    val syncEngine = SyncEngine(
+        api = api,
+        importer = BundleImporter(database),
+        settings = syncSettings,
+        scrapeLeague = { league ->
+            val leagueContainer = get(league)
+            leagueContainer.groupDataSource.getGroups()
+            leagueContainer.prefetchGroupsUseCase.prefetchAll()
+        }
+    )
+
+    /** Leagues offered by the app (backend list or the built-in fallback). */
+    val leagues: StateFlow<List<League>> get() = leagueCatalog.leagues
+
+    operator fun get(league: League): AppContainer =
+        containerMap.value[league.id] ?: containerMap.updateAndGet { current ->
+            if (league.id in current) current else current + (league.id to AppContainer(league, scraping, settings))
+        }.getValue(league.id)
 
     /** Opens the TLS connection early so the first real request is faster. Never throws. */
     suspend fun prewarmConnection() = fetcher.prewarm("${ScrapingService.BASE_URL}Ligas_Calendario.asp")

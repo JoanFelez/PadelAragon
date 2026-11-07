@@ -22,6 +22,8 @@ class ScrapingService(
     val db: AppDatabase,
     val fetcher: HtmlFetcher = HtmlFetcher(),
     val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
+    /** Lets the sync engine veto background scraping while a healthy backend feeds the cache. */
+    private val backgroundScrapingAllowed: () -> Boolean = { true },
     private val nowMs: () -> Long = { Clock.System.now().toEpochMilliseconds() }
 ) {
     private val activeRefreshes = MutableStateFlow<Set<String>>(emptySet())
@@ -36,6 +38,7 @@ class ScrapingService(
      * Failures are swallowed: the caller already has cached data.
      */
     fun revalidateInBackground(key: String, refresh: suspend () -> Unit) {
+        if (!backgroundScrapingAllowed()) return
         if (activeRefreshes.getAndUpdate { it + key }.contains(key)) return
         scope.launch {
             try {

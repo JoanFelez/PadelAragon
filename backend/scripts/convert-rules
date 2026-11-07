@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+"""Convert the rulebook PDFs in backend/rules/ into backend/rules/reglamento.md.
+
+Output uses `## Art. N (Tag) Title` headings, which the Worker splits on.
+Requires `pdftotext` (poppler-utils). The generated files are gitignored: never commit rule text.
+
+Usage: backend/scripts/convert-rules [rules_dir]
+"""
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+rules_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent / "rules"
+FIP_PDF = rules_dir / "fip-reglas-2026.pdf"
+LIGA_PDF = rules_dir / "liga-aragonesa-normativa-2021.pdf"
+
+
+def pdf_lines(path: Path):
+    out = subprocess.run(["pdftotext", "-layout", str(path), "-"], check=True, capture_output=True, text=True).stdout
+    return [l.replace("\f", "").rstrip() for l in out.splitlines()]
+
+
+def clean(lines):
+    text = "\n".join(l.strip() for l in lines)
+    return re.sub(r"\n{3,}", "\n\n", text).strip()
+
+
+def convert_liga(path: Path):
+    sections, current, topic = [], None, ""
+    for line in pdf_lines(path):
+        s = line.strip()
+        if re.match(r"^\d+\s*\|\s*Reglamento de la Liga", s) or re.match(r"^\d+\|", s):
+            continue
+        top = re.match(r"^(\d+)\.\s+([A-ZÁÉÍÓÚÑ][^a-z]*)$", s)
+        if top:
+            topic = top.group(2).strip().rstrip(".:")
+            current = None
+            continue
+        clause = re.match(r"^(\d+\.\d+(?:\.\d+)*)\.?\s{2,}(.*)$", line.strip()) or re.match(r"^(\d+\.\d+(?:\.\d+)*)\.?\s+(\S.*)$", s)
+        if clause:
+            current = {"heading": f"Art. {clause.group(1)} (Liga) {topic.capitalize()}", "lines": [clause.group(2)]}
+            sections.append(current)
+        elif current is not None:
+            current["lines"].append(line)
+    return sections
+
+
+HEADINGS_FIP = [
+    (re.compile(r"^REGLA\s+(\d+)\.\s*(.+)$"), lambda m: f"Art. {m.group(1)} (FIP) {m.group(2).title()}"),
+    (re.compile(r"^(LA PISTA|LA PELOTA|LA PALA)$"), lambda m: f"{m.group(1).title()} (FIP)"),
+    (re.compile(r"^(NORMAS DE ETIQUETA Y DE CONDUCTA)$"), lambda m: f"{m.group(1).capitalize()} (FIP)"),
+]
+
+
+def convert_fip(path: Path):
+    sections, current = [], None
+    for line in pdf_lines(path):
+        s = line.strip()
+        if re.search(r"\s{2,}\d+$", line) or re.fullmatch(r"\d+", s):  # index entries and page numbers
+            continue
+        for pattern, fmt in HEADINGS_FIP:
+            m = pattern.match(s)
+            if m:
+                current = {"heading": fmt(m), "lines": []}
+                sections.append(current)
+                break
+        else:
+            if current is not None:
+                current["lines"].append(line)
+    return sections
+
+
+def render(sections):
+    return "\n\n".join(f"## {s['heading']}\n{clean(s['lines'])}" for s in sections if clean(s["lines"]))
+
+
+parts = []
+for pdf, fn in ((LIGA_PDF, convert_liga), (FIP_PDF, convert_fip)):
+    if pdf.exists():
+        parts.append(render(fn(pdf)))
+    else:
+        print(f"missing {pdf.name}, skipped", file=sys.stderr)
+if not parts:
+    sys.exit("no rulebook PDFs found in " + str(rules_dir))
+
+target = rules_dir / "reglamento.md"
+target.write_text("# Reglamento\n\n" + "\n\n".join(parts) + "\n", encoding="utf-8")
+print(f"wrote {target} ({target.stat().st_size} bytes, {sum(p.count(chr(10) + '## ') + 1 for p in parts)} sections)")

@@ -1,0 +1,19 @@
+name = "padelaragon-api"
+main = "src/index.ts"
+compatibility_date = "2026-08-01"
+
+[[kv_namespaces]]
+binding = "PADEL"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+[ai]
+binding = "AI"
+
+[vars]
+GEMINI_MODEL = "gemini-3.5-flash-lite"
+WORKERS_AI_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+GITHUB_REPO = "JoanFelez/PadelAragon"
+GITHUB_REF = "master"
+
+[triggers]
+crons = ["*/30 6-22 * * *"]

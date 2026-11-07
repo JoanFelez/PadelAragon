@@ -78,3 +78,26 @@ jobs:
         with:
           name: PadelAragon-windows-msi
           path: desktopApp/build/compose/binaries/main/msi/*.msi
+
+  worker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend/worker
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: backend/worker/package-lock.json
+
+      - run: npm ci
+
+      - run: npm test
+
+      - run: npx tsc --noEmit
+
+      - run: npx wrangler deploy --dry-run

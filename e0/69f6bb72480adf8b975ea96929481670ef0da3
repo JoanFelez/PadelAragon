@@ -1,0 +1,55 @@
+.github/workflows/ci.yml
+  s_4d44cc0ea07121::t_113b41b555f775 1-80
+.gitignore
+  s_4d44cc0ea07121::t_d90a3dee26987c 28-32
+androidApp/build.gradle.kts
+  s_4d44cc0ea07121::t_2cf67103a3d030 1-3,17,59
+androidApp/src/test/java/com/padelaragon/app/SharedModuleTest.kt
+  s_4d44cc0ea07121::t_8e9482d6e4fca2 1-14
+build.gradle.kts
+  s_4d44cc0ea07121::t_40396d13bd67be 2-9
+desktopApp/build.gradle.kts
+  s_4d44cc0ea07121::t_1c86ff5b173f85 1-53
+desktopApp/src/main/kotlin/com/padelaragon/desktop/Main.kt
+  s_4d44cc0ea07121::t_0967a99bbf464b 1-11
+gradle.properties
+  s_4d44cc0ea07121::t_22f81e93b2aa6f 1-2,5-10
+gradle/libs.versions.toml
+  s_4d44cc0ea07121::t_b0f5f6faedc493 1-28
+scraper/build.gradle.kts
+  s_4d44cc0ea07121::t_8e792a397ce3c8 1-17
+scraper/src/main/kotlin/com/padelaragon/scraper/Main.kt
+  s_4d44cc0ea07121::t_79f063b6e4e65d 1-7
+scraper/src/test/kotlin/com/padelaragon/scraper/MainTest.kt
+  s_4d44cc0ea07121::t_86a6ddc61ff5c7 1-12
+settings.gradle.kts
+  s_4d44cc0ea07121::t_951659c188f2a0 21
+shared/build.gradle.kts
+  s_4d44cc0ea07121::t_e6059753c8b452 1-47
+shared/src/androidMain/kotlin/com/padelaragon/shared/Platform.android.kt
+  s_4d44cc0ea07121::t_e4826ca6d3e6df 1-3
+shared/src/commonMain/kotlin/com/padelaragon/shared/App.kt
+  s_4d44cc0ea07121::t_b64ee3ad7add79 1-18
+shared/src/commonMain/kotlin/com/padelaragon/shared/Platform.kt
+  s_4d44cc0ea07121::t_e8949543012725 1-5
+shared/src/commonTest/kotlin/com/padelaragon/shared/PlatformTest.kt
+  s_4d44cc0ea07121::t_ebfa140babafc8 1-10,12-15,17
+shared/src/desktopMain/kotlin/com/padelaragon/shared/Platform.desktop.kt
+  s_4d44cc0ea07121::t_7736f200c3b08c 1-3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "e069f6bb72480adf8b975ea96929481670ef0da3",
+  "prompts": {},
+  "sessions": {
+    "s_4d44cc0ea07121": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "a3234ffc-f095-4653-ae28-699eb9259f11",
+        "model": "unknown"
+      },
+      "human_author": "Joan Felez Albero <joanfa@ext.zara.com>"
+    }
+  }
+}

@@ -64,9 +64,11 @@ class ChatViewModelTest {
     private val requests = mutableListOf<HttpRequestData>()
     private val prefs = ChatPreferences(MapSettings())
 
-    // The mock engine and the client run on real threads, so wait on wall-clock time.
-    private suspend fun ChatViewModel.idle() {
-        withContext(Dispatchers.Default) { withTimeout(5_000) { ui.first { !it.isBusy } } }
+    // The mock engine and the client run on real threads, so wait on wall-clock time. `ui` is a
+    // combine() of several flows and lags behind the sources, so a bare "not busy" check can see
+    // the state from before send()/retry(); always wait for the outcome the test expects.
+    private suspend fun ChatViewModel.await(done: (ChatViewModel.UiState) -> Boolean) {
+        withContext(Dispatchers.Default) { withTimeout(5_000) { ui.first { !it.isBusy && done(it) } } }
     }
 
     @BeforeTest fun setUp() = Dispatchers.setMain(UnconfinedTestDispatcher())
@@ -88,9 +90,8 @@ class ChatViewModelTest {
             "data: {\"delta\":\"Hola \"}\n\ndata: {\"delta\":\"**mundo**\"}\n\n" +
                 "data: {\"citations\":[{\"type\":\"rule\",\"label\":\"Art. 1\"}]}\n\ndata: [DONE]\n\n"
         ) }
-        vm.idle()
         vm.send("  ¿Qué tal?  ")
-        vm.idle()
+        vm.await { it.messages.lastOrNull()?.role == ChatRole.ASSISTANT }
         val ui = vm.ui.value
         assertNull(ui.streaming)
         assertNull(ui.error)
@@ -103,9 +104,8 @@ class ChatViewModelTest {
     @Test
     fun `not configured shows error without calling the network or storing`() = runTest {
         val vm = vm(BackendConfig("", "")) { error("must not be called") }
-        vm.idle()
         vm.send("hola")
-        vm.idle()
+        vm.await { it.error != null }
         assertEquals(ChatFailure.NOT_CONFIGURED, vm.ui.value.error)
         assertTrue(vm.ui.value.messages.isEmpty())
         assertTrue(requests.isEmpty())
@@ -118,13 +118,12 @@ class ChatViewModelTest {
             if (calls++ == 0) respond("{}", HttpStatusCode.TooManyRequests)
             else sseOk("data: {\"delta\":\"ok\"}\n\ndata: [DONE]\n\n")
         }
-        vm.idle()
         vm.send("pregunta")
-        vm.idle()
+        vm.await { it.error != null }
         assertEquals(ChatFailure.QUOTA, vm.ui.value.error)
         assertTrue(vm.ui.value.canRetry)
         vm.retry()
-        vm.idle()
+        vm.await { it.error == null && it.messages.lastOrNull()?.role == ChatRole.ASSISTANT }
         assertNull(vm.ui.value.error)
         assertEquals(listOf("pregunta", "ok"), vm.ui.value.messages.map { it.content })
     }
@@ -132,9 +131,8 @@ class ChatViewModelTest {
     @Test
     fun `stream error frame discards partial text and flags failure`() = runTest {
         val vm = vm { sseOk("data: {\"delta\":\"par\"}\n\ndata: {\"error\":\"provider_failed\"}\n\ndata: [DONE]\n\n") }
-        vm.idle()
         vm.send("q")
-        vm.idle()
+        vm.await { it.error != null }
         assertEquals(ChatFailure.UNAVAILABLE, vm.ui.value.error)
         assertEquals(1, vm.ui.value.messages.size)
     }
@@ -149,13 +147,11 @@ class ChatViewModelTest {
             channel.close()
             respond(channel, HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "text/event-stream"))
         }
-        vm.idle()
         vm.send("q")
-        assertTrue(vm.ui.value.isBusy)
+        withContext(Dispatchers.Default) { withTimeout(5_000) { vm.ui.first { it.isBusy } } }
         vm.stop()
-        vm.idle()
+        vm.await { it.messages.map { m -> m.content } == listOf("q") }
         gate.complete(Unit)
-        assertTrue(!vm.ui.value.isBusy)
         assertEquals(listOf("q"), vm.ui.value.messages.map { it.content })
         assertTrue(vm.ui.value.canRetry)
     }
@@ -167,9 +163,8 @@ class ChatViewModelTest {
             store.add(ChatMessage(role = if (it % 2 == 0) ChatRole.USER else ChatRole.ASSISTANT, content = "x".repeat(1500)))
         }
         val vm = vm { sseOk("data: [DONE]\n\n") }
-        vm.idle()
         vm.send("nueva")
-        vm.idle()
+        vm.await { it.messages.lastOrNull()?.content == "nueva" && it.messages.size >= 10 && requests.isNotEmpty() }
         val json = Json.parseToJsonElement((requests.single().body as TextContent).text).jsonObject
         val messages = json["messages"]!!.jsonArray
         assertEquals(10, messages.size)
@@ -182,11 +177,10 @@ class ChatViewModelTest {
     @Test
     fun `new conversation clears history`() = runTest {
         val vm = vm { sseOk("data: {\"delta\":\"a\"}\n\ndata: [DONE]\n\n") }
-        vm.idle()
         vm.send("q")
-        vm.idle()
+        vm.await { it.messages.lastOrNull()?.role == ChatRole.ASSISTANT }
         vm.newConversation()
-        vm.idle()
+        vm.await { it.messages.isEmpty() }
         assertTrue(vm.ui.value.messages.isEmpty())
     }
 }

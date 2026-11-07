@@ -28,6 +28,7 @@ import com.padelaragon.shared.domain.notification.ChangeDetector
 import com.padelaragon.shared.domain.notification.NotificationSettings
 import com.padelaragon.shared.domain.notification.ResultNotifier
 import com.padelaragon.shared.domain.notification.SettingsNotificationStateStore
+import com.padelaragon.shared.update.UpdateChecker
 import com.padelaragon.shared.domain.usecase.PrefetchGroupsUseCase
 import com.padelaragon.shared.data.remote.BackendApi
 import com.padelaragon.shared.data.sync.BundleImporter
@@ -101,6 +102,7 @@ class MultiLeagueContainer(
     )
 
     val notificationSettings = NotificationSettings(settings)
+    val updateChecker = UpdateChecker(settings)
     val resultNotifier by lazy {
         ResultNotifier(this, notificationSettings, ChangeDetector(SettingsNotificationStateStore(settings)))
     }

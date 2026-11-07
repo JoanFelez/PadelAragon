@@ -1,0 +1,35 @@
+CHANGELOG.md
+  s_c7b3222b3aa1f4::t_5dfe188d1533ed 1-24
+README.md
+  s_c7b3222b3aa1f4::t_41519637c3371e 1-52
+docs/ARCHITECTURE.md
+  s_c7b3222b3aa1f4::t_3be49c5417d4e9 1-52
+docs/SETUP.md
+  s_c7b3222b3aa1f4::t_58fb3fbd063e57 1-101
+shared/src/commonMain/kotlin/com/padelaragon/shared/di/AppContainer.kt
+  s_c7b3222b3aa1f4::t_0a9563373ddf77 31,105
+shared/src/commonMain/kotlin/com/padelaragon/shared/ui/screen/SettingsScreen.kt
+  s_c7b3222b3aa1f4::t_c5b2c8b805fe09 48,88
+shared/src/commonMain/kotlin/com/padelaragon/shared/update/UpdateChecker.kt
+  s_c7b3222b3aa1f4::t_c1b72fbf56a47f 1-115
+shared/src/commonMain/kotlin/com/padelaragon/shared/update/UpdateSection.kt
+  s_c7b3222b3aa1f4::t_6ab85d257cd01f 1-36
+shared/src/desktopTest/kotlin/com/padelaragon/shared/update/UpdateCheckerTest.kt
+  s_c7b3222b3aa1f4::t_3aa8b0628b306d 1-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "d62d90d1bcb892ecfc140eeaee3b6a26f88f336e",
+  "prompts": {},
+  "sessions": {
+    "s_c7b3222b3aa1f4": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "99798c3d-924b-454f-88cf-131741dfb3fd",
+        "model": "unknown"
+      },
+      "human_author": "Joan Felez Albero <joanfa@ext.zara.com>"
+    }
+  }
+}

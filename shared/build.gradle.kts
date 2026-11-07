@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.buildkonfig)
     alias(libs.plugins.ksp)
@@ -28,6 +29,7 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material3)
             api(libs.kotlinx.coroutines.core)
+            api(libs.kotlinx.serialization.json)
             api(libs.room.runtime)
             implementation(libs.sqlite.bundled)
             implementation(libs.ktor.client.core)
@@ -64,6 +66,7 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     useJUnit()
+    systemProperty("contracts.dir", rootProject.file("contracts/fixtures").absolutePath)
 }
 
 buildkonfig {

@@ -25,8 +25,32 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Release signing is opt-in: only applied when the keystore is provided via
+    // environment variables or gradle properties (CI release workflow).
+    fun signingValue(name: String): String? =
+        System.getenv(name)?.takeIf { it.isNotBlank() }
+            ?: (findProperty(name) as String?)?.takeIf { it.isNotBlank() }
+
+    val releaseStoreFile = signingValue("ANDROID_KEYSTORE_FILE")
+    val hasReleaseSigning = releaseStoreFile != null &&
+        signingValue("ANDROID_KEYSTORE_PASSWORD") != null &&
+        signingValue("ANDROID_KEY_ALIAS") != null &&
+        signingValue("ANDROID_KEY_PASSWORD") != null
+
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(releaseStoreFile!!)
+                storePassword = signingValue("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias = signingValue("ANDROID_KEY_ALIAS")
+                keyPassword = signingValue("ANDROID_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            if (hasReleaseSigning) signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
         }

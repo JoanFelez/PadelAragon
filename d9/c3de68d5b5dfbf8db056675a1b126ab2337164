@@ -1,0 +1,89 @@
+.github/workflows/ci.yml
+  s_1aeaf152febfe5::t_2c95c203385098 81-103
+.gitignore
+  s_1aeaf152febfe5::t_c963246300dc54 33-38
+backend/scripts/convert-rules
+  s_1aeaf152febfe5::t_c67697a214e350 1-89
+backend/scripts/upload-rules.sh
+  s_1aeaf152febfe5::t_3699c09e556499 1-15
+backend/worker/.dev.vars.example
+  s_1aeaf152febfe5::t_ead00736d926cb 1-4
+backend/worker/.gitignore
+  s_1aeaf152febfe5::t_eae81f69ef737d 1-4
+backend/worker/README.md
+  s_1aeaf152febfe5::t_810f55542af322 1-37
+backend/worker/env.d.ts
+  s_1aeaf152febfe5::t_9693297e518435 1-5
+backend/worker/package-lock.json
+  s_1aeaf152febfe5::t_4526ab8be36973 1-4348
+backend/worker/package.json
+  s_1aeaf152febfe5::t_56ba3304d3dada 1-22
+backend/worker/src/app.ts
+  s_1aeaf152febfe5::t_693a937710acf6 1-12
+backend/worker/src/auth.ts
+  s_1aeaf152febfe5::t_412eabbc8b54bc 1-33
+backend/worker/src/chat/couples.ts
+  s_1aeaf152febfe5::t_ead119fc8abf7e 1-77
+backend/worker/src/chat/index.ts
+  s_1aeaf152febfe5::t_1f3186c7e33860 1-168
+backend/worker/src/chat/prompt.ts
+  s_1aeaf152febfe5::t_a69ab73eda3e1d 1-21
+backend/worker/src/chat/providers.ts
+  s_1aeaf152febfe5::t_4168a50878a70c 1-206
+backend/worker/src/chat/rules.ts
+  s_1aeaf152febfe5::t_a1f8fa8f2b0829 1-99
+backend/worker/src/chat/tools.ts
+  s_1aeaf152febfe5::t_e9b05b752f78fd 1-291
+backend/worker/src/cron.ts
+  s_1aeaf152febfe5::t_3aa2857fa3ffcf 1-20
+backend/worker/src/data.ts
+  s_1aeaf152febfe5::t_c8f3c46d78e56f 1-108
+backend/worker/src/index.ts
+  s_1aeaf152febfe5::t_2a524f05606a78 1-12
+backend/worker/src/types.ts
+  s_1aeaf152febfe5::t_649c0188281248 1-121
+backend/worker/test/chat.test.ts
+  s_1aeaf152febfe5::t_9d3a8e0d089c17 1-213
+backend/worker/test/contract.test.ts
+  s_1aeaf152febfe5::t_d5c761748f145b 1-32
+backend/worker/test/couples.test.ts
+  s_1aeaf152febfe5::t_0635796a3ea630 1-34
+backend/worker/test/cron.test.ts
+  s_1aeaf152febfe5::t_a814a0a044060b 1-20
+backend/worker/test/data.test.ts
+  s_1aeaf152febfe5::t_e25dfcede01235 1-109
+backend/worker/test/helpers.ts
+  s_1aeaf152febfe5::t_e7a7fccdba6d06 1-42
+backend/worker/tsconfig.json
+  s_1aeaf152febfe5::t_abb12331f52bc1 1-15
+backend/worker/vitest.config.ts
+  s_1aeaf152febfe5::t_e73cc5d3548b1a 1-7
+backend/worker/wrangler.toml
+  s_1aeaf152febfe5::t_55073a64f9df28 1-19
+contracts/fixtures/couples.parity.json
+  s_1aeaf152febfe5::t_8a4f80991f9449 1-156
+contracts/README.md
+  s_1aeaf152febfe5::t_7d522a1f933e6f 1-49
+contracts/fixtures/league-bundle.sample.json
+  s_1aeaf152febfe5::t_fa5bed83bf3889 1-152
+contracts/fixtures/leagues.sample.json
+  s_1aeaf152febfe5::t_7d5923890f8b29 1-5
+contracts/fixtures/manifest.sample.json
+  s_1aeaf152febfe5::t_27e4d1049ff02b 1-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "d9c3de68d5b5dfbf8db056675a1b126ab2337164",
+  "prompts": {},
+  "sessions": {
+    "s_1aeaf152febfe5": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "abed63b2-373f-4539-80c0-03b900d0061d",
+        "model": "unknown"
+      },
+      "human_author": "Joan Felez Albero <joanfa@ext.zara.com>"
+    }
+  }
+}

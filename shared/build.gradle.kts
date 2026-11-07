@@ -35,12 +35,21 @@ kotlin {
             implementation(libs.ktor.client.core)
             implementation(libs.ksoup)
             api(libs.multiplatform.settings)
+            implementation(compose.materialIconsExtended)
+            implementation(libs.navigation.compose)
+            implementation(libs.lifecycle.viewmodel.compose)
+            implementation(libs.adaptive)
+            implementation(libs.compose.ui.backhandler)
+            implementation(libs.adaptive.layout)
+            implementation(libs.adaptive.navigation)
+            implementation(libs.material3.adaptive.navigation.suite)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
         androidMain.dependencies {
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.androidx.core.ktx)
         }
         val desktopMain by getting {
             dependencies {

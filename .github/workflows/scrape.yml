@@ -1,0 +1,67 @@
+name: Scrape
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Scrape only; do not upload to the Worker'
+        type: boolean
+        default: false
+  schedule:
+    - cron: '17 */2 * * *'
+
+concurrency:
+  group: scrape
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      WORKER_URL: ${{ secrets.WORKER_URL }}
+      SCRAPER_TOKEN: ${{ secrets.SCRAPER_TOKEN }}
+      APP_KEY: ${{ secrets.APP_KEY }}
+      DRY_RUN: ${{ inputs.dry_run }}
+    steps:
+      - name: Check configuration
+        id: config
+        run: |
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          elif [ -z "$WORKER_URL" ] || [ -z "$SCRAPER_TOKEN" ]; then
+            echo "::notice::WORKER_URL and/or SCRAPER_TOKEN secrets are not configured; skipping scrape."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.config.outputs.run == 'true'
+
+      - uses: actions/setup-java@v4
+        if: steps.config.outputs.run == 'true'
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v4
+        if: steps.config.outputs.run == 'true'
+
+      - name: Scrape (dry run, no upload)
+        if: steps.config.outputs.run == 'true' && env.DRY_RUN == 'true'
+        run: ./gradlew :scraper:run --args="--out scraper/build/out" --console=plain
+
+      - name: Scrape and upload
+        if: steps.config.outputs.run == 'true' && env.DRY_RUN != 'true'
+        run: |
+          ARGS="--out scraper/build/out --upload"
+          if [ -n "$APP_KEY" ]; then
+            ARGS="$ARGS --previous-from $WORKER_URL"
+          else
+            echo "::warning::APP_KEY secret missing; scraping without incremental state."
+          fi
+          ./gradlew :scraper:run --console=plain --args="$ARGS"

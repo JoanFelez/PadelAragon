@@ -5,7 +5,6 @@ val versionPatch = (property("appVersionPatch") as String).toInt()
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
-    id("com.google.devtools.ksp")
 }
 
 kotlin {
@@ -70,21 +69,12 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.9.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
 
-    implementation("org.jsoup:jsoup:1.22.1")
-    implementation("com.squareup.okhttp3:okhttp:5.3.2")
     implementation("com.google.android.gms:play-services-base:18.10.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
-
-    // Room
-    implementation("androidx.room:room-runtime:2.8.4")
-    implementation("androidx.room:room-ktx:2.8.4")
-    ksp("androidx.room:room-compiler:2.8.4")
 
     // --- Local JVM test stack (app/src/test) ---
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
-    testImplementation("org.jsoup:jsoup:1.22.1")
-    testImplementation("androidx.room:room-testing:2.8.4")
     testImplementation("org.robolectric:robolectric:4.14.1")
     testImplementation("androidx.test:core:1.6.1")
     testImplementation("androidx.test.ext:junit:1.2.1")

@@ -1,6 +1,6 @@
 package com.padelaragon.app.ui.viewmodel
 
-import com.padelaragon.app.data.model.MatchResult
+import com.padelaragon.shared.data.model.MatchResult
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test

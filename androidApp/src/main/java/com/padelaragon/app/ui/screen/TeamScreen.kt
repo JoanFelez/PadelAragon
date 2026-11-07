@@ -41,9 +41,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.padelaragon.app.data.model.Player
-import com.padelaragon.app.data.model.StandingRow
-import com.padelaragon.app.data.model.TeamDetail
+import com.padelaragon.shared.data.model.Player
+import com.padelaragon.shared.data.model.StandingRow
+import com.padelaragon.shared.data.model.TeamDetail
 import com.padelaragon.app.ui.components.LoadingErrorWrapper
 import com.padelaragon.app.ui.components.MatchCard
 import com.padelaragon.app.ui.viewmodel.TeamViewModel

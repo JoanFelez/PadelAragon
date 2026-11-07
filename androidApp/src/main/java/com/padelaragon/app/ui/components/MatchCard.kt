@@ -32,8 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.padelaragon.app.data.model.MatchDetail
-import com.padelaragon.app.data.model.MatchResult
+import com.padelaragon.shared.data.model.MatchDetail
+import com.padelaragon.shared.data.model.MatchResult
 
 @Composable
 fun MatchCard(
@@ -189,7 +189,7 @@ fun MatchCard(
 }
 
 @Composable
-private fun PairDetailRow(pair: com.padelaragon.app.data.model.PairDetail) {
+private fun PairDetailRow(pair: com.padelaragon.shared.data.model.PairDetail) {
     Column(
         modifier = Modifier
             .fillMaxWidth()

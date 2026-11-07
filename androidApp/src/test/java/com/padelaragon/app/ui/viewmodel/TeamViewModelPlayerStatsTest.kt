@@ -1,10 +1,10 @@
 package com.padelaragon.app.ui.viewmodel
 
-import com.padelaragon.app.data.model.MatchDetail
-import com.padelaragon.app.data.model.MatchResult
-import com.padelaragon.app.data.model.PairDetail
-import com.padelaragon.app.data.model.PlayerStats
-import com.padelaragon.app.data.model.SetScore
+import com.padelaragon.shared.data.model.MatchDetail
+import com.padelaragon.shared.data.model.MatchResult
+import com.padelaragon.shared.data.model.PairDetail
+import com.padelaragon.shared.data.model.PlayerStats
+import com.padelaragon.shared.data.model.SetScore
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

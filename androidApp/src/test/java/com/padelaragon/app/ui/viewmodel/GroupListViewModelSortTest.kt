@@ -1,7 +1,7 @@
 package com.padelaragon.app.ui.viewmodel
 
-import com.padelaragon.app.data.model.Gender
-import com.padelaragon.app.data.model.LeagueGroup
+import com.padelaragon.shared.data.model.Gender
+import com.padelaragon.shared.data.model.LeagueGroup
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

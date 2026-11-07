@@ -26,8 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.padelaragon.app.data.model.Gender
-import com.padelaragon.app.data.model.LeagueGroup
+import com.padelaragon.shared.data.model.Gender
+import com.padelaragon.shared.data.model.LeagueGroup
 import com.padelaragon.app.ui.components.LoadingErrorWrapper
 import com.padelaragon.app.ui.viewmodel.GroupListViewModel
 import com.padelaragon.app.ui.viewmodel.GroupListViewModelFactory

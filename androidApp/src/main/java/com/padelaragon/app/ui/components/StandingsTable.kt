@@ -28,7 +28,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.padelaragon.app.data.model.StandingRow
+import com.padelaragon.shared.data.model.StandingRow
 
 private val COL_POS = 36.dp
 private val COL_TEAM = 160.dp

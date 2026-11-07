@@ -1,0 +1,19 @@
+shared/src/desktopTest/kotlin/com/padelaragon/shared/ui/viewmodel/ChatViewModelTest.kt
+  s_2d50363a0b4f25::t_579d2e53fa848f 67-71,94,108,122,126,135,151,153,167,181,183
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "f38b1ada7c8de65145ae1e571a57f6f6a4f3ec48",
+  "prompts": {},
+  "sessions": {
+    "s_2d50363a0b4f25": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "0ccecb7b-46b4-477a-9aff-06d04cb51be9",
+        "model": "unknown"
+      },
+      "human_author": "Joan Felez Albero <joanfa@ext.zara.com>"
+    }
+  }
+}

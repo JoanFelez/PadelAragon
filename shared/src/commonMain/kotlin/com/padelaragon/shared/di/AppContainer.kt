@@ -20,6 +20,10 @@ import com.padelaragon.shared.data.repository.datasource.MatchDetailDataSource
 import com.padelaragon.shared.data.repository.datasource.MatchResultDataSource
 import com.padelaragon.shared.data.repository.datasource.StandingsDataSource
 import com.padelaragon.shared.data.repository.datasource.TeamDataSource
+import com.padelaragon.shared.domain.notification.ChangeDetector
+import com.padelaragon.shared.domain.notification.NotificationSettings
+import com.padelaragon.shared.domain.notification.ResultNotifier
+import com.padelaragon.shared.domain.notification.SettingsNotificationStateStore
 import com.padelaragon.shared.domain.usecase.PrefetchGroupsUseCase
 import com.padelaragon.shared.data.remote.BackendApi
 import com.padelaragon.shared.data.sync.BundleImporter
@@ -88,6 +92,11 @@ class MultiLeagueContainer(
             leagueContainer.prefetchGroupsUseCase.prefetchAll()
         }
     )
+
+    val notificationSettings = NotificationSettings(settings)
+    val resultNotifier by lazy {
+        ResultNotifier(this, notificationSettings, ChangeDetector(SettingsNotificationStateStore(settings)))
+    }
 
     /** Leagues offered by the app (backend list or the built-in fallback). */
     val leagues: StateFlow<List<League>> get() = leagueCatalog.leagues

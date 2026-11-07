@@ -26,6 +26,10 @@ class PadelAragonApp : Application() {
         }
 
         multiLeagueContainer = MultiLeagueContainer.create(PlatformContext(this))
+        NotificationWorker.ensureChannel(this)
+        multiLeagueContainer.notificationSettings.let {
+            NotificationWorker.reschedule(this, it.enabled && NotificationWorker.hasPermission(this), it.intervalHours)
+        }
         CoroutineScope(SupervisorJob() + Dispatchers.Default).launch { multiLeagueContainer.prewarmConnection() }
     }
 }

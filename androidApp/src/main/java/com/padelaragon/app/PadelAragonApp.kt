@@ -1,31 +1,36 @@
 package com.padelaragon.app
 
 import android.app.Application
-import android.util.Log
+import android.content.pm.ApplicationInfo
 import com.google.android.gms.security.ProviderInstaller
-import com.padelaragon.app.data.favorites.FavoritesManager
-import com.padelaragon.app.data.local.AppDatabase
-import com.padelaragon.app.data.network.HtmlFetcher
-import com.padelaragon.app.di.AppContainer
+import com.padelaragon.shared.data.local.PlatformContext
+import com.padelaragon.shared.data.model.League
+import com.padelaragon.shared.di.AppContainer
+import com.padelaragon.shared.di.MultiLeagueContainer
+import com.padelaragon.shared.util.Logger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 class PadelAragonApp : Application() {
-    lateinit var container: AppContainer
+    lateinit var multiLeagueContainer: MultiLeagueContainer
         private set
+
+    /** The current Android UI only knows the Absoluta league until the UI is unified. */
+    val container: AppContainer get() = multiLeagueContainer[League.ABSOLUTA]
 
     override fun onCreate() {
         super.onCreate()
+        Logger.enabled = (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
         try {
             ProviderInstaller.installIfNeeded(this)
-            Log.d("PadelAragonApp", "Security provider updated successfully")
+            Logger.d("PadelAragonApp", "Security provider updated successfully")
         } catch (e: Exception) {
-            Log.e("PadelAragonApp", "Failed to update security provider", e)
+            Logger.e("PadelAragonApp", "Failed to update security provider", e)
         }
 
-        // Prewarm HTTPS connection during startup (saves TLS handshake on first real request)
-        HtmlFetcher.prewarmConnection("https://padelfederacion.es/pAGINAS/ARAPADEL/Ligas_Calendario.asp")
-
-        FavoritesManager.init(this)
-        val db = AppDatabase.getInstance(this)
-        container = AppContainer(db, cacheDir)
+        multiLeagueContainer = MultiLeagueContainer.create(PlatformContext(this))
+        CoroutineScope(SupervisorJob() + Dispatchers.Default).launch { multiLeagueContainer.prewarmConnection() }
     }
 }

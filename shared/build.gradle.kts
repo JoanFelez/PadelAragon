@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.buildkonfig)
+    alias(libs.plugins.ksp)
 }
 
 val appVersion = "${property("appVersionMajor")}.${property("appVersionMinor")}.${property("appVersionPatch")}"
@@ -26,17 +27,43 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
-            implementation(libs.kotlinx.coroutines.core)
+            api(libs.kotlinx.coroutines.core)
+            api(libs.room.runtime)
+            implementation(libs.sqlite.bundled)
+            implementation(libs.ktor.client.core)
+            implementation(libs.ksoup)
+            api(libs.multiplatform.settings)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
+        androidMain.dependencies {
+            implementation(libs.ktor.client.okhttp)
+        }
         val desktopMain by getting {
             dependencies {
                 implementation(libs.kotlinx.coroutines.swing)
+                implementation(libs.ktor.client.okhttp)
+            }
+        }
+        val desktopTest by getting {
+            dependencies {
+                implementation(libs.junit)
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.ktor.client.mock)
+                implementation(libs.multiplatform.settings.test)
             }
         }
     }
+}
+
+dependencies {
+    add("kspAndroid", libs.room.compiler)
+    add("kspDesktop", libs.room.compiler)
+}
+
+tasks.withType<Test>().configureEach {
+    useJUnit()
 }
 
 buildkonfig {

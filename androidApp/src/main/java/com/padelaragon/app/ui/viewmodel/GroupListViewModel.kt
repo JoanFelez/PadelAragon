@@ -3,11 +3,11 @@ package com.padelaragon.app.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.padelaragon.app.data.model.LeagueGroup
-import com.padelaragon.app.data.repository.datasource.FavoritesDataSource
-import com.padelaragon.app.data.repository.datasource.GroupDataSource
-import com.padelaragon.app.domain.usecase.PrefetchGroupsUseCase
-import com.padelaragon.app.domain.usecase.SortGroupsUseCase
+import com.padelaragon.shared.data.model.LeagueGroup
+import com.padelaragon.shared.data.repository.datasource.FavoritesDataSource
+import com.padelaragon.shared.data.repository.datasource.GroupDataSource
+import com.padelaragon.shared.domain.usecase.PrefetchGroupsUseCase
+import com.padelaragon.shared.domain.usecase.SortGroupsUseCase
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -6,6 +6,8 @@ import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import kotlinx.coroutines.Dispatchers
+import com.padelaragon.shared.data.chat.ChatMessageDao
+import com.padelaragon.shared.data.chat.ChatMessageEntity
 import com.padelaragon.shared.data.local.dao.BundleImportDao
 import com.padelaragon.shared.data.local.dao.CacheTimestampDao
 import com.padelaragon.shared.data.local.dao.JornadaDao
@@ -32,9 +34,10 @@ import com.padelaragon.shared.data.local.entity.TeamDetailEntity
         TeamDetailEntity::class,
         PlayerEntity::class,
         JornadaEntity::class,
-        CacheTimestamp::class
+        CacheTimestamp::class,
+        ChatMessageEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -47,6 +50,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun jornadaDao(): JornadaDao
     abstract fun cacheTimestampDao(): CacheTimestampDao
     abstract fun bundleImportDao(): BundleImportDao
+    abstract fun chatMessageDao(): ChatMessageDao
 }
 
 // Room's KSP processor generates the actual implementation of this constructor.

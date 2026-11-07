@@ -32,6 +32,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.padelaragon.shared.di.MultiLeagueContainer
+import com.padelaragon.shared.ui.chat.ChatScreen
 import com.padelaragon.shared.ui.screen.FavoritesScreen
 import com.padelaragon.shared.ui.screen.GroupsScreen
 import com.padelaragon.shared.ui.screen.LeagueChooserScreen
@@ -130,7 +131,7 @@ fun AppNavigation(container: MultiLeagueContainer, screens: AppScreens = AppScre
                 )
             }
 
-            composable<ChatRoute> { Box(Modifier.fillMaxSize()) { screens.chat() } }
+            composable<ChatRoute> { Box(Modifier.fillMaxSize()) { screens.chat?.invoke() ?: ChatScreen(container, onOpenSettings = { navigateToTab(AppTab.SETTINGS) }) } }
             composable<SettingsRoute> { Box(Modifier.fillMaxSize()) { screens.settings?.invoke() ?: SettingsScreen(container, screens.settingsExtras) } }
 
             composable<GroupsRoute> { entry ->

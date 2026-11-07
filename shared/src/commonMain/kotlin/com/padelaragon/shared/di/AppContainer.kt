@@ -1,5 +1,9 @@
 package com.padelaragon.shared.di
 
+import com.padelaragon.shared.data.chat.ChatApi
+import com.padelaragon.shared.data.chat.ChatPreferences
+import com.padelaragon.shared.data.chat.ChatStore
+import com.padelaragon.shared.data.chat.RoomChatStore
 import com.padelaragon.shared.data.favorites.createFavoritesSettings
 import com.padelaragon.shared.data.local.AppDatabase
 import com.padelaragon.shared.data.local.PlatformContext
@@ -71,6 +75,9 @@ class MultiLeagueContainer(
     api: BackendApi = BackendApi()
 ) {
     val syncSettings = SyncSettings(settings)
+    val chatApi = ChatApi()
+    val chatStore: ChatStore = RoomChatStore(database.chatMessageDao())
+    val chatPreferences = ChatPreferences(settings)
     private val scraping = ScrapingService(
         database, fetcher, backgroundScrapingAllowed = { syncEngine.backgroundScrapingAllowed() }
     )

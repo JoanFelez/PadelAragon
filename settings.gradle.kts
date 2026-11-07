@@ -18,4 +18,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "PadelAragon"
-include(":app")
+include(":shared", ":androidApp", ":desktopApp", ":scraper")

@@ -43,6 +43,7 @@ kotlin {
             implementation(libs.sqlite.bundled)
             implementation(libs.ktor.client.core)
             implementation(libs.ksoup)
+            implementation(libs.markdown.renderer.m3)
             api(libs.multiplatform.settings)
             implementation(compose.materialIconsExtended)
             implementation(libs.navigation.compose)

@@ -19,8 +19,10 @@ androidx-lifecycle = "2.10.0"
 m3-adaptive = "1.2.0"
 m3-navigation-suite = "1.9.0"
 androidx-core = "1.17.0"
+markdown-renderer = "0.46.0"
 
 [libraries]
+markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdown-renderer" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }

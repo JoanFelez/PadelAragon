@@ -1,0 +1,41 @@
+androidApp/build.gradle.kts
+  s_d32cd1c390b80c::t_98e2eb9ca571f6 87-88,90
+androidApp/src/main/AndroidManifest.xml
+  s_d32cd1c390b80c::t_b03503db4ba692 5
+androidApp/src/main/java/com/padelaragon/app/MainActivity.kt
+  s_d32cd1c390b80c::t_f17b2b83e571a6 3,6,9-13,15-16,23-46
+androidApp/src/main/java/com/padelaragon/app/NotificationWorker.kt
+  s_d32cd1c390b80c::t_c6727ad8460350 1-88
+androidApp/src/main/java/com/padelaragon/app/PadelAragonApp.kt
+  s_d32cd1c390b80c::t_400090dd14472c 29-32
+desktopApp/src/main/kotlin/com/padelaragon/desktop/Main.kt
+  s_d32cd1c390b80c::t_aeb2361eca2c41 3-8,11,14-15,20-21,26,29-38,44-64,71
+shared/src/commonMain/kotlin/com/padelaragon/shared/di/AppContainer.kt
+  s_d32cd1c390b80c::t_211d9f4b3701b5 23-26,96-100
+shared/src/commonMain/kotlin/com/padelaragon/shared/domain/notification/ChangeDetector.kt
+  s_d32cd1c390b80c::t_304d02150143aa 1-128
+shared/src/commonMain/kotlin/com/padelaragon/shared/domain/notification/NotificationSettings.kt
+  s_d32cd1c390b80c::t_534efd174def79 1-33
+shared/src/commonMain/kotlin/com/padelaragon/shared/domain/notification/ResultNotifier.kt
+  s_d32cd1c390b80c::t_e10691dba3cc12 1-68
+shared/src/commonMain/kotlin/com/padelaragon/shared/ui/screen/NotificationsSection.kt
+  s_d32cd1c390b80c::t_60e306080850db 1-76
+shared/src/desktopTest/kotlin/com/padelaragon/shared/domain/notification/ChangeDetectorTest.kt
+  s_d32cd1c390b80c::t_313d02c3c52a13 1-68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "7f126ab15b9db8465ee53ee76e54847d61d8e7f6",
+  "prompts": {},
+  "sessions": {
+    "s_d32cd1c390b80c": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "5e70b3e2-f10f-4340-8fe3-b1e75ad0d9fd",
+        "model": "unknown"
+      },
+      "human_author": "Joan Felez Albero <joanfa@ext.zara.com>"
+    }
+  }
+}

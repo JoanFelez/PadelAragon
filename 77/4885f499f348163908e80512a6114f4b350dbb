@@ -1,0 +1,61 @@
+shared/build.gradle.kts
+  s_d53598cb5771d4::t_2062ddbe4c4dfd 2,14-21,94-95
+shared/src/commonMain/kotlin/com/padelaragon/shared/App.kt
+  s_d53598cb5771d4::t_739ebfba23a6a1 16,38,44-47,60,63-65,68-71
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/local/AppDatabase.kt
+  s_d53598cb5771d4::t_b56a43af966821 9,49
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/local/dao/BundleImportDao.kt
+  s_d53598cb5771d4::t_bae23747dccfcd 1-99
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/model/League.kt
+  s_d53598cb5771d4::t_100d41fae013d5 6-8,10,12-17
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/remote/BackendApi.kt
+  s_d53598cb5771d4::t_164245ab4dbbd0 1-87
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/repository/ScrapingService.kt
+  s_d53598cb5771d4::t_9e17ab4d456a52 25-26,41
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/sync/BundleImporter.kt
+  s_d53598cb5771d4::t_c015ccabb2a81f 1-62
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/sync/LeagueCatalog.kt
+  s_d53598cb5771d4::t_c98acdbcc73a75 1-50
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/sync/SyncEngine.kt
+  s_d53598cb5771d4::t_28b2f6322d16b6 1-176
+shared/src/commonMain/kotlin/com/padelaragon/shared/data/sync/SyncSettings.kt
+  s_d53598cb5771d4::t_5aa2eb7f5f2904 1-84
+shared/src/commonMain/kotlin/com/padelaragon/shared/di/AppContainer.kt
+  s_d53598cb5771d4::t_b2e233623b9d5a 24-28,30-32,63-66,69-71,73-76,78-93,95-98
+shared/src/commonMain/kotlin/com/padelaragon/shared/domain/usecase/StartupPreloader.kt
+  s_d53598cb5771d4::t_37eed1e4ea4bcf 37
+shared/src/commonMain/kotlin/com/padelaragon/shared/ui/navigation/AppNavigation.kt
+  s_d53598cb5771d4::t_dedfd4d68adef8 18,39,120-121,134,138,167
+shared/src/commonMain/kotlin/com/padelaragon/shared/ui/navigation/AppScreens.kt
+  s_d53598cb5771d4::t_668c5ec05e4f86 3,8-9,13-16
+shared/src/commonMain/kotlin/com/padelaragon/shared/ui/screen/LeagueChooserScreen.kt
+  s_d53598cb5771d4::t_dbf66ac894fa1e 29,51
+shared/src/commonMain/kotlin/com/padelaragon/shared/ui/screen/SettingsScreen.kt
+  s_d53598cb5771d4::t_6e48adebb8f85d 1-199
+shared/src/commonMain/kotlin/com/padelaragon/shared/ui/screen/TeamScreen.kt
+  s_d53598cb5771d4::t_3aa78064bef068 247
+shared/src/commonMain/kotlin/com/padelaragon/shared/ui/viewmodel/FavoritesViewModel.kt
+  s_d53598cb5771d4::t_3b91dee54cce85 69
+shared/src/commonMain/kotlin/com/padelaragon/shared/ui/viewmodel/SettingsViewModel.kt
+  s_d53598cb5771d4::t_86260d2333928b 1-72
+shared/src/desktopTest/kotlin/com/padelaragon/shared/data/remote/BackendApiTest.kt
+  s_d53598cb5771d4::t_6225258cef595b 1-85
+shared/src/desktopTest/kotlin/com/padelaragon/shared/data/sync/SyncEngineTest.kt
+  s_d53598cb5771d4::t_41e3c2c36e2975 1-198
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "774885f499f348163908e80512a6114f4b350dbb",
+  "prompts": {},
+  "sessions": {
+    "s_d53598cb5771d4": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "3ec32139-fc03-401c-b403-be5d8711c244",
+        "model": "unknown"
+      },
+      "human_author": "Joan Felez Albero <joanfa@ext.zara.com>"
+    }
+  }
+}

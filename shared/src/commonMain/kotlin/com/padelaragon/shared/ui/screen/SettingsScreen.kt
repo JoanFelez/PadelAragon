@@ -45,6 +45,7 @@ import com.padelaragon.shared.di.MultiLeagueContainer
 import com.padelaragon.shared.platformName
 import com.padelaragon.shared.ui.viewmodel.SettingsViewModel
 import com.padelaragon.shared.ui.viewmodel.SettingsViewModelFactory
+import com.padelaragon.shared.update.UpdateSection
 import kotlin.time.Instant
 
 /**
@@ -84,6 +85,7 @@ fun SettingsScreen(
             BackendCard(ui, vm::saveBackend)
             SyncCard(syncState, vm::syncNow)
             extraSections()
+            UpdateSection(container.updateChecker)
             AboutCard()
         }
     }

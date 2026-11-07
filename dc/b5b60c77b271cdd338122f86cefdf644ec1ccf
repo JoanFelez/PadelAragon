@@ -1,0 +1,19 @@
+gradle/libs.versions.toml
+  s_bd23133e43b027::t_5eb97a83f84128 45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "dcb5b60c77b271cdd338122f86cefdf644ec1ccf",
+  "prompts": {},
+  "sessions": {
+    "s_bd23133e43b027": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "f8f98006-a284-4730-9c8f-912a33f455eb",
+        "model": "unknown"
+      },
+      "human_author": "Joan Felez Albero <joanfa@ext.zara.com>"
+    }
+  }
+}

@@ -57,7 +57,7 @@ backend.url=https://padelaragon-api.<subdominio>.workers.dev
 backend.appKey=<APP_KEY>
 ```
 
-o variables de entorno `PADEL_BACKEND_URL` y `PADEL_APP_KEY` al compilar. También se pueden introducir en Ajustes → Backend en la propia app. Sin ellos: modo solo web de la federación.
+o variables de entorno `PADEL_BACKEND_URL` y `PADEL_APP_KEY` al compilar (`release.yml` las toma de los secretos `WORKER_URL` y `APP_KEY`, así que los instaladores de release ya vienen configurados y no hay que escribir nada en la app). También se pueden introducir en Ajustes → Backend en la propia app. Sin ellos: modo solo web de la federación.
 
 ## 7. Reglamento para el chat
 

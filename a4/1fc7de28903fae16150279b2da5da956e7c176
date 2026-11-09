@@ -1,0 +1,21 @@
+.github/workflows/release.yml
+  s_0479c1b42a8563::t_eea23cd5410b19 80-81,114-116,146-148
+docs/SETUP.md
+  s_0479c1b42a8563::t_f5dcca335a9e9e 60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "a41fc7de28903fae16150279b2da5da956e7c176",
+  "prompts": {},
+  "sessions": {
+    "s_0479c1b42a8563": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "de196680-3727-4764-90a1-901eae080e0c",
+        "model": "claude-sonnet-5.5"
+      },
+      "human_author": "Joan Felez Albero <joanfa@ext.zara.com>"
+    }
+  }
+}

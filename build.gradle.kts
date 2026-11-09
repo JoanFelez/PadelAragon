@@ -1,5 +1,11 @@
 plugins {
-    id("com.android.application") version "9.1.0" apply false
-    id("org.jetbrains.kotlin.plugin.compose") version "2.3.20" apply false
-    id("com.google.devtools.ksp") version "2.3.6" apply false
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.kotlin.multiplatform.library) apply false
+    alias(libs.plugins.kotlin.multiplatform) apply false
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.kotlin.compose) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.compose.multiplatform) apply false
+    alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.buildkonfig) apply false
 }

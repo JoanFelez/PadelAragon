@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "league": { "id": 27951, "name": "Absoluta" },
+  "generatedAt": "2026-11-07T12:00:00Z",
+  "groups": [
+    {
+      "group": {
+        "id": 90001,
+        "name": "1ª CATEGORÍA MASCULINA - GRUPO A",
+        "gender": "MASCULINA",
+        "category": "1ª CATEGORÍA",
+        "groupLetter": "A"
+      },
+      "standings": [
+        {
+          "position": 1, "teamName": "CP Ficticio Alfa", "teamId": 1001, "teamHref": "/equipo?id=1001",
+          "points": 5, "matchesPlayed": 2, "encountersWon": 2, "encountersLost": 0,
+          "matchesWon": 4, "matchesLost": 2, "setsWon": 9, "setsLost": 5, "gamesWon": 70, "gamesLost": 55
+        },
+        {
+          "position": 2, "teamName": "CP Ficticio Beta", "teamId": 1002, "teamHref": "/equipo?id=1002",
+          "points": 2, "matchesPlayed": 1, "encountersWon": 0, "encountersLost": 1,
+          "matchesWon": 1, "matchesLost": 2, "setsWon": 3, "setsLost": 5, "gamesWon": 30, "gamesLost": 36
+        },
+        {
+          "position": 3, "teamName": "CP Ficticio Gamma", "teamId": 1003, "teamHref": "/equipo?id=1003",
+          "points": 1, "matchesPlayed": 1, "encountersWon": 0, "encountersLost": 1,
+          "matchesWon": 1, "matchesLost": 2, "setsWon": 2, "setsLost": 4, "gamesWon": 24, "gamesLost": 33
+        }
+      ],
+      "jornadas": [1, 2, 3],
+      "results": [
+        {
+          "localTeam": "CP Ficticio Alfa", "localTeamId": 1001,
+          "visitorTeam": "CP Ficticio Beta", "visitorTeamId": 1002,
+          "localScore": "2", "visitorScore": "1",
+          "date": "10/10/2026", "venue": "Pista Ficticia 1", "jornada": 1,
+          "detailUrl": "https://example.invalid/partido/5001"
+        },
+        {
+          "localTeam": "CP Ficticio Gamma", "localTeamId": 1003,
+          "visitorTeam": "CP Ficticio Alfa", "visitorTeamId": 1001,
+          "localScore": "1", "visitorScore": "2",
+          "date": "17/10/2026", "venue": "Pista Ficticia 3", "jornada": 2,
+          "detailUrl": "https://example.invalid/partido/5002"
+        },
+        {
+          "localTeam": "CP Ficticio Beta", "localTeamId": 1002,
+          "visitorTeam": "CP Ficticio Gamma", "visitorTeamId": 1003,
+          "localScore": "--", "visitorScore": "--",
+          "date": "24/10/2026", "venue": null, "jornada": 3,
+          "detailUrl": null
+        }
+      ],
+      "teams": [
+        {
+          "teamId": 1001, "teamName": "CP Ficticio Alfa",
+          "category": "1ª CATEGORÍA MASCULINA", "captainName": "Jugador Uno Alfa",
+          "players": [
+            { "name": "Jugador Uno Alfa", "isCaptain": true, "points": "120", "birthYear": "1990" },
+            { "name": "Jugador Dos Alfa", "isCaptain": false, "points": "110", "birthYear": "1985" },
+            { "name": "Jugador Tres Alfa", "isCaptain": false, "points": "100", "birthYear": "1980" },
+            { "name": "Jugador Cuatro Alfa", "isCaptain": false, "points": null, "birthYear": "1978" },
+            { "name": "Jugador Cinco Alfa", "isCaptain": false, "points": "90", "birthYear": "1975" },
+            { "name": "Jugador Seis Alfa", "isCaptain": false, "points": "80", "birthYear": "1970" }
+          ]
+        },
+        {
+          "teamId": 1002, "teamName": "CP Ficticio Beta",
+          "category": "1ª CATEGORÍA MASCULINA", "captainName": null,
+          "players": [
+            { "name": "Jugador Uno Beta", "isCaptain": false, "points": null, "birthYear": "1992" },
+            { "name": "Jugador Dos Beta", "isCaptain": false, "points": null, "birthYear": null }
+          ]
+        },
+        {
+          "teamId": 1003, "teamName": "CP Ficticio Gamma",
+          "category": "1ª CATEGORÍA MASCULINA", "captainName": null,
+          "players": [
+            { "name": "Jugador Uno Gamma", "isCaptain": false, "points": null, "birthYear": "1988" },
+            { "name": "Jugador Dos Gamma", "isCaptain": false, "points": null, "birthYear": "1981" }
+          ]
+        }
+      ],
+      "matchDetails": {
+        "https://example.invalid/partido/5001": {
+          "pairs": [
+            {
+              "pairNumber": 1,
+              "localPlayer1": "Jugador Uno Alfa", "localPlayer2": "Jugador Dos Alfa",
+              "visitorPlayer1": "Jugador Uno Beta", "visitorPlayer2": "Jugador Dos Beta",
+              "sets": [
+                { "localScore": 6, "visitorScore": 3 },
+                { "localScore": 6, "visitorScore": 4 }
+              ]
+            },
+            {
+              "pairNumber": 2,
+              "localPlayer1": "Jugador Tres Alfa", "localPlayer2": "Jugador Cuatro Alfa",
+              "visitorPlayer1": "Jugador Tres Beta", "visitorPlayer2": "Jugador Cuatro Beta",
+              "sets": [
+                { "localScore": 4, "visitorScore": 6 },
+                { "localScore": 3, "visitorScore": 6 }
+              ]
+            },
+            {
+              "pairNumber": 3,
+              "localPlayer1": "Jugador Cinco Alfa", "localPlayer2": "Jugador Seis Alfa",
+              "visitorPlayer1": "Jugador Cinco Beta", "visitorPlayer2": "Jugador Seis Beta",
+              "sets": [
+                { "localScore": 6, "visitorScore": 2 },
+                { "localScore": 3, "visitorScore": 6 },
+                { "localScore": 7, "visitorScore": 5 }
+              ]
+            }
+          ]
+        },
+        "https://example.invalid/partido/5002": {
+          "pairs": [
+            {
+              "pairNumber": 1,
+              "localPlayer1": "Jugador Uno Gamma", "localPlayer2": "Jugador Dos Gamma",
+              "visitorPlayer1": "Jugador Uno Alfa", "visitorPlayer2": "Jugador Dos Alfa",
+              "sets": [
+                { "localScore": 6, "visitorScore": 7 },
+                { "localScore": 2, "visitorScore": 6 }
+              ]
+            },
+            {
+              "pairNumber": 2,
+              "localPlayer1": "Jugador Tres Gamma", "localPlayer2": "Jugador Cuatro Gamma",
+              "visitorPlayer1": "Jugador Tres Alfa", "visitorPlayer2": "Jugador Cuatro Alfa",
+              "sets": [
+                { "localScore": 6, "visitorScore": 1 },
+                { "localScore": 6, "visitorScore": 2 }
+              ]
+            },
+            {
+              "pairNumber": 3,
+              "localPlayer1": "Jugador Cinco Gamma", "localPlayer2": "Jugador Seis Gamma",
+              "visitorPlayer1": "Jugador Cinco Alfa", "visitorPlayer2": "Jugador Seis Alfa",
+              "sets": [
+                { "localScore": 3, "visitorScore": 6 },
+                { "localScore": 4, "visitorScore": 6 }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

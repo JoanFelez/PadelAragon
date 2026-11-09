@@ -4,7 +4,7 @@ compatibility_date = "2026-08-01"
 
 [[kv_namespaces]]
 binding = "PADEL"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "0734ba056a5541f48ce036720fb77bf3"
 
 [ai]
 binding = "AI"

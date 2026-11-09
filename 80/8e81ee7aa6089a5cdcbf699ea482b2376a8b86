@@ -1,0 +1,19 @@
+backend/worker/wrangler.toml
+  s_0479c1b42a8563::t_0deb904015f717 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "808e81ee7aa6089a5cdcbf699ea482b2376a8b86",
+  "prompts": {},
+  "sessions": {
+    "s_0479c1b42a8563": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "de196680-3727-4764-90a1-901eae080e0c",
+        "model": "claude-sonnet-5.5"
+      },
+      "human_author": "Joan Felez Albero <joanfa@ext.zara.com>"
+    }
+  }
+}

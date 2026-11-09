@@ -1,0 +1,21 @@
+backend/scripts/convert-rules
+  s_0479c1b42a8563::t_72a8f2ef80725f 17-26,84-132,143-148
+docs/SETUP.md
+  s_0479c1b42a8563::t_9de3c987ecad5f 66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "a4aa2c31c59a74e041351dcdb302e43d2f871f87",
+  "prompts": {},
+  "sessions": {
+    "s_0479c1b42a8563": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "de196680-3727-4764-90a1-901eae080e0c",
+        "model": "claude-sonnet-5.5"
+      },
+      "human_author": "Joan Felez Albero <joanfa@ext.zara.com>"
+    }
+  }
+}

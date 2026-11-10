@@ -61,10 +61,10 @@ o variables de entorno `PADEL_BACKEND_URL` y `PADEL_APP_KEY` al compilar (`relea
 
 ## 7. Reglamento para el chat
 
-Las fuentes (PDF) y el texto convertido están en `backend/rules/`, **gitignored: nunca se commitean** (copyright).
+Las fuentes (PDF públicos de la federación) y el texto convertido están versionados en `backend/rules/`.
 
-1. Coloca los PDF en `backend/rules/` (`normativa_tecnica_2026.pdf`, `reglamento_fap_2026.pdf`, `master_fap_2026.pdf`, `veteranos_fap_2026.pdf`, `puntos_veteranos_fap_2026.pdf`, `sistema_puntos_paf_2026.pdf`; opcionalmente `fip-reglas-2026.pdf` y `liga-aragonesa-normativa-2021.pdf`) (necesita `pdftotext`, paquete `poppler-utils`).
-2. `backend/scripts/convert-rules` genera `backend/rules/reglamento.md`.
+1. Coloca los PDF en `backend/rules/` (`normativa_tecnica_2026.pdf`, `reglamento_fap_2026.pdf`, `master_fap_2026.pdf`, `veteranos_fap_2026.pdf`, `puntos_veteranos_fap_2026.pdf`, `sistema_puntos_paf_2026.pdf`; opcionalmente `fip-reglas-2026.pdf` y `liga-aragon-2026.pdf`) (necesita `pdftotext`, paquete `poppler-utils`).
+2. `python3 backend/scripts/convert-rules` genera `backend/rules/reglamento.md`.
 3. `backend/scripts/upload-rules.sh` lo sube a KV (`rules:current`). Para el entorno local de wrangler: `--local`.
 
 Sin reglamento el chat solo responde sobre datos de liga y lo indica.

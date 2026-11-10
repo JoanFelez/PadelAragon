@@ -3,7 +3,7 @@ import { requireAppKey } from "../auth";
 import type { Env } from "../types";
 import { buildSystemPrompt } from "./prompt";
 import { createProviders, type ChatMessage, type Provider, type ProviderRequest, type ToolCall } from "./providers";
-import { findCitedRules, formatRules, parseRules, selectRules } from "./rules";
+import { COMPACT_RULES_BUDGET_CHARS, findCitedRules, formatRules, parseRules, selectRules } from "./rules";
 import { TOOL_DECLARATIONS, ToolRunner } from "./tools";
 
 export const MAX_TURNS = 10;
@@ -98,8 +98,10 @@ async function runChat(
     const allRules = rulesMarkdown ? parseRules(rulesMarkdown) : [];
     const selected = allRules.length ? selectRules(allRules, question) : [];
     const system = buildSystemPrompt(selected.length ? formatRules(selected) : null, req);
+    const compact = allRules.length ? selectRules(allRules, question, COMPACT_RULES_BUDGET_CHARS) : [];
+    const systemCompact = buildSystemPrompt(compact.length ? formatRules(compact) : null, req);
 
-    const runner = new ToolRunner(env.PADEL, req.leagueId, now.getFullYear());
+    const runner = new ToolRunner(env.PADEL, undefined, now.getFullYear());
     const history: ChatMessage[] = req.messages.map((m) =>
       m.role === "user" ? { role: "user", text: m.content } : { role: "assistant", text: m.content, toolCalls: [] },
     );
@@ -109,6 +111,7 @@ async function runChat(
     for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
       const request: ProviderRequest = {
         system,
+        systemCompact,
         messages: history,
         tools: round < MAX_TOOL_ROUNDS ? TOOL_DECLARATIONS : [],
       };
@@ -116,7 +119,17 @@ async function runChat(
         answer += delta;
         await send({ delta });
       });
-      if (toolCalls.length === 0) break;
+      if (toolCalls.length === 0) {
+        // The model sometimes stops silently after reading tool results: force a text-only final answer.
+        if (!answer.trim() && history.length > req.messages.length) {
+          history.push({ role: "user", text: "Responde ahora al usuario con los resultados obtenidos, sin llamar a más herramientas." });
+          await streamWithFallback(providers, { system, systemCompact, messages: history, tools: [] }, async (delta) => {
+            answer += delta;
+            await send({ delta });
+          });
+        }
+        break;
+      }
 
       history.push({ role: "assistant", text, toolCalls });
       for (const call of toolCalls) {
@@ -161,6 +174,7 @@ async function streamWithFallback(
       return { text, toolCalls };
     } catch (e) {
       lastError = e;
+      console.warn("provider failed", e instanceof Error ? e.message : e);
       if (emitted) throw e;
     }
   }

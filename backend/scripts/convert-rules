@@ -2,7 +2,7 @@
 """Convert the rulebook PDFs in backend/rules/ into backend/rules/reglamento.md.
 
 Output uses `## Art. N (Tag) Title` headings, which the Worker splits on.
-Requires `pdftotext` (poppler-utils). The generated files are gitignored: never commit rule text.
+Requires `pdftotext` (poppler-utils). The sources are public federation documents and are versioned together with the output.
 
 Usage: backend/scripts/convert-rules [rules_dir]
 """
@@ -13,7 +13,7 @@ from pathlib import Path
 
 rules_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent / "rules"
 FIP_PDF = rules_dir / "fip-reglas-2026.pdf"
-LIGA_PDF = rules_dir / "liga-aragonesa-normativa-2021.pdf"
+LIGA_PDF = rules_dir / "liga-aragon-2026.pdf"
 NT_PDF = rules_dir / "normativa_tecnica_2026.pdf"
 # Short FAP documents: (file, title shown to the user)
 FAP_DOCS = [

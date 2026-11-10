@@ -48,7 +48,11 @@ function keywords(text: string): string[] {
     .filter((w) => w.length > 2 && !STOPWORDS.has(w));
 }
 
-export const RULES_BUDGET_CHARS = 20000;
+// The whole rulebook (~270 KB) is resent on every tool round and exhausts the free token-per-minute
+// quota, so only the most relevant sections (~15k tokens) are sent.
+export const RULES_BUDGET_CHARS = 60000;
+
+export const COMPACT_RULES_BUDGET_CHARS = 20000;
 
 export function selectRules(sections: RuleSection[], question: string, budget = RULES_BUDGET_CHARS): RuleSection[] {
   const render = (s: RuleSection) => s.title.length + s.text.length + 8;

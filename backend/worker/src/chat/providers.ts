@@ -16,6 +16,8 @@ export type ProviderEvent = { type: "text"; text: string } | { type: "toolCall";
 
 export interface ProviderRequest {
   system: string;
+  /** Shorter prompt for providers with a small context window (Workers AI: 24k tokens). */
+  systemCompact?: string;
   messages: ChatMessage[];
   tools: ToolDeclaration[];
 }
@@ -38,7 +40,7 @@ export class ProviderError extends Error {
 export const DEFAULT_GEMINI_MODEL = "gemini-3.5-flash-lite";
 export const DEFAULT_WORKERS_AI_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 
-export function createProviders(env: Env, fetchFn: typeof fetch = fetch): Provider[] {
+export function createProviders(env: Env, fetchFn: typeof fetch = (input, init) => fetch(input, init)): Provider[] {
   const providers: Provider[] = [];
   if (env.GEMINI_API_KEY) {
     providers.push(new GeminiProvider(env.GEMINI_API_KEY, env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL, fetchFn));
@@ -85,20 +87,30 @@ export class GeminiProvider implements Provider {
     };
     if (req.tools.length) body.tools = [{ functionDeclarations: req.tools }];
 
-    let res: Response;
-    try {
-      res = await this.fetchFn(
-        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(this.model)}:streamGenerateContent?alt=sse`,
-        {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(this.model)}:streamGenerateContent?alt=sse`;
+    let res: Response | undefined;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        res = await this.fetchFn(url, {
           method: "POST",
           headers: { "content-type": "application/json", "x-goog-api-key": this.apiKey },
           body: JSON.stringify(body),
-        },
-      );
-    } catch (e) {
-      throw new ProviderError(this.name, 0, `network: ${e instanceof Error ? e.message : e}`);
+        });
+      } catch (e) {
+        throw new ProviderError(this.name, 0, `network: ${e instanceof Error ? e.message : e}`);
+      }
+      if (res.ok && res.body) break;
+      const detail = (await res.text().catch(() => "")).replace(/\s+/g, " ");
+      // Free-tier limits are per minute and Gemini overloads are brief, so a short wait is worth it before falling back.
+      const hint = /retry in ([\d.]+)s/.exec(detail);
+      const waitMs = res.status === 503 ? 1500 * (attempt + 1) : res.status === 429 && hint ? Number(hint[1]) * 1000 + 500 : 0;
+      if (attempt < 2 && waitMs > 0 && waitMs <= 12000) {
+        await new Promise((r) => setTimeout(r, waitMs));
+        continue;
+      }
+      throw new ProviderError(this.name, res.status, `gemini http ${res.status} ${detail.slice(0, 300)}`);
     }
-    if (!res.ok || !res.body) throw new ProviderError(this.name, res.status, `gemini http ${res.status}`);
+    if (!res || !res.body) throw new ProviderError(this.name, 0, "gemini empty response");
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
@@ -148,7 +160,7 @@ export class WorkersAiProvider implements Provider {
   ) {}
 
   private messages(req: ProviderRequest) {
-    const out: Record<string, unknown>[] = [{ role: "system", content: req.system }];
+    const out: Record<string, unknown>[] = [{ role: "system", content: req.systemCompact ?? req.system }];
     for (const m of req.messages) {
       if (m.role === "user") out.push({ role: "user", content: m.text });
       else if (m.role === "assistant") {

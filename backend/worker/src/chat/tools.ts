@@ -1,6 +1,7 @@
 import { bundleKey } from "../data";
 import type { GroupBundle, LeagueBundle, LeagueRef, MatchResult, TeamBundle } from "../types";
 import { generatePossibleCouples } from "./couples";
+import { TABLES, buildRows, runQuery, matches, type QuerySpec } from "./query";
 import { normalize } from "./rules";
 
 export interface ToolDeclaration {
@@ -32,6 +33,82 @@ export const TOOL_DECLARATIONS: ToolDeclaration[] = [
         leagueId: { type: "integer", description: "Opcional: id de liga" },
       },
       required: ["query"],
+    },
+  },
+  {
+    name: "rankPlayers",
+    description:
+      "Ranking de jugadores/jugadoras por rendimiento. Por defecto 'score' pondera el % de victorias con el número de partidos (prefiere 9/10 a 1/1); también winRate, wins o matches con filtros simples. Úsala PRIMERO para 'mejores jugadores/jugadoras', 'más victorias', '% de victorias'. Para consultas más raras usa queryStats.",
+    parameters: {
+      type: "object",
+      properties: {
+        metric: { type: "string", enum: ["score", "winRate", "wins", "matches"], description: "score (por defecto) = mejores jugadores equilibrando % de victorias y partidos jugados (9/10 > 1/1); winRate = % bruto" },
+        league: { type: "string", description: "Absoluta, Veteranos o Menores" },
+        gender: { type: "string", description: "MASCULINA o FEMENINA (jugadoras = FEMENINA)" },
+        team: { type: "string", description: "Parte del nombre del equipo/club, p. ej. 'INDOOR'" },
+        category: { type: "string", description: "Por ejemplo '3ª CATEGORÍA' (tercera = 3ª)" },
+        minMatches: { type: "integer", description: "Mínimo de partidos jugados, por defecto 1" },
+        limit: { type: "integer", description: "Por defecto 5, máximo 20" },
+      },
+      required: ["metric"],
+    },
+  },
+  {
+    name: "findTeams",
+    description:
+      "Busca equipos por nombre (parcial, sin importar mayúsculas ni acentos) en todas las ligas y grupos. Úsala siempre que el usuario mencione un equipo; devuelve id, nombre, grupo y liga.",
+    parameters: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "Parte del nombre del equipo, por ejemplo 'sandra style'" },
+        leagueId: { type: "integer", description: "Opcional: id de liga" },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    name: "queryStats",
+    description:
+      "Motor de estadísticas sobre TODOS los datos (jugadores, clasificaciones, encuentros, parejas y rendimiento por jugador). Úsala para rankings, medias, recuentos, máximos, comparativas o cualquier estadística nueva: filtra, agrupa y agrega, no calcules a mano. Tablas: " +
+      Object.entries(TABLES)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join(" | ") +
+      " Valores: league = Absoluta|Veteranos|Menores; gender = MASCULINA|FEMENINA; category = '1ª CATEGORÍA'..'5ª CATEGORÍA' ('tercera absoluta' = league Absoluta + category 3ª; 'jugadoras' = gender FEMENINA). Filtros: op eq|ne|gt|gte|lt|lte|contains|in (texto sin distinguir mayúsculas/acentos). Métricas: fn count|sum|avg|min|max|countDistinct sobre field. Ejemplo: % de victorias por jugador = table playerMatches, groupBy [player], metrics [{fn:avg,field:won,as:winRate},{fn:count,as:partidos}], having [{field:partidos,op:gte,value:5}], orderBy winRate, desc true. 'having' filtra después de agrupar y su value puede ser '@alias' para comparar dos métricas. Cada métrica admite 'where' (filtros propios) para obtener varias cifras en una consulta, p. ej. victorias de local y de visitante por equipo: table teamMatches, groupBy [team], metrics [{fn:sum,field:won,as:home,where:[{field:side,op:eq,value:home}]},{fn:sum,field:won,as:away,where:[{field:side,op:eq,value:away}]}], having [{field:away,op:gt,value:'@home'}].",
+    parameters: {
+      type: "object",
+      properties: {
+        table: { type: "string", enum: Object.keys(TABLES) },
+        filters: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: { field: { type: "string" }, op: { type: "string" }, value: {} },
+            required: ["field", "op", "value"],
+          },
+        },
+        having: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: { field: { type: "string" }, op: { type: "string" }, value: {} },
+            required: ["field", "op", "value"],
+          },
+        },
+        groupBy: { type: "array", items: { type: "string" } },
+        metrics: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: { fn: { type: "string" }, field: { type: "string" }, as: { type: "string" }, where: { type: "array", items: { type: "object" } } },
+            required: ["fn"],
+          },
+        },
+        orderBy: { type: "string", description: "Campo o alias de métrica por el que ordenar" },
+        desc: { type: "boolean" },
+        limit: { type: "integer", description: "Máximo 50 (por defecto 20)" },
+        leagueId: { type: "integer", description: "Opcional; por defecto todas las ligas" },
+      },
+      required: ["table"],
     },
   },
   {
@@ -134,6 +211,7 @@ export class ToolRunner {
   private async teamLookup(team: string | number, leagueId?: number) {
     const asId = /^\d+$/.test(String(team)) ? Number(team) : null;
     const wanted = normalize(String(team)).trim();
+    const words = wanted.split(/\s+/).filter(Boolean);
     let partial: { league: LeagueRef; g: GroupBundle; t: TeamBundle } | null = null;
     for (const b of await this.scope(leagueId)) {
       for (const g of b.groups) {
@@ -141,11 +219,28 @@ export class ToolRunner {
           if (asId !== null && t.teamId === asId) return { league: b.league, g, t };
           const n = normalize(t.teamName);
           if (n === wanted) return { league: b.league, g, t };
-          if (!partial && wanted && n.includes(wanted)) partial = { league: b.league, g, t };
+          if (!partial && words.length && words.every((w) => n.includes(w))) partial = { league: b.league, g, t };
         }
       }
     }
     return partial;
+  }
+
+  private async findTeams(query: string, leagueId?: number) {
+    const words = normalize(query).split(/\s+/).filter(Boolean);
+    const found: unknown[] = [];
+    if (!words.length) return found;
+    for (const b of await this.scope(leagueId)) {
+      for (const g of b.groups) {
+        for (const t of g.teams) {
+          const n = normalize(t.teamName);
+          if (!words.every((w) => n.includes(w))) continue;
+          const standing = g.standings.find((s) => s.teamId === t.teamId) ?? null;
+          found.push({ leagueId: b.league.id, league: b.league.name, groupId: g.group.id, group: g.group.name, teamId: t.teamId, teamName: t.teamName, standing });
+        }
+      }
+    }
+    return found;
   }
 
   async execute(name: string, args: Record<string, any>): Promise<ToolOutcome> {
@@ -164,6 +259,48 @@ export class ToolRunner {
             }
           }
           return { result: found.slice(0, MAX_ITEMS), source: { tool: name, label: `Grupos: ${args.query}` } };
+        }
+        case "findTeams": {
+          const found = await this.findTeams(String(args.query ?? ""), args.leagueId);
+          return { result: found.slice(0, MAX_ITEMS), source: { tool: name, label: `Equipos: ${args.query}` } };
+        }
+        case "rankPlayers": {
+          const rows = buildRows("playerMatches", await this.scope(args.leagueId), this.currentYear)!;
+          const filters = (["league", "gender", "category", "team"] as const)
+            .filter((k) => typeof args[k] === "string" && String(args[k]).trim())
+            .map((k) => ({ field: k, op: "contains", value: String(args[k]) }));
+          const metric = String(args.metric ?? "score");
+          const minMatches = Number(args.minMatches) || 1;
+          const limit = Math.min(Number(args.limit) || 5, 20);
+          const data = filters.length ? rows.filter((r) => filters.every((f) => matches(r, f))) : rows;
+          const agg = new Map<string, { player: string; team: unknown; category: unknown; gender: unknown; wins: number; matches: number }>();
+          for (const r of data) {
+            if (r.won === null || r.won === undefined) continue;
+            const key = `${r.player}|${r.groupId}`;
+            const a = agg.get(key) ?? { player: String(r.player), team: r.team, category: r.category, gender: r.gender, wins: 0, matches: 0 };
+            a.matches += 1;
+            a.wins += Number(r.won) ? 1 : 0;
+            agg.set(key, a);
+          }
+          // Wilson lower bound (95%): rewards 9/10 over 1/1 by penalising small samples.
+          const wilson = (w: number, n: number) => {
+            const z = 1.96;
+            const p = w / n;
+            return (p + (z * z) / (2 * n) - z * Math.sqrt((p * (1 - p) + (z * z) / (4 * n)) / n)) / (1 + (z * z) / n);
+          };
+          const ranked = [...agg.values()]
+            .filter((a) => a.matches >= minMatches)
+            .map((a) => ({ ...a, winRate: Math.round((a.wins / a.matches) * 1000) / 1000, score: Math.round(wilson(a.wins, a.matches) * 1000) / 1000 }))
+            .sort((x, y) => (metric === "winRate" ? y.winRate - x.winRate || y.matches - x.matches : metric === "wins" ? y.wins - x.wins : metric === "matches" ? y.matches - x.matches : y.score - x.score || y.matches - x.matches));
+          const res = { rows: ranked.slice(0, limit), totalGroups: ranked.length, note: "score = límite inferior de Wilson (95%) del % de victorias: pondera la muestra; 9/10 puntúa más que 1/1" };
+          return { result: res, source: { tool: name, label: "Ranking de jugadores" } };
+        }
+        case "queryStats": {
+          const table = String(args.table ?? "");
+          const rows = buildRows(table, await this.scope(args.leagueId), this.currentYear);
+          if (!rows) return { result: { error: "unknown_table", tables: Object.keys(TABLES) } };
+          const res = runQuery(rows, args as QuerySpec);
+          return { result: res, source: { tool: name, label: `Estadísticas: ${table}` } };
         }
         case "getStandings": {
           const r = await this.groupById(Number(args.groupId), args.leagueId);

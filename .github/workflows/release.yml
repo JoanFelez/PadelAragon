@@ -175,8 +175,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
-          ls -l dist
-          gh release create "$TAG" dist/* \
+          find dist -type f
+          mapfile -t FILES < <(find dist -type f)
+          gh release create "$TAG" "${FILES[@]}" \
             --repo "$GITHUB_REPOSITORY" \
             --title "PadelAragon $TAG" \
             --verify-tag \

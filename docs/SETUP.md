@@ -57,13 +57,13 @@ backend.url=https://padelaragon-api.<subdominio>.workers.dev
 backend.appKey=<APP_KEY>
 ```
 
-o variables de entorno `PADEL_BACKEND_URL` y `PADEL_APP_KEY` al compilar. También se pueden introducir en Ajustes → Backend en la propia app. Sin ellos: modo solo web de la federación.
+o variables de entorno `PADEL_BACKEND_URL` y `PADEL_APP_KEY` al compilar (`release.yml` las toma de los secretos `WORKER_URL` y `APP_KEY`, así que los instaladores de release ya vienen configurados y no hay que escribir nada en la app). También se pueden introducir en Ajustes → Backend en la propia app. Sin ellos: modo solo web de la federación.
 
 ## 7. Reglamento para el chat
 
 Las fuentes (PDF) y el texto convertido están en `backend/rules/`, **gitignored: nunca se commitean** (copyright).
 
-1. Coloca `fip-reglas-2026.pdf` y `liga-aragonesa-normativa-2021.pdf` en `backend/rules/` (necesita `pdftotext`, paquete `poppler-utils`).
+1. Coloca los PDF en `backend/rules/` (`normativa_tecnica_2026.pdf`, `reglamento_fap_2026.pdf`, `master_fap_2026.pdf`, `veteranos_fap_2026.pdf`, `puntos_veteranos_fap_2026.pdf`, `sistema_puntos_paf_2026.pdf`; opcionalmente `fip-reglas-2026.pdf` y `liga-aragonesa-normativa-2021.pdf`) (necesita `pdftotext`, paquete `poppler-utils`).
 2. `backend/scripts/convert-rules` genera `backend/rules/reglamento.md`.
 3. `backend/scripts/upload-rules.sh` lo sube a KV (`rules:current`). Para el entorno local de wrangler: `--local`.
 

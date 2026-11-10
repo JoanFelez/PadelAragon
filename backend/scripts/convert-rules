@@ -14,6 +14,16 @@ from pathlib import Path
 rules_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent / "rules"
 FIP_PDF = rules_dir / "fip-reglas-2026.pdf"
 LIGA_PDF = rules_dir / "liga-aragonesa-normativa-2021.pdf"
+NT_PDF = rules_dir / "normativa_tecnica_2026.pdf"
+# Short FAP documents: (file, title shown to the user)
+FAP_DOCS = [
+    ("reglamento_fap_2026.pdf", "Reglamento Circuito Aragonés Absoluto 2026 (FAP)"),
+    ("master_fap_2026.pdf", "Master Final Circuito Aragonés 2026 (FAP)"),
+    ("veteranos_fap_2026.pdf", "Circuito Aragonés de Veteranos 2026 (FAP)"),
+    ("puntos_veteranos_fap_2026.pdf", "Puntos Circuito de Veteranos 2026 (FAP)"),
+    ("sistema_puntos_paf_2026.pdf", "Sistema de puntos Circuito Absoluto 2026 (FAP)"),
+]
+MAX_SECTION_CHARS = 5000  # the Worker injects only ~20k chars of rules per question
 
 
 def pdf_lines(path: Path):
@@ -71,6 +81,55 @@ def convert_fip(path: Path):
     return sections
 
 
+def split_long(heading, lines):
+    """Split a long section into paragraph-aligned chunks so each fits the Worker's prompt budget."""
+    text = clean(lines)
+    if len(text) <= MAX_SECTION_CHARS:
+        return [{"heading": heading, "lines": text.splitlines()}]
+    chunks, buf = [], ""
+    for para in re.split(r"\n\n", text):
+        if buf and len(buf) + len(para) + 2 > MAX_SECTION_CHARS:
+            chunks.append(buf)
+            buf = ""
+        buf = f"{buf}\n\n{para}" if buf else para
+    if buf:
+        chunks.append(buf)
+    return [{"heading": f"{heading} (parte {i})", "lines": c.splitlines()} for i, c in enumerate(chunks, 1)]
+
+
+def convert_nt(path: Path):
+    """Normativa Técnica: sections per 'N.M' clause, grouped under 'ARTÍCULO N'."""
+    sections, article, head, cur = [], None, "", None
+    article_re = re.compile(r"^ARTÍCULO\s+(\d+)\.?-?\s*(.*)$")
+    clause_re = re.compile(r"^(\d{1,2})\.(\d{1,2})\.?\s+\S")
+    started = False
+    for line in pdf_lines(path):
+        s = line.strip()
+        m = article_re.match(s)
+        if m and not re.search(r"\s\d+$", s) and int(m.group(1)) == int(article or 0) + 1:  # in sequence: skips the index
+            started = True
+            article, head = m.group(1), m.group(2).strip().rstrip(".").capitalize()
+            cur = {"heading": f"Art. {article} (NT) {head}", "lines": []}
+            sections.append(cur)
+            continue
+        if not started or re.fullmatch(r"\d+", s):
+            continue
+        c = clause_re.match(s)
+        if c and c.group(1) == article:
+            cur = {"heading": f"Art. {c.group(1)}.{c.group(2)} (NT) {head}", "lines": [s]}
+            sections.append(cur)
+        elif cur is not None:
+            cur["lines"].append(line)
+    out = []
+    for sec in sections:
+        out.extend(split_long(sec["heading"], sec["lines"]))
+    return out
+
+
+def convert_doc(path: Path, title: str):
+    return split_long(title, pdf_lines(path))
+
+
 def render(sections):
     return "\n\n".join(f"## {s['heading']}\n{clean(s['lines'])}" for s in sections if clean(s["lines"]))
 
@@ -81,6 +140,12 @@ for pdf, fn in ((LIGA_PDF, convert_liga), (FIP_PDF, convert_fip)):
         parts.append(render(fn(pdf)))
     else:
         print(f"missing {pdf.name}, skipped", file=sys.stderr)
+if NT_PDF.exists():
+    parts.append(render(convert_nt(NT_PDF)))
+for name, title in FAP_DOCS:
+    pdf = rules_dir / name
+    if pdf.exists():
+        parts.append(render(convert_doc(pdf, title)))
 if not parts:
     sys.exit("no rulebook PDFs found in " + str(rules_dir))
 

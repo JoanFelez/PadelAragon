@@ -13,7 +13,7 @@ from pathlib import Path
 
 rules_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent / "rules"
 FIP_PDF = rules_dir / "fip-reglas-2026.pdf"
-LIGA_PDF = rules_dir / "liga-aragonesa-normativa-2021.pdf"
+LIGA_PDF = rules_dir / "liga-aragon-2026.pdf"
 NT_PDF = rules_dir / "normativa_tecnica_2026.pdf"
 # Short FAP documents: (file, title shown to the user)
 FAP_DOCS = [

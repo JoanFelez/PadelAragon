@@ -1,6 +1,13 @@
 package com.padelaragon.shared.ui.chat
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -136,8 +143,23 @@ fun ChatScreen(container: MultiLeagueContainer, onOpenSettings: () -> Unit) {
                 OutlinedTextField(
                     value = draft,
                     onValueChange = { draft = it.take(ChatLimits.MAX_MESSAGE_CHARS) },
-                    modifier = Modifier.weight(1f),
-                    placeholder = { Text("Pregunta sobre el reglamento o la liga") },
+                    modifier = Modifier.weight(1f).onPreviewKeyEvent { event ->
+                        val isEnter = event.key == Key.Enter || event.key == Key.NumPadEnter
+                        when {
+                            !isEnter -> false
+                            event.type != KeyEventType.KeyDown -> true
+                            // Ctrl/Shift+Enter inserts a line break; plain Enter sends.
+                            event.isCtrlPressed || event.isShiftPressed -> {
+                                if (draft.length < ChatLimits.MAX_MESSAGE_CHARS) draft += "\n"
+                                true
+                            }
+                            else -> {
+                                if (draft.isNotBlank() && !state.isBusy) send()
+                                true
+                            }
+                        }
+                    },
+                    placeholder = { Text("Pregunta sobre el reglamento o la liga (Intro envía, Ctrl+Intro nueva línea)") },
                     maxLines = 4,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                     keyboardActions = KeyboardActions(onSend = { send() })

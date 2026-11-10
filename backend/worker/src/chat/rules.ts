@@ -48,7 +48,10 @@ function keywords(text: string): string[] {
     .filter((w) => w.length > 2 && !STOPWORDS.has(w));
 }
 
-export const RULES_BUDGET_CHARS = 20000;
+// Gemini copes with the whole rulebook (~175 KB); keyword selection only kicks in beyond this.
+export const RULES_BUDGET_CHARS = 250000;
+
+export const COMPACT_RULES_BUDGET_CHARS = 20000;
 
 export function selectRules(sections: RuleSection[], question: string, budget = RULES_BUDGET_CHARS): RuleSection[] {
   const render = (s: RuleSection) => s.title.length + s.text.length + 8;

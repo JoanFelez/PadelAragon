@@ -16,6 +16,8 @@ export type ProviderEvent = { type: "text"; text: string } | { type: "toolCall";
 
 export interface ProviderRequest {
   system: string;
+  /** Shorter prompt for providers with a small context window (Workers AI: 24k tokens). */
+  systemCompact?: string;
   messages: ChatMessage[];
   tools: ToolDeclaration[];
 }
@@ -38,7 +40,7 @@ export class ProviderError extends Error {
 export const DEFAULT_GEMINI_MODEL = "gemini-3.5-flash-lite";
 export const DEFAULT_WORKERS_AI_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 
-export function createProviders(env: Env, fetchFn: typeof fetch = fetch): Provider[] {
+export function createProviders(env: Env, fetchFn: typeof fetch = (input, init) => fetch(input, init)): Provider[] {
   const providers: Provider[] = [];
   if (env.GEMINI_API_KEY) {
     providers.push(new GeminiProvider(env.GEMINI_API_KEY, env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL, fetchFn));
@@ -148,7 +150,7 @@ export class WorkersAiProvider implements Provider {
   ) {}
 
   private messages(req: ProviderRequest) {
-    const out: Record<string, unknown>[] = [{ role: "system", content: req.system }];
+    const out: Record<string, unknown>[] = [{ role: "system", content: req.systemCompact ?? req.system }];
     for (const m of req.messages) {
       if (m.role === "user") out.push({ role: "user", content: m.text });
       else if (m.role === "assistant") {

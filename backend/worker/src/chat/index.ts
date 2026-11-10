@@ -3,7 +3,7 @@ import { requireAppKey } from "../auth";
 import type { Env } from "../types";
 import { buildSystemPrompt } from "./prompt";
 import { createProviders, type ChatMessage, type Provider, type ProviderRequest, type ToolCall } from "./providers";
-import { findCitedRules, formatRules, parseRules, selectRules } from "./rules";
+import { COMPACT_RULES_BUDGET_CHARS, findCitedRules, formatRules, parseRules, selectRules } from "./rules";
 import { TOOL_DECLARATIONS, ToolRunner } from "./tools";
 
 export const MAX_TURNS = 10;
@@ -98,6 +98,8 @@ async function runChat(
     const allRules = rulesMarkdown ? parseRules(rulesMarkdown) : [];
     const selected = allRules.length ? selectRules(allRules, question) : [];
     const system = buildSystemPrompt(selected.length ? formatRules(selected) : null, req);
+    const compact = allRules.length ? selectRules(allRules, question, COMPACT_RULES_BUDGET_CHARS) : [];
+    const systemCompact = buildSystemPrompt(compact.length ? formatRules(compact) : null, req);
 
     const runner = new ToolRunner(env.PADEL, req.leagueId, now.getFullYear());
     const history: ChatMessage[] = req.messages.map((m) =>
@@ -109,6 +111,7 @@ async function runChat(
     for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
       const request: ProviderRequest = {
         system,
+        systemCompact,
         messages: history,
         tools: round < MAX_TOOL_ROUNDS ? TOOL_DECLARATIONS : [],
       };
@@ -161,6 +164,7 @@ async function streamWithFallback(
       return { text, toolCalls };
     } catch (e) {
       lastError = e;
+      console.warn("provider failed", e instanceof Error ? e.message : e);
       if (emitted) throw e;
     }
   }

@@ -159,7 +159,7 @@ fun ChatScreen(container: MultiLeagueContainer, onOpenSettings: () -> Unit) {
                             }
                         }
                     },
-                    placeholder = { Text("Pregunta sobre el reglamento o la liga (Intro envía, Ctrl+Intro nueva línea)") },
+                    placeholder = { Text("Pregunta sobre el reglamento o la liga") },
                     maxLines = 4,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                     keyboardActions = KeyboardActions(onSend = { send() })

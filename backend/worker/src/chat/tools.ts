@@ -1,6 +1,7 @@
 import { bundleKey } from "../data";
 import type { GroupBundle, LeagueBundle, LeagueRef, MatchResult, TeamBundle } from "../types";
 import { generatePossibleCouples } from "./couples";
+import { TABLES, buildRows, runQuery, type QuerySpec } from "./query";
 import { normalize } from "./rules";
 
 export interface ToolDeclaration {
@@ -45,6 +46,51 @@ export const TOOL_DECLARATIONS: ToolDeclaration[] = [
         leagueId: { type: "integer", description: "Opcional: id de liga" },
       },
       required: ["query"],
+    },
+  },
+  {
+    name: "queryStats",
+    description:
+      "Motor de estadísticas sobre TODOS los datos (jugadores, clasificaciones, encuentros, parejas y rendimiento por jugador). Úsala para rankings, medias, recuentos, máximos, comparativas o cualquier estadística nueva: filtra, agrupa y agrega, no calcules a mano. Tablas: " +
+      Object.entries(TABLES)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join(" | ") +
+      " Filtros: op eq|ne|gt|gte|lt|lte|contains|in (texto sin distinguir mayúsculas/acentos). Métricas: fn count|sum|avg|min|max|countDistinct sobre field. Ejemplo: % de victorias por jugador = table playerMatches, groupBy [player], metrics [{fn:avg,field:won,as:winRate},{fn:count,as:partidos}], having [{field:partidos,op:gte,value:5}], orderBy winRate, desc true. 'having' filtra después de agrupar y su value puede ser '@alias' para comparar dos métricas. Cada métrica admite 'where' (filtros propios) para obtener varias cifras en una consulta, p. ej. victorias de local y de visitante por equipo: table teamMatches, groupBy [team], metrics [{fn:sum,field:won,as:home,where:[{field:side,op:eq,value:home}]},{fn:sum,field:won,as:away,where:[{field:side,op:eq,value:away}]}], having [{field:away,op:gt,value:'@home'}].",
+    parameters: {
+      type: "object",
+      properties: {
+        table: { type: "string", enum: Object.keys(TABLES) },
+        filters: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: { field: { type: "string" }, op: { type: "string" }, value: {} },
+            required: ["field", "op", "value"],
+          },
+        },
+        having: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: { field: { type: "string" }, op: { type: "string" }, value: {} },
+            required: ["field", "op", "value"],
+          },
+        },
+        groupBy: { type: "array", items: { type: "string" } },
+        metrics: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: { fn: { type: "string" }, field: { type: "string" }, as: { type: "string" }, where: { type: "array", items: { type: "object" } } },
+            required: ["fn"],
+          },
+        },
+        orderBy: { type: "string", description: "Campo o alias de métrica por el que ordenar" },
+        desc: { type: "boolean" },
+        limit: { type: "integer", description: "Máximo 50 (por defecto 20)" },
+        leagueId: { type: "integer", description: "Opcional; por defecto todas las ligas" },
+      },
+      required: ["table"],
     },
   },
   {
@@ -199,6 +245,13 @@ export class ToolRunner {
         case "findTeams": {
           const found = await this.findTeams(String(args.query ?? ""), args.leagueId);
           return { result: found.slice(0, MAX_ITEMS), source: { tool: name, label: `Equipos: ${args.query}` } };
+        }
+        case "queryStats": {
+          const table = String(args.table ?? "");
+          const rows = buildRows(table, await this.scope(args.leagueId), this.currentYear);
+          if (!rows) return { result: { error: "unknown_table", tables: Object.keys(TABLES) } };
+          const res = runQuery(rows, args as QuerySpec);
+          return { result: res, source: { tool: name, label: `Estadísticas: ${table}` } };
         }
         case "getStandings": {
           const r = await this.groupById(Number(args.groupId), args.leagueId);

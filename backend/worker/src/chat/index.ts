@@ -101,7 +101,7 @@ async function runChat(
     const compact = allRules.length ? selectRules(allRules, question, COMPACT_RULES_BUDGET_CHARS) : [];
     const systemCompact = buildSystemPrompt(compact.length ? formatRules(compact) : null, req);
 
-    const runner = new ToolRunner(env.PADEL, req.leagueId, now.getFullYear());
+    const runner = new ToolRunner(env.PADEL, undefined, now.getFullYear());
     const history: ChatMessage[] = req.messages.map((m) =>
       m.role === "user" ? { role: "user", text: m.content } : { role: "assistant", text: m.content, toolCalls: [] },
     );

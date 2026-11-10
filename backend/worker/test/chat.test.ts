@@ -184,6 +184,44 @@ describe("tools and rules", () => {
     expect((r.result as any[]).map((t) => t.teamId)).toContain(1001);
   });
 
+  it("aggregates stats with queryStats (group, having, order)", async () => {
+    const env = makeEnv();
+    await seedFixtures(env);
+    const r = await new ToolRunner(env.PADEL).execute("queryStats", {
+      table: "playerMatches",
+      groupBy: ["player"],
+      metrics: [{ fn: "avg", field: "won", as: "winRate" }, { fn: "count", as: "n" }],
+      having: [{ field: "n", op: "gte", value: 1 }],
+      orderBy: "winRate",
+      desc: true,
+    });
+    const rows = (r.result as any).rows;
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows[0].winRate).toBeGreaterThanOrEqual(rows[rows.length - 1].winRate);
+    const t = await new ToolRunner(env.PADEL).execute("queryStats", { table: "standings", metrics: [{ fn: "sum", field: "points", as: "p" }] });
+    expect((t.result as any).rows[0].p).toBe(8);
+    const tm = await new ToolRunner(env.PADEL).execute("queryStats", { table: "teamMatches", groupBy: ["side"], metrics: [{ fn: "count", as: "n" }] });
+    expect((tm.result as any).rows.map((x: any) => x.side).sort()).toEqual(["away", "home"]);
+    const sp = await new ToolRunner(env.PADEL).execute("queryStats", {
+      table: "teamMatches",
+      groupBy: ["team"],
+      metrics: [
+        { fn: "sum", field: "won", as: "home", where: [{ field: "side", op: "eq", value: "home" }] },
+        { fn: "sum", field: "won", as: "away", where: [{ field: "side", op: "eq", value: "away" }] },
+      ],
+      having: [{ field: "home", op: "gte", value: "@away" }],
+    });
+    expect((sp.result as any).rows.every((x: any) => x.home >= x.away)).toBe(true);
+    const all = await new ToolRunner(env.PADEL).execute("queryStats", {
+      table: "teamMatches",
+      groupBy: ["team"],
+      metrics: [{ fn: "sum", field: "won", as: "away", where: [{ field: "side", op: "eq", value: "away" }] }],
+      filters: [{ field: "team", op: "contains", value: "alfa" }],
+    });
+    expect((all.result as any).rows[0].away).toBe(1);
+    expect(((await new ToolRunner(env.PADEL).execute("queryStats", { table: "nope" })).result as any).error).toBe("unknown_table");
+  });
+
   it("computes player stats from match details", async () => {
     const env = makeEnv();
     await seedFixtures(env);

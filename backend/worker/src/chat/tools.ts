@@ -36,6 +36,23 @@ export const TOOL_DECLARATIONS: ToolDeclaration[] = [
     },
   },
   {
+    name: "rankPlayers",
+    description:
+      "Ranking de jugadores/jugadoras por rendimiento (porcentaje de victoria, victorias o partidos jugados) con filtros simples. Úsala PRIMERO para 'mejores jugadores/jugadoras', 'más victorias', '% de victorias'. Para consultas más raras usa queryStats.",
+    parameters: {
+      type: "object",
+      properties: {
+        metric: { type: "string", enum: ["winRate", "wins", "matches"], description: "winRate = % de victorias" },
+        league: { type: "string", description: "Absoluta, Veteranos o Menores" },
+        gender: { type: "string", description: "MASCULINA o FEMENINA (jugadoras = FEMENINA)" },
+        category: { type: "string", description: "Por ejemplo '3ª CATEGORÍA' (tercera = 3ª)" },
+        minMatches: { type: "integer", description: "Mínimo de partidos jugados, por defecto 3" },
+        limit: { type: "integer", description: "Por defecto 5, máximo 20" },
+      },
+      required: ["metric"],
+    },
+  },
+  {
     name: "findTeams",
     description:
       "Busca equipos por nombre (parcial, sin importar mayúsculas ni acentos) en todas las ligas y grupos. Úsala siempre que el usuario mencione un equipo; devuelve id, nombre, grupo y liga.",
@@ -55,7 +72,7 @@ export const TOOL_DECLARATIONS: ToolDeclaration[] = [
       Object.entries(TABLES)
         .map(([k, v]) => `${k}: ${v}`)
         .join(" | ") +
-      " Filtros: op eq|ne|gt|gte|lt|lte|contains|in (texto sin distinguir mayúsculas/acentos). Métricas: fn count|sum|avg|min|max|countDistinct sobre field. Ejemplo: % de victorias por jugador = table playerMatches, groupBy [player], metrics [{fn:avg,field:won,as:winRate},{fn:count,as:partidos}], having [{field:partidos,op:gte,value:5}], orderBy winRate, desc true. 'having' filtra después de agrupar y su value puede ser '@alias' para comparar dos métricas. Cada métrica admite 'where' (filtros propios) para obtener varias cifras en una consulta, p. ej. victorias de local y de visitante por equipo: table teamMatches, groupBy [team], metrics [{fn:sum,field:won,as:home,where:[{field:side,op:eq,value:home}]},{fn:sum,field:won,as:away,where:[{field:side,op:eq,value:away}]}], having [{field:away,op:gt,value:'@home'}].",
+      " Valores: league = Absoluta|Veteranos|Menores; gender = MASCULINA|FEMENINA; category = '1ª CATEGORÍA'..'5ª CATEGORÍA' ('tercera absoluta' = league Absoluta + category 3ª; 'jugadoras' = gender FEMENINA). Filtros: op eq|ne|gt|gte|lt|lte|contains|in (texto sin distinguir mayúsculas/acentos). Métricas: fn count|sum|avg|min|max|countDistinct sobre field. Ejemplo: % de victorias por jugador = table playerMatches, groupBy [player], metrics [{fn:avg,field:won,as:winRate},{fn:count,as:partidos}], having [{field:partidos,op:gte,value:5}], orderBy winRate, desc true. 'having' filtra después de agrupar y su value puede ser '@alias' para comparar dos métricas. Cada métrica admite 'where' (filtros propios) para obtener varias cifras en una consulta, p. ej. victorias de local y de visitante por equipo: table teamMatches, groupBy [team], metrics [{fn:sum,field:won,as:home,where:[{field:side,op:eq,value:home}]},{fn:sum,field:won,as:away,where:[{field:side,op:eq,value:away}]}], having [{field:away,op:gt,value:'@home'}].",
     parameters: {
       type: "object",
       properties: {
@@ -245,6 +262,28 @@ export class ToolRunner {
         case "findTeams": {
           const found = await this.findTeams(String(args.query ?? ""), args.leagueId);
           return { result: found.slice(0, MAX_ITEMS), source: { tool: name, label: `Equipos: ${args.query}` } };
+        }
+        case "rankPlayers": {
+          const rows = buildRows("playerMatches", await this.scope(args.leagueId), this.currentYear)!;
+          const filters = (["league", "gender", "category"] as const)
+            .filter((k) => typeof args[k] === "string" && String(args[k]).trim())
+            .map((k) => ({ field: k, op: "contains", value: String(args[k]) }));
+          const metric = String(args.metric ?? "winRate");
+          const res = runQuery(rows, {
+            table: "playerMatches",
+            filters,
+            groupBy: ["player", "team", "category", "gender"],
+            metrics: [
+              { fn: "avg", field: "won", as: "winRate" },
+              { fn: "sum", field: "won", as: "wins" },
+              { fn: "count", field: "won", as: "matches" },
+            ],
+            having: [{ field: "matches", op: "gte", value: Number(args.minMatches) || 3 }],
+            orderBy: metric === "wins" || metric === "matches" ? metric : "winRate",
+            desc: true,
+            limit: Math.min(Number(args.limit) || 5, 20),
+          });
+          return { result: res, source: { tool: name, label: "Ranking de jugadores" } };
         }
         case "queryStats": {
           const table = String(args.table ?? "");

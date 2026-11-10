@@ -184,6 +184,25 @@ describe("tools and rules", () => {
     expect((r.result as any[]).map((t) => t.teamId)).toContain(1001);
   });
 
+  it("matches loose category/gender filters like 'Primera absoluta' / 'Masculino'", async () => {
+    const env = makeEnv();
+    await seedFixtures(env);
+    const r = await new ToolRunner(env.PADEL).execute("queryStats", {
+      table: "standings",
+      filters: [{ field: "category", op: "eq", value: "Primera absoluta" }, { field: "gender", op: "eq", value: "Masculino" }],
+    });
+    expect((r.result as any).rows.length).toBeGreaterThan(0);
+  });
+
+  it("ranks players with rankPlayers and loose filters", async () => {
+    const env = makeEnv();
+    await seedFixtures(env);
+    const r = await new ToolRunner(env.PADEL).execute("rankPlayers", { metric: "winRate", category: "primera", minMatches: 1 });
+    const rows = (r.result as any).rows;
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows[0]).toHaveProperty("winRate");
+  });
+
   it("aggregates stats with queryStats (group, having, order)", async () => {
     const env = makeEnv();
     await seedFixtures(env);

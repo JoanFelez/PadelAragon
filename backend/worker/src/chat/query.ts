@@ -175,12 +175,25 @@ export function buildRows(table: string, bundles: LeagueBundle[], year: number):
   return rows;
 }
 
+const ORDINALS: Record<string, string> = { primera: "1ª", segunda: "2ª", tercera: "3ª", cuarta: "4ª", quinta: "5ª", "1a": "1ª", "2a": "2ª", "3a": "3ª", "4a": "4ª", "5a": "5ª", "1": "1ª", "2": "2ª", "3": "3ª", "4": "4ª", "5": "5ª" };
+
+// Tolerant text tokens: the model often writes "Tercera absoluta" / "Femenino" instead of the stored "3ª CATEGORÍA" / "FEMENINA".
+function foldTokens(s: string, field: string): string[] {
+  const loose = field === "category" || field === "gender" || field === "group";
+  return normalize(s)
+    .replace(/[º°]/g, "ª")
+    .split(/[\s,;-]+/)
+    .filter(Boolean)
+    .map((t) => ORDINALS[t] ?? t.replace(/^(femenin|masculin)[oa]s?$/, "$1"))
+    .filter((t) => t !== "categoria" && !(loose && t === "absoluta"));
+}
+
 function matches(row: Row, f: { field: string; op: string; value: unknown }): boolean {
   const v = row[f.field];
   const op = f.op;
   if (op === "contains") {
-    const w = normalize(String(f.value ?? "")).split(/\s+/).filter(Boolean);
-    const hay = normalize(String(v ?? ""));
+    const w = foldTokens(String(f.value ?? ""), f.field);
+    const hay = foldTokens(String(v ?? ""), f.field).join(" ");
     return w.every((x) => hay.includes(x));
   }
   if (op === "in") {
@@ -188,6 +201,12 @@ function matches(row: Row, f: { field: string; op: string; value: unknown }): bo
     return set.includes(normalize(String(v ?? "")));
   }
   if (v === null || v === undefined) return op === "ne";
+  if ((op === "eq" || op === "ne") && typeof v === "string" && typeof f.value === "string" && normalize(v) !== normalize(f.value)) {
+    const want = foldTokens(f.value, f.field);
+    const hay = foldTokens(v, f.field);
+    const hit = want.length > 0 && want.every((t) => hay.some((h) => h.startsWith(t)));
+    return op === "eq" ? hit : !hit;
+  }
   const numeric = typeof v === "number" || typeof v === "boolean";
   const a: string | number = typeof v === "boolean" ? (v ? 1 : 0) : (v as string | number);
   const b: string | number = numeric ? Number(f.value === true ? 1 : f.value === false ? 0 : f.value) : normalize(String(f.value));

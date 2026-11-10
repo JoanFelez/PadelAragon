@@ -188,7 +188,7 @@ function foldTokens(s: string, field: string): string[] {
     .filter((t) => t !== "categoria" && !(loose && t === "absoluta"));
 }
 
-function matches(row: Row, f: { field: string; op: string; value: unknown }): boolean {
+export function matches(row: Row, f: { field: string; op: string; value: unknown }): boolean {
   const v = row[f.field];
   const op = f.op;
   if (op === "contains") {

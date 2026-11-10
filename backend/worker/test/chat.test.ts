@@ -197,10 +197,10 @@ describe("tools and rules", () => {
   it("ranks players with rankPlayers and loose filters", async () => {
     const env = makeEnv();
     await seedFixtures(env);
-    const r = await new ToolRunner(env.PADEL).execute("rankPlayers", { metric: "winRate", category: "primera", minMatches: 1 });
+    const r = await new ToolRunner(env.PADEL).execute("rankPlayers", { metric: "score", category: "primera" });
     const rows = (r.result as any).rows;
     expect(rows.length).toBeGreaterThan(0);
-    expect(rows[0]).toHaveProperty("winRate");
+    expect(rows[0]).toHaveProperty("score");
   });
 
   it("aggregates stats with queryStats (group, having, order)", async () => {

@@ -35,6 +35,19 @@ export const TOOL_DECLARATIONS: ToolDeclaration[] = [
     },
   },
   {
+    name: "findTeams",
+    description:
+      "Busca equipos por nombre (parcial, sin importar mayúsculas ni acentos) en todas las ligas y grupos. Úsala siempre que el usuario mencione un equipo; devuelve id, nombre, grupo y liga.",
+    parameters: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "Parte del nombre del equipo, por ejemplo 'sandra style'" },
+        leagueId: { type: "integer", description: "Opcional: id de liga" },
+      },
+      required: ["query"],
+    },
+  },
+  {
     name: "getStandings",
     description: "Clasificación de un grupo.",
     parameters: {
@@ -134,6 +147,7 @@ export class ToolRunner {
   private async teamLookup(team: string | number, leagueId?: number) {
     const asId = /^\d+$/.test(String(team)) ? Number(team) : null;
     const wanted = normalize(String(team)).trim();
+    const words = wanted.split(/\s+/).filter(Boolean);
     let partial: { league: LeagueRef; g: GroupBundle; t: TeamBundle } | null = null;
     for (const b of await this.scope(leagueId)) {
       for (const g of b.groups) {
@@ -141,11 +155,28 @@ export class ToolRunner {
           if (asId !== null && t.teamId === asId) return { league: b.league, g, t };
           const n = normalize(t.teamName);
           if (n === wanted) return { league: b.league, g, t };
-          if (!partial && wanted && n.includes(wanted)) partial = { league: b.league, g, t };
+          if (!partial && words.length && words.every((w) => n.includes(w))) partial = { league: b.league, g, t };
         }
       }
     }
     return partial;
+  }
+
+  private async findTeams(query: string, leagueId?: number) {
+    const words = normalize(query).split(/\s+/).filter(Boolean);
+    const found: unknown[] = [];
+    if (!words.length) return found;
+    for (const b of await this.scope(leagueId)) {
+      for (const g of b.groups) {
+        for (const t of g.teams) {
+          const n = normalize(t.teamName);
+          if (!words.every((w) => n.includes(w))) continue;
+          const standing = g.standings.find((s) => s.teamId === t.teamId) ?? null;
+          found.push({ leagueId: b.league.id, league: b.league.name, groupId: g.group.id, group: g.group.name, teamId: t.teamId, teamName: t.teamName, standing });
+        }
+      }
+    }
+    return found;
   }
 
   async execute(name: string, args: Record<string, any>): Promise<ToolOutcome> {
@@ -164,6 +195,10 @@ export class ToolRunner {
             }
           }
           return { result: found.slice(0, MAX_ITEMS), source: { tool: name, label: `Grupos: ${args.query}` } };
+        }
+        case "findTeams": {
+          const found = await this.findTeams(String(args.query ?? ""), args.leagueId);
+          return { result: found.slice(0, MAX_ITEMS), source: { tool: name, label: `Equipos: ${args.query}` } };
         }
         case "getStandings": {
           const r = await this.groupById(Number(args.groupId), args.leagueId);

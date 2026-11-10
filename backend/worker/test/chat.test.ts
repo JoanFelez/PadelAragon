@@ -177,6 +177,13 @@ describe("tools and rules", () => {
     expect(selectRules(sections, "cualquier cosa", 100000)).toHaveLength(3);
   });
 
+  it("finds teams by partial name across leagues, ignoring case and order", async () => {
+    const env = makeEnv();
+    await seedFixtures(env);
+    const r = await new ToolRunner(env.PADEL).execute("findTeams", { query: "ALFA ficticio" });
+    expect((r.result as any[]).map((t) => t.teamId)).toContain(1001);
+  });
+
   it("computes player stats from match details", async () => {
     const env = makeEnv();
     await seedFixtures(env);

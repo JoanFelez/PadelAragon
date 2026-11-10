@@ -251,7 +251,8 @@ export function runQuery(rows: Row[], spec: QuerySpec): { rows: Row[]; totalGrou
   for (const f of spec.having ?? []) {
     if (!f || typeof f.field !== "string") return { error: "invalid_having" };
     out = out.filter((r) => {
-      const ref = typeof f.value === "string" && f.value.startsWith("@") ? r[f.value.slice(1)] : undefined;
+      const key = typeof f.value === "string" ? f.value.replace(/^@/, "") : "";
+      const ref = key && key in r ? r[key] : undefined;
       return matches(r, ref === undefined ? f : { ...f, value: ref });
     });
   }

@@ -209,7 +209,7 @@ describe("tools and rules", () => {
         { fn: "sum", field: "won", as: "home", where: [{ field: "side", op: "eq", value: "home" }] },
         { fn: "sum", field: "won", as: "away", where: [{ field: "side", op: "eq", value: "away" }] },
       ],
-      having: [{ field: "home", op: "gte", value: "@away" }],
+      having: [{ field: "home", op: "gte", value: "away" }],
     });
     expect((sp.result as any).rows.every((x: any) => x.home >= x.away)).toBe(true);
     const all = await new ToolRunner(env.PADEL).execute("queryStats", {

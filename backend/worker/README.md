@@ -32,6 +32,6 @@ npx wrangler dev    # the AI binding always calls Cloudflare remotely
 1. `npx wrangler login`; create the KV namespace and paste its id in `wrangler.toml`.
 2. Set the secrets above.
 3. `npx wrangler deploy`.
-4. Rulebook (gitignored sources, never commit): put the PDFs in `backend/rules/`, run `backend/scripts/convert-rules` and `backend/scripts/upload-rules.sh`.
+4. Rulebook (public federation PDFs, versioned): put the PDFs in `backend/rules/`, run `backend/scripts/convert-rules` and `backend/scripts/upload-rules.sh`.
 
 Free-tier safety: KV writes happen only on content change (limit 1,000/day); no billing is configured anywhere.

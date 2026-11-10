@@ -2,7 +2,7 @@
 """Convert the rulebook PDFs in backend/rules/ into backend/rules/reglamento.md.
 
 Output uses `## Art. N (Tag) Title` headings, which the Worker splits on.
-Requires `pdftotext` (poppler-utils). The generated files are gitignored: never commit rule text.
+Requires `pdftotext` (poppler-utils). The sources are public federation documents and are versioned together with the output.
 
 Usage: backend/scripts/convert-rules [rules_dir]
 """

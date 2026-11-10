@@ -77,6 +77,8 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          PADEL_BACKEND_URL: ${{ secrets.WORKER_URL }}
+          PADEL_APP_KEY: ${{ secrets.APP_KEY }}
         run: ./gradlew :androidApp:assembleRelease --console=plain
 
       - name: Verify APK is signed
@@ -109,6 +111,9 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Build Windows installers (.exe, .msi)
+        env:
+          PADEL_BACKEND_URL: ${{ secrets.WORKER_URL }}
+          PADEL_APP_KEY: ${{ secrets.APP_KEY }}
         run: .\gradlew.bat :desktopApp:packageExe :desktopApp:packageMsi --console=plain
         shell: pwsh
 
@@ -138,6 +143,9 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y fakeroot
 
       - name: Build Linux .deb
+        env:
+          PADEL_BACKEND_URL: ${{ secrets.WORKER_URL }}
+          PADEL_APP_KEY: ${{ secrets.APP_KEY }}
         run: ./gradlew :desktopApp:packageDeb --console=plain
 
       - uses: actions/upload-artifact@v4

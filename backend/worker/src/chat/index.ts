@@ -119,7 +119,17 @@ async function runChat(
         answer += delta;
         await send({ delta });
       });
-      if (toolCalls.length === 0) break;
+      if (toolCalls.length === 0) {
+        // The model sometimes stops silently after reading tool results: force a text-only final answer.
+        if (!answer.trim() && history.length > req.messages.length) {
+          history.push({ role: "user", text: "Responde ahora al usuario con los resultados obtenidos, sin llamar a más herramientas." });
+          await streamWithFallback(providers, { system, systemCompact, messages: history, tools: [] }, async (delta) => {
+            answer += delta;
+            await send({ delta });
+          });
+        }
+        break;
+      }
 
       history.push({ role: "assistant", text, toolCalls });
       for (const call of toolCalls) {

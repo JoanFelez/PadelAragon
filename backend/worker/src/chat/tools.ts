@@ -45,6 +45,7 @@ export const TOOL_DECLARATIONS: ToolDeclaration[] = [
         metric: { type: "string", enum: ["score", "winRate", "wins", "matches"], description: "score (por defecto) = mejores jugadores equilibrando % de victorias y partidos jugados (9/10 > 1/1); winRate = % bruto" },
         league: { type: "string", description: "Absoluta, Veteranos o Menores" },
         gender: { type: "string", description: "MASCULINA o FEMENINA (jugadoras = FEMENINA)" },
+        team: { type: "string", description: "Parte del nombre del equipo/club, p. ej. 'INDOOR'" },
         category: { type: "string", description: "Por ejemplo '3ª CATEGORÍA' (tercera = 3ª)" },
         minMatches: { type: "integer", description: "Mínimo de partidos jugados, por defecto 1" },
         limit: { type: "integer", description: "Por defecto 5, máximo 20" },
@@ -265,7 +266,7 @@ export class ToolRunner {
         }
         case "rankPlayers": {
           const rows = buildRows("playerMatches", await this.scope(args.leagueId), this.currentYear)!;
-          const filters = (["league", "gender", "category"] as const)
+          const filters = (["league", "gender", "category", "team"] as const)
             .filter((k) => typeof args[k] === "string" && String(args[k]).trim())
             .map((k) => ({ field: k, op: "contains", value: String(args[k]) }));
           const metric = String(args.metric ?? "score");

@@ -228,6 +228,7 @@ export function runQuery(rows: Row[], spec: QuerySpec): { rows: Row[]; totalGrou
       const o: Row = {};
       for (const f of groupBy) o[f] = rs[0][f] ?? null;
       for (const m of ms) {
+        if (m.fn !== "count" && !m.field) return { error: `metric_needs_field:${m.fn} (usa 'field', p.ej. 'won' o 'homeWins')` };
         const name = m.as ?? (m.field ? `${m.fn}_${m.field}` : m.fn);
         const wh = m.where ? (Array.isArray(m.where) ? m.where : [m.where as never]) : [];
         const rsm = wh.length ? rs.filter((r) => wh.every((w) => matches(r, w))) : rs;

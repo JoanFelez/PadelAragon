@@ -49,8 +49,8 @@ function keywords(text: string): string[] {
 }
 
 // The whole rulebook (~270 KB) is resent on every tool round and exhausts the free token-per-minute
-// quota, so only the most relevant sections (~25k tokens) are sent.
-export const RULES_BUDGET_CHARS = 100000;
+// quota, so only the most relevant sections (~15k tokens) are sent.
+export const RULES_BUDGET_CHARS = 60000;
 
 export const COMPACT_RULES_BUDGET_CHARS = 20000;
 

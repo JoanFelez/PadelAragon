@@ -87,20 +87,30 @@ export class GeminiProvider implements Provider {
     };
     if (req.tools.length) body.tools = [{ functionDeclarations: req.tools }];
 
-    let res: Response;
-    try {
-      res = await this.fetchFn(
-        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(this.model)}:streamGenerateContent?alt=sse`,
-        {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(this.model)}:streamGenerateContent?alt=sse`;
+    let res: Response | undefined;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        res = await this.fetchFn(url, {
           method: "POST",
           headers: { "content-type": "application/json", "x-goog-api-key": this.apiKey },
           body: JSON.stringify(body),
-        },
-      );
-    } catch (e) {
-      throw new ProviderError(this.name, 0, `network: ${e instanceof Error ? e.message : e}`);
+        });
+      } catch (e) {
+        throw new ProviderError(this.name, 0, `network: ${e instanceof Error ? e.message : e}`);
+      }
+      if (res.ok && res.body) break;
+      const detail = (await res.text().catch(() => "")).replace(/\s+/g, " ");
+      // Free-tier limits are per minute and Gemini overloads are brief, so a short wait is worth it before falling back.
+      const hint = /retry in ([\d.]+)s/.exec(detail);
+      const waitMs = res.status === 503 ? 1500 * (attempt + 1) : res.status === 429 && hint ? Number(hint[1]) * 1000 + 500 : 0;
+      if (attempt < 2 && waitMs > 0 && waitMs <= 12000) {
+        await new Promise((r) => setTimeout(r, waitMs));
+        continue;
+      }
+      throw new ProviderError(this.name, res.status, `gemini http ${res.status} ${detail.slice(0, 300)}`);
     }
-    if (!res.ok || !res.body) throw new ProviderError(this.name, res.status, `gemini http ${res.status}`);
+    if (!res || !res.body) throw new ProviderError(this.name, 0, "gemini empty response");
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
